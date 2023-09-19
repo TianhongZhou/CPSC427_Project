@@ -1,0 +1,40 @@
+Game Title: Pinball Luminary
+Story:
+A Demon Lord threatens to destroy the world, and it is up to the great pinball luminary to save it. 
+Demon lord threatens the land of <Rhodes>, it is up to the great luminary <player name> to save everyone, they must venture into the demon lords cursed tower to defeat him, but the curse has done something funny to the luminary, they must be launched by a flipper to attack!
+There will be a dozen rooms to be investigated by the great luminary, and each new room is a step closer to the final boss. 
+Core game design elements:
+Roguelike World:
+top-down WASD movement across the world
+randomized dungeon generation for each playthrough of the dungeon
+to start simply have the same dungeon layout for each playthrough and randomly choose between a couple of different rooms types for each room
+collision between dungeon walls
+
+Rendering: 
+Cartoon shader applied to give the game a better, textured look.
+
+Physics: 
+Collision detection, acceleration calculation, gravity sim, rigid body physics for pinball combat
+Game world consists of 2D physics colliders for walls, objects and enemies etc.
+
+2D geometry manipulation:
+Collision effects, characters animations, dynamic background(world)
+
+Gameplay Logic:
+Players will explore different rooms with a character and encounter enemies in the process
+Upon colliding with an enemy, the player is brought into a different scene for combat (pinball game)
+Player & enemy health management, attack modifiers for different types of attacks (direct hit, dash hit)
+Player and enemy attacks have polarity, player would not be harmed by enemy attack with the same polarity as the player at the time, polarity is switched by the same input as the flipper orientation switch.
+Upon defeating an enemy, players will gain loots such as <artifacts and gold etc.> which will make them stronger 
+The game is won after defeating the final boss in the final room
+Audio:
+Background music when the player enters each room, the damage made by the pinball would change according to the beats of the music.
+
+Concept Art:
+
+
+
+
+
+
+
