@@ -1,0 +1,3 @@
+D:/CPSC427/project/out/build/x64-Debug/CMakeFiles/salmon.dir
+D:/CPSC427/project/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+D:/CPSC427/project/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
