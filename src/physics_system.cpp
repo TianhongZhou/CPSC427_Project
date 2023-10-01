@@ -26,88 +26,43 @@ bool collides(const Motion& motion1, const Motion& motion2)
 	return false;
 }
 
-void PhysicsSystem::step(float elapsed_ms)
-{
-	// Move fish based on how much time has passed, this is to (partially) avoid
-	// having entities move at different speed based on the machine.
-	auto& motion_container = registry.motions;
-	for(uint i = 0; i < motion_container.size(); i++)
-	{
-		// !!! TODO A1: update motion.position based on step_seconds and motion.velocity
-		//Motion& motion = motion_container.components[i];
-		//Entity entity = motion_container.entities[i];
-		//float step_seconds = elapsed_ms / 1000.f;
-		(void)elapsed_ms; // placeholder to silence unused warning until implemented
-	}
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: HANDLE PEBBLE UPDATES HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	// Check for collisions between all moving entities
-	for(uint i = 0; i < motion_container.components.size(); i++)
-	{
-		Motion& motion_i = motion_container.components[i];
-		Entity entity_i = motion_container.entities[i];
-		
-		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
-		for(uint j = i+1; j < motion_container.components.size(); j++)
-		{
-			Motion& motion_j = motion_container.components[j];
-			if (collides(motion_i, motion_j))
-			{
-				Entity entity_j = motion_container.entities[j];
-				// Create a collisions event
-				// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
-				registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-				registry.collisions.emplace_with_duplicates(entity_j, entity_i);
-			}
-		}
-	}
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: HANDLE PEBBLE collisions HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-}
 
 
 float MIN_Y_COORD = 200.0f;
 
-struct Vertex_Phys {
-	vec2 pos;
-	vec2 oldPos;
-
-	vec2 accel;
-
-};
-
-
-struct Edge {
-	Vertex_Phys* v1;
-	Vertex_Phys* v2;
-
-	physObj* parentObj;
-
-	float len;
-
-};
-
-
-struct physObj {
-
-	Vertex_Phys* Vertices[8];
-	Edge* Edges[13];
-
-
-	vec2 center;
-
-	int VertexCount;
-	int EdgesCount;
-
-
-};
+//struct Vertex_Phys {
+//	vec2 pos;
+//	vec2 oldPos;
+//
+//	vec2 accel;
+//
+//};
+//
+//
+//struct Edge {
+//	Vertex_Phys* v1;
+//	Vertex_Phys* v2;
+//
+//	physObj* parentObj;
+//
+//	float len;
+//
+//};
+//
+//
+//struct physObj {
+//
+//	Vertex_Phys Vertices[8];
+//	Edge Edges[13];
+//
+//
+//	vec2 center;
+//
+//	int VertexCount;
+//	int EdgesCount;
+//
+//
+//};
 
 
 struct CollisionEvent {
@@ -121,20 +76,83 @@ struct CollisionEvent {
 
 
 
-void createNewRectangle(float w, float h, vec2 centerPos) {
+void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) {
 
-	physObj newRect;
+	
 
-	auto& entity = Entity();
+//	auto& entity = Entity();
 
 	Vertex_Phys newV;
+	registry.physObjs.emplace(e);
 
-	registry.Vertex_Phys_Array.emplace(entity)
+	physObj& newObj = registry.physObjs.get(e);
 
-	.pos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
+	newV.pos= vec2(centerPos.x - w / 2, centerPos.y + h / 2);
+	newV.oldPos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
+	newV.accel = vec2(0.0, 0.0);
+
+	
+
+	newObj.Vertices[0] = newV;
+
+	newV.pos = vec2(centerPos.x + w / 2, centerPos.y + h / 2);
+	newV.oldPos = vec2(centerPos.x + w / 2, centerPos.y + h / 2);
+	
+	newObj.Vertices[1] = newV;
+
+	newV.pos = vec2(centerPos.x - w / 2, centerPos.y - h / 2);
+	newV.oldPos = vec2(centerPos.x - w / 2, centerPos.y - h / 2);
+
+	newObj.Vertices[3] = newV;
+
+	newV.pos = vec2(centerPos.x + w / 2, centerPos.y - h / 2);
+	newV.oldPos = vec2(centerPos.x + w / 2, centerPos.y - h / 2);
 
 
-	newRect.Vertices[0] = newV;
+	newObj.Vertices[2] = newV;
+
+	newObj.VertexCount = 4;
+
+	Edge newEdge;
+	newEdge.parentObj = &newObj;
+
+
+
+	newEdge.v1 = &newObj.Vertices[0];
+	newEdge.v2 = &newObj.Vertices[1];
+	newEdge.len = w;
+
+	newObj.Edges[0] = newEdge;
+
+	newEdge.v1 = &newObj.Vertices[1];
+	newEdge.v2 = &newObj.Vertices[2];
+	newEdge.len = h;
+
+	newObj.Edges[1] = newEdge;
+
+	newEdge.v1 = &newObj.Vertices[2];
+	newEdge.v2 = &newObj.Vertices[3];
+	newEdge.len = w;
+
+	newObj.Edges[2] = newEdge;
+
+
+	newEdge.v1 = &newObj.Vertices[3];
+	newEdge.v2 = &newObj.Vertices[0];
+	newEdge.len = h;
+
+	newObj.Edges[3] = newEdge;
+
+
+	newEdge.v1 = &newObj.Vertices[0];
+	newEdge.v2 = &newObj.Vertices[2];
+	newEdge.len = sqrt(h*h + w*w);
+
+	newObj.Edges[4] = newEdge;
+
+	newObj.EdgesCount = 5;
+
+	newObj.center = centerPos;
 
 
 }
@@ -152,7 +170,7 @@ void updateEdges(physObj& obj) {
 
 	for (int i = 0; i < obj.EdgesCount; i++) {
 
-		Edge& e = *obj.Edges[i];
+		Edge& e = obj.Edges[i];
 
 		vec2 v1v2 = e.v2->pos - e.v1->pos;
 
@@ -180,12 +198,12 @@ void updateEdges(physObj& obj) {
 
 void projectObjToAxis(physObj& Obj, vec2 Axis, float& Max, float& Min) {
 
-	float dp = dot(Axis, Obj.Vertices[0]->pos);
+	float dp = dot(Axis, Obj.Vertices[0].pos);
 
 	Max = Min = dp;
 
 	for (int i = 1; i < Obj.VertexCount; i++) {
-		dp = dot(Axis, Obj.Vertices[i]->pos);
+		dp = dot(Axis, Obj.Vertices[i].pos);
 
 		Min = min(dp, Min);
 		Max = max(dp, Max);
@@ -201,8 +219,8 @@ vec2 findCenter(const physObj& a) {
 	float cx = 0.f;
 	float cy = 0.f;
 	for (int i = 0; i < a.VertexCount; i++) {
-		cx += a.Vertices[i]->pos.x;
-		cy += a.Vertices[i]->pos.y;
+		cx += a.Vertices[i].pos.x;
+		cy += a.Vertices[i].pos.y;
 
 	}
 
@@ -213,7 +231,25 @@ vec2 findCenter(const physObj& a) {
 
 }
 
+void collisionResponse(CollisionEvent& e) {
+	vec2 CollisionVector = e.Normal * e.Depth;
 
+	Vertex_Phys* E1 = e.Edge->v1;
+	Vertex_Phys* E2 = e.Edge->v2;
+
+	float fac;
+	if (abs(E1->pos.x - E2->pos.x) > abs(E1->pos.y - E2->pos.y))
+		fac = (e.Vertex->pos.x - CollisionVector.x - E1->pos.x) / (E2->pos.x - E1->pos.x);
+	else
+		fac = (e.Vertex->pos.y - CollisionVector.y - E1->pos.y) / (E2->pos.y - E1->pos.y);
+
+	float Lambda = 1.0f / (fac * fac + (1 - fac) * (1 - fac));
+
+	E1->pos -= CollisionVector * (1 - fac) * 0.5f * Lambda;
+	E2->pos -= CollisionVector * fac * 0.5f * Lambda;
+
+	e.Vertex->pos += CollisionVector * 0.5f;
+}
 
 
 bool detectAndResloveCollision(physObj* a, physObj* b) {
@@ -224,10 +260,10 @@ bool detectAndResloveCollision(physObj* a, physObj* b) {
 	for (int i = 0; i < a->EdgesCount + b->EdgesCount; i++) {
 		Edge* currEdge;
 		if (i < a->EdgesCount) {
-			currEdge = a->Edges[i];
+			currEdge = &a->Edges[i];
 		}
 		else {
-			currEdge = b->Edges[i - a->EdgesCount];
+			currEdge = &b->Edges[i - a->EdgesCount];
 		}
 
 		vec2 Axis = vec2(currEdge->v1->pos.y - currEdge->v2->pos.y,
@@ -289,13 +325,13 @@ bool detectAndResloveCollision(physObj* a, physObj* b) {
 
 	for (int i = 0; i < b->VertexCount; i++) {
 		//Measure the distance of the vertex from the line using the line equation
-		float distance = dot(event.Normal, (a->Vertices[i]->pos - b->center)); //questionable
+		float distance = dot(event.Normal, (a->Vertices[i].pos - b->center)); //questionable
 
 		//If the measured distance is smaller than the smallest distance reported
 		//so far, set the smallest distance and the collision vertex
 		if (distance < smallestDist) {
 			smallestDist = distance;
-			event.Vertex = a->Vertices[i];
+			event.Vertex = &a->Vertices[i];
 		}
 	}
 
@@ -316,27 +352,9 @@ void accelerate(vec2 acc, Vertex_Phys& obj) {
 
 }
 
-void update(float dt) {
-	applyObjGrav();
-	updateAllObjPos(dt);
-
-	applyGlobalConstraints();
-
-	updateAllEdges();
-	updateAllCenters();
-	detectAndSolveAllCollisions();
-
-}
 
 
-void updateWithSubstep(float dt, int steps) {
 
-	for (int i = 0; i < steps; i++) {
-		update(dt / steps);
-	}
-
-
-}
 
 
 void detectAndSolveAllCollisions() {
@@ -376,7 +394,7 @@ void updateAllObjPos(float dt) {
 		physObj& obj = registry.physObjs.components[i];
 
 		for (int i2 = 0; i < obj.VertexCount; i++) {
-			updatePos(dt, *(obj.Vertices[i2]));
+			updatePos(dt, (obj.Vertices[i2]));
 		}
 		
 	}
@@ -397,7 +415,7 @@ void applyObjGrav() {
 		physObj& obj = registry.physObjs.components[i];
 
 		for (int i2 = 0; i < obj.VertexCount; i++) {
-			accelerate(GRAV, *(obj.Vertices[i2]));
+			accelerate(GRAV, (obj.Vertices[i2]));
 		}
 
 	}
@@ -424,8 +442,8 @@ void applyGlobalConstraints() {
 		physObj& obj = registry.physObjs.components[i];
 
 		for (int i2 = 0; i < obj.VertexCount; i++) {
-			if (obj.Vertices[i2]->pos.y < MIN_Y_COORD) {
-				obj.Vertices[i2]->pos.y = MIN_Y_COORD;
+			if (obj.Vertices[i2].pos.y < MIN_Y_COORD) {
+				obj.Vertices[i2].pos.y = MIN_Y_COORD;
 			}
 				
 		}
@@ -437,22 +455,95 @@ void applyGlobalConstraints() {
 
  
 
-void collisionResponse(CollisionEvent& e) {
-	vec2 CollisionVector = e.Normal * e.Depth;
 
-	Vertex_Phys* E1 = e.Edge->v1;
-	Vertex_Phys* E2 = e.Edge->v2;
 
-	float fac;
-	if (abs(E1->pos.x - E2->pos.x) > abs(E1->pos.y - E2->pos.y))
-		fac = (e.Vertex->pos.x - CollisionVector.x - E1->pos.x) / (E2->pos.x - E1->pos.x);
-	else
-		fac = (e.Vertex->pos.y - CollisionVector.y - E1->pos.y) / (E2->pos.y - E1->pos.y);
 
-	float Lambda = 1.0f / (fac * fac + (1 - fac) * (1 - fac));
+void updateAllMotionInfo() {
 
-	E1->pos -= CollisionVector * (1 - fac) * 0.5f * Lambda;
-	E2->pos -= CollisionVector * fac * 0.5f * Lambda;
 
-	e.Vertex->pos += CollisionVector * 0.5f;
+	for (uint i = 0; i < registry.physObjs.size(); i++) {
+		Entity& obj = registry.physObjs.entities[i];
+
+		float x = registry.physObjs.get(obj).Vertices[1].pos.x - registry.physObjs.get(obj).Vertices[0].pos.x;
+		float y = registry.physObjs.get(obj).Vertices[1].pos.y - registry.physObjs.get(obj).Vertices[0].pos.y;
+
+		registry.motions.get(obj).position = registry.physObjs.get(obj).center;
+		registry.motions.get(obj).angle = atan2(y, x);
+	}
+
+}
+
+
+void update(float dt) {
+	applyObjGrav();
+	updateAllObjPos(dt);
+
+	applyGlobalConstraints();
+
+	updateAllEdges();
+	updateAllCenters();
+	detectAndSolveAllCollisions();
+
+	updateAllMotionInfo();
+
+}
+
+void updateWithSubstep(float dt, int steps) {
+
+	for (int i = 0; i < steps; i++) {
+		update(dt / steps);
+	}
+
+
+}
+
+
+void PhysicsSystem::step(float elapsed_ms)
+{
+
+	updateWithSubstep(elapsed_ms, 8);
+
+
+	//// Move fish based on how much time has passed, this is to (partially) avoid
+	//// having entities move at different speed based on the machine.
+	//auto& motion_container = registry.motions;
+	//for(uint i = 0; i < motion_container.size(); i++)
+	//{
+	//	// !!! TODO A1: update motion.position based on step_seconds and motion.velocity
+	//	//Motion& motion = motion_container.components[i];
+	//	//Entity entity = motion_container.entities[i];
+	//	//float step_seconds = elapsed_ms / 1000.f;
+	//	(void)elapsed_ms; // placeholder to silence unused warning until implemented
+	//}
+
+	//// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//// TODO A2: HANDLE PEBBLE UPDATES HERE
+	//// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
+	//// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+	//// Check for collisions between all moving entities
+	//for(uint i = 0; i < motion_container.components.size(); i++)
+	//{
+	//	Motion& motion_i = motion_container.components[i];
+	//	Entity entity_i = motion_container.entities[i];
+	//	
+	//	// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
+	//	for(uint j = i+1; j < motion_container.components.size(); j++)
+	//	{
+	//		Motion& motion_j = motion_container.components[j];
+	//		if (collides(motion_i, motion_j))
+	//		{
+	//			Entity entity_j = motion_container.entities[j];
+	//			// Create a collisions event
+	//			// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
+	//			registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+	//			registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+	//		}
+	//	}
+	//}
+
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// TODO A2: HANDLE PEBBLE collisions HERE
+	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }

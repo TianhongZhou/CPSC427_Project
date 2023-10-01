@@ -100,6 +100,8 @@ struct Vertex_Phys {
 
 };
 
+struct physObj;
+
 
 struct Edge {
 	Vertex_Phys* v1;
@@ -111,11 +113,10 @@ struct Edge {
 
 };
 
-
 struct physObj {
 
-	Vertex_Phys* Vertices[8];
-	Edge* Edges[13];
+	Vertex_Phys Vertices[8];
+	Edge Edges[13];
 
 
 	vec2 center;
@@ -125,6 +126,13 @@ struct physObj {
 
 
 };
+
+
+
+
+
+
+
 
 /**
  * The following enumerators represent global identifiers refering to graphic
