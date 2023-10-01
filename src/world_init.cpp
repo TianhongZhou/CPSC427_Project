@@ -330,3 +330,86 @@ Entity createPebble(vec2 pos, vec2 size)
 
 	return entity;
 }
+
+
+
+void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) {
+
+
+
+	//	auto& entity = Entity();
+
+	Vertex_Phys newV;
+	registry.physObjs.emplace(e);
+
+	physObj& newObj = registry.physObjs.get(e);
+
+	newV.pos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
+	newV.oldPos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
+	newV.accel = vec2(0.0, 0.0);
+
+
+
+	newObj.Vertices[0] = newV;
+
+	newV.pos = vec2(centerPos.x + w / 2, centerPos.y + h / 2);
+	newV.oldPos = vec2(centerPos.x + w / 2, centerPos.y + h / 2);
+
+	newObj.Vertices[1] = newV;
+
+	newV.pos = vec2(centerPos.x - w / 2, centerPos.y - h / 2);
+	newV.oldPos = vec2(centerPos.x - w / 2, centerPos.y - h / 2);
+
+	newObj.Vertices[3] = newV;
+
+	newV.pos = vec2(centerPos.x + w / 2, centerPos.y - h / 2);
+	newV.oldPos = vec2(centerPos.x + w / 2, centerPos.y - h / 2);
+
+
+	newObj.Vertices[2] = newV;
+
+	newObj.VertexCount = 4;
+
+	Edge newEdge;
+	newEdge.parentObj = &newObj;
+
+
+
+	newEdge.v1 = &newObj.Vertices[0];
+	newEdge.v2 = &newObj.Vertices[1];
+	newEdge.len = w;
+
+	newObj.Edges[0] = newEdge;
+
+	newEdge.v1 = &newObj.Vertices[1];
+	newEdge.v2 = &newObj.Vertices[2];
+	newEdge.len = h;
+
+	newObj.Edges[1] = newEdge;
+
+	newEdge.v1 = &newObj.Vertices[2];
+	newEdge.v2 = &newObj.Vertices[3];
+	newEdge.len = w;
+
+	newObj.Edges[2] = newEdge;
+
+
+	newEdge.v1 = &newObj.Vertices[3];
+	newEdge.v2 = &newObj.Vertices[0];
+	newEdge.len = h;
+
+	newObj.Edges[3] = newEdge;
+
+
+	newEdge.v1 = &newObj.Vertices[0];
+	newEdge.v2 = &newObj.Vertices[2];
+	newEdge.len = sqrt(h * h + w * w);
+
+	newObj.Edges[4] = newEdge;
+
+	newObj.EdgesCount = 5;
+
+	newObj.center = centerPos;
+
+
+}

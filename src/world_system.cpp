@@ -220,6 +220,12 @@ void WorldSystem::restart_game() {
 	// registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
 	Entity player_ball = createBall(renderer, { 400, 400 });
 	Entity rectangle = createPolygonByVertex(renderer, { {220, 350}, { 220,220 }, { 400,220 }, { 400,350 } }, GEOMETRY_BUFFER_ID::RECT);
+
+	createNewRectangleTiedToEntity(rectangle, 180.f, 130.f, registry.motions.get(rectangle).position);
+	
+
+
+
 	Entity oct = createPolygonByVertex(renderer, {
 	{680.0f, 400.0f},
 	{660.56f, 460.56f},

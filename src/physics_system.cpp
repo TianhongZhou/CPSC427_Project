@@ -28,7 +28,7 @@ bool collides(const Motion& motion1, const Motion& motion2)
 
 
 
-float MIN_Y_COORD = 200.0f;
+float MIN_Y_COORD = 700.0f;
 
 //struct Vertex_Phys {
 //	vec2 pos;
@@ -76,86 +76,86 @@ struct CollisionEvent {
 
 
 
-void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) {
-
-	
-
-//	auto& entity = Entity();
-
-	Vertex_Phys newV;
-	registry.physObjs.emplace(e);
-
-	physObj& newObj = registry.physObjs.get(e);
-
-	newV.pos= vec2(centerPos.x - w / 2, centerPos.y + h / 2);
-	newV.oldPos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
-	newV.accel = vec2(0.0, 0.0);
-
-	
-
-	newObj.Vertices[0] = newV;
-
-	newV.pos = vec2(centerPos.x + w / 2, centerPos.y + h / 2);
-	newV.oldPos = vec2(centerPos.x + w / 2, centerPos.y + h / 2);
-	
-	newObj.Vertices[1] = newV;
-
-	newV.pos = vec2(centerPos.x - w / 2, centerPos.y - h / 2);
-	newV.oldPos = vec2(centerPos.x - w / 2, centerPos.y - h / 2);
-
-	newObj.Vertices[3] = newV;
-
-	newV.pos = vec2(centerPos.x + w / 2, centerPos.y - h / 2);
-	newV.oldPos = vec2(centerPos.x + w / 2, centerPos.y - h / 2);
-
-
-	newObj.Vertices[2] = newV;
-
-	newObj.VertexCount = 4;
-
-	Edge newEdge;
-	newEdge.parentObj = &newObj;
-
-
-
-	newEdge.v1 = &newObj.Vertices[0];
-	newEdge.v2 = &newObj.Vertices[1];
-	newEdge.len = w;
-
-	newObj.Edges[0] = newEdge;
-
-	newEdge.v1 = &newObj.Vertices[1];
-	newEdge.v2 = &newObj.Vertices[2];
-	newEdge.len = h;
-
-	newObj.Edges[1] = newEdge;
-
-	newEdge.v1 = &newObj.Vertices[2];
-	newEdge.v2 = &newObj.Vertices[3];
-	newEdge.len = w;
-
-	newObj.Edges[2] = newEdge;
-
-
-	newEdge.v1 = &newObj.Vertices[3];
-	newEdge.v2 = &newObj.Vertices[0];
-	newEdge.len = h;
-
-	newObj.Edges[3] = newEdge;
-
-
-	newEdge.v1 = &newObj.Vertices[0];
-	newEdge.v2 = &newObj.Vertices[2];
-	newEdge.len = sqrt(h*h + w*w);
-
-	newObj.Edges[4] = newEdge;
-
-	newObj.EdgesCount = 5;
-
-	newObj.center = centerPos;
-
-
-}
+//void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) {
+//
+//	
+//
+////	auto& entity = Entity();
+//
+//	Vertex_Phys newV;
+//	registry.physObjs.emplace(e);
+//
+//	physObj& newObj = registry.physObjs.get(e);
+//
+//	newV.pos= vec2(centerPos.x - w / 2, centerPos.y + h / 2);
+//	newV.oldPos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
+//	newV.accel = vec2(0.0, 0.0);
+//
+//	
+//
+//	newObj.Vertices[0] = newV;
+//
+//	newV.pos = vec2(centerPos.x + w / 2, centerPos.y + h / 2);
+//	newV.oldPos = vec2(centerPos.x + w / 2, centerPos.y + h / 2);
+//	
+//	newObj.Vertices[1] = newV;
+//
+//	newV.pos = vec2(centerPos.x - w / 2, centerPos.y - h / 2);
+//	newV.oldPos = vec2(centerPos.x - w / 2, centerPos.y - h / 2);
+//
+//	newObj.Vertices[3] = newV;
+//
+//	newV.pos = vec2(centerPos.x + w / 2, centerPos.y - h / 2);
+//	newV.oldPos = vec2(centerPos.x + w / 2, centerPos.y - h / 2);
+//
+//
+//	newObj.Vertices[2] = newV;
+//
+//	newObj.VertexCount = 4;
+//
+//	Edge newEdge;
+//	newEdge.parentObj = &newObj;
+//
+//
+//
+//	newEdge.v1 = &newObj.Vertices[0];
+//	newEdge.v2 = &newObj.Vertices[1];
+//	newEdge.len = w;
+//
+//	newObj.Edges[0] = newEdge;
+//
+//	newEdge.v1 = &newObj.Vertices[1];
+//	newEdge.v2 = &newObj.Vertices[2];
+//	newEdge.len = h;
+//
+//	newObj.Edges[1] = newEdge;
+//
+//	newEdge.v1 = &newObj.Vertices[2];
+//	newEdge.v2 = &newObj.Vertices[3];
+//	newEdge.len = w;
+//
+//	newObj.Edges[2] = newEdge;
+//
+//
+//	newEdge.v1 = &newObj.Vertices[3];
+//	newEdge.v2 = &newObj.Vertices[0];
+//	newEdge.len = h;
+//
+//	newObj.Edges[3] = newEdge;
+//
+//
+//	newEdge.v1 = &newObj.Vertices[0];
+//	newEdge.v2 = &newObj.Vertices[2];
+//	newEdge.len = sqrt(h*h + w*w);
+//
+//	newObj.Edges[4] = newEdge;
+//
+//	newObj.EdgesCount = 5;
+//
+//	newObj.center = centerPos;
+//
+//
+//}
 
 
 
@@ -385,7 +385,7 @@ void detectAndSolveAllCollisions() {
 
 
 
-vec2 GRAV = { 0.f, 800.f };
+vec2 GRAV = { 0.f, 0.00008f};
 
 void updateAllObjPos(float dt) {
 
@@ -393,8 +393,9 @@ void updateAllObjPos(float dt) {
 	for (uint i = 0; i < registry.physObjs.size(); i++) {
 		physObj& obj = registry.physObjs.components[i];
 
-		for (int i2 = 0; i < obj.VertexCount; i++) {
+		for (int i2 = 0; i2 < obj.VertexCount; i2++) {
 			updatePos(dt, (obj.Vertices[i2]));
+			printf("x=%f, y=%f\n", obj.Vertices[i2].pos.x, obj.Vertices[i2].pos.y);
 		}
 		
 	}
@@ -414,7 +415,7 @@ void applyObjGrav() {
 	for (uint i = 0; i < registry.physObjs.size(); i++) {
 		physObj& obj = registry.physObjs.components[i];
 
-		for (int i2 = 0; i < obj.VertexCount; i++) {
+		for (int i2 = 0; i2 < obj.VertexCount; i2++) {
 			accelerate(GRAV, (obj.Vertices[i2]));
 		}
 
@@ -441,8 +442,8 @@ void applyGlobalConstraints() {
 	for (uint i = 0; i < registry.physObjs.size(); i++) {
 		physObj& obj = registry.physObjs.components[i];
 
-		for (int i2 = 0; i < obj.VertexCount; i++) {
-			if (obj.Vertices[i2].pos.y < MIN_Y_COORD) {
+		for (int i2 = 0; i2 < obj.VertexCount; i2++) {
+			if (obj.Vertices[i2].pos.y > MIN_Y_COORD) {
 				obj.Vertices[i2].pos.y = MIN_Y_COORD;
 			}
 				
@@ -468,6 +469,8 @@ void updateAllMotionInfo() {
 		float y = registry.physObjs.get(obj).Vertices[1].pos.y - registry.physObjs.get(obj).Vertices[0].pos.y;
 
 		registry.motions.get(obj).position = registry.physObjs.get(obj).center;
+
+		printf("%f \n",registry.motions.get(obj).position.y);
 		registry.motions.get(obj).angle = atan2(y, x);
 	}
 
