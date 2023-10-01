@@ -472,6 +472,7 @@ void updateAllMotionInfo() {
 
 		printf("%f \n",registry.motions.get(obj).position.y);
 		registry.motions.get(obj).angle = atan2(y, x);
+		printf("angle = %f \n", atan2(y, x));
 	}
 
 }

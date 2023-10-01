@@ -324,6 +324,13 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         restart_game();
 	}
 
+	if (action == GLFW_RELEASE && key == GLFW_KEY_P) {
+		registry.physObjs.components[0].Vertices[0].accel = vec2(0.0, -0.1);
+		
+	}
+
+
+
 	// Debugging
 	if (key == GLFW_KEY_D) {
 		if (action == GLFW_RELEASE)
@@ -350,6 +357,8 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// xpos and ypos are relative to the top-left of the window, the salmon's
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }
