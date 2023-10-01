@@ -90,6 +90,42 @@ struct Mesh
 		vec2& out_size);
 };
 
+
+
+struct Vertex_Phys {
+	vec2 pos;
+	vec2 oldPos;
+
+	vec2 accel;
+
+};
+
+
+struct Edge {
+	Vertex_Phys* v1;
+	Vertex_Phys* v2;
+
+	physObj* parentObj;
+
+	float len;
+
+};
+
+
+struct physObj {
+
+	Vertex_Phys* Vertices[8];
+	Edge* Edges[13];
+
+
+	vec2 center;
+
+	int VertexCount;
+	int EdgesCount;
+
+
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture

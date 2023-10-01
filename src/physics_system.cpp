@@ -71,3 +71,388 @@ void PhysicsSystem::step(float elapsed_ms)
 	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
+
+
+float MIN_Y_COORD = 200.0f;
+
+struct Vertex_Phys {
+	vec2 pos;
+	vec2 oldPos;
+
+	vec2 accel;
+
+};
+
+
+struct Edge {
+	Vertex_Phys* v1;
+	Vertex_Phys* v2;
+
+	physObj* parentObj;
+
+	float len;
+
+};
+
+
+struct physObj {
+
+	Vertex_Phys* Vertices[8];
+	Edge* Edges[13];
+
+
+	vec2 center;
+
+	int VertexCount;
+	int EdgesCount;
+
+
+};
+
+
+struct CollisionEvent {
+	vec2 Normal;
+	float Depth;
+	Edge* Edge;
+	Vertex_Phys* Vertex;
+};
+
+
+
+
+
+void createNewRectangle(float w, float h, vec2 centerPos) {
+
+	physObj newRect;
+
+	auto& entity = Entity();
+
+	Vertex_Phys newV;
+
+	registry.Vertex_Phys_Array.emplace(entity)
+
+	.pos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
+
+
+	newRect.Vertices[0] = newV;
+
+
+}
+
+
+
+void updatePos(float dt, Vertex_Phys& v) {
+	vec2 velocity = v.pos - v.oldPos;
+	v.oldPos = v.pos;
+	v.pos = v.pos + velocity + v.accel * dt * dt;
+	v.accel = {};
+}
+
+void updateEdges(physObj& obj) {
+
+	for (int i = 0; i < obj.EdgesCount; i++) {
+
+		Edge& e = *obj.Edges[i];
+
+		vec2 v1v2 = e.v2->pos - e.v1->pos;
+
+		float curr_len = length(v1v2);
+
+		float diff = curr_len - e.len;
+
+		vec2 direction = normalize(v1v2);
+
+		e.v1->pos += direction * diff * 0.5f;
+		e.v2->pos -= direction * diff * 0.5f;
+
+
+	}
+
+
+}
+
+
+
+
+
+
+
+
+void projectObjToAxis(physObj& Obj, vec2 Axis, float& Max, float& Min) {
+
+	float dp = dot(Axis, Obj.Vertices[0]->pos);
+
+	Max = Min = dp;
+
+	for (int i = 1; i < Obj.VertexCount; i++) {
+		dp = dot(Axis, Obj.Vertices[i]->pos);
+
+		Min = min(dp, Min);
+		Max = max(dp, Max);
+
+	}
+
+
+
+}
+
+vec2 findCenter(const physObj& a) {
+
+	float cx = 0.f;
+	float cy = 0.f;
+	for (int i = 0; i < a.VertexCount; i++) {
+		cx += a.Vertices[i]->pos.x;
+		cy += a.Vertices[i]->pos.y;
+
+	}
+
+
+	return vec2(cx / a.VertexCount, cy / a.VertexCount);
+
+
+
+}
+
+
+
+
+bool detectAndResloveCollision(physObj* a, physObj* b) {
+
+	float minDist = 15000.0f;
+	CollisionEvent event;
+
+	for (int i = 0; i < a->EdgesCount + b->EdgesCount; i++) {
+		Edge* currEdge;
+		if (i < a->EdgesCount) {
+			currEdge = a->Edges[i];
+		}
+		else {
+			currEdge = b->Edges[i - a->EdgesCount];
+		}
+
+		vec2 Axis = vec2(currEdge->v1->pos.y - currEdge->v2->pos.y,
+			currEdge->v2->pos.x - currEdge->v1->pos.x);
+		Axis = normalize(Axis);
+
+
+		float MinA, MinB, MaxA, MaxB;
+
+		projectObjToAxis(*a, Axis, MaxA, MinA);
+		projectObjToAxis(*b, Axis, MaxB, MinB);
+		float dist;
+
+		if (MinA < MinB) {
+			dist = MinB - MaxA;
+		}
+		else {
+			dist = MinA - MaxB;
+		}
+
+		if (dist > 0.0f) {
+			return false;
+
+		}
+		else if (abs(dist) < minDist){
+			minDist = abs(dist);
+
+			
+			event.Normal = Axis;
+			event.Edge = currEdge;
+
+
+			//emplace this new event
+
+		}
+
+
+	}
+
+	event.Depth = minDist;
+
+
+	if ((event.Edge->parentObj) != b) {
+		physObj* temp = b;
+		b = a;
+		a = temp;
+	}
+
+	float check = dot(event.Normal, (a->center - b->center)); // questionable?
+
+	int sign = (0.f < check) - (check < 0.f);
+
+	if (sign != 1) {
+		event.Normal = -event.Normal;
+	}
+
+	float smallestDist = 20000.0f;
+
+
+	for (int i = 0; i < b->VertexCount; i++) {
+		//Measure the distance of the vertex from the line using the line equation
+		float distance = dot(event.Normal, (a->Vertices[i]->pos - b->center)); //questionable
+
+		//If the measured distance is smaller than the smallest distance reported
+		//so far, set the smallest distance and the collision vertex
+		if (distance < smallestDist) {
+			smallestDist = distance;
+			event.Vertex = a->Vertices[i];
+		}
+	}
+
+
+	collisionResponse(event);
+
+
+	return true;
+
+
+}
+
+
+
+
+void accelerate(vec2 acc, Vertex_Phys& obj) {
+	obj.accel += acc;
+
+}
+
+void update(float dt) {
+	applyObjGrav();
+	updateAllObjPos(dt);
+
+	applyGlobalConstraints();
+
+	updateAllEdges();
+	updateAllCenters();
+	detectAndSolveAllCollisions();
+
+}
+
+
+void updateWithSubstep(float dt, int steps) {
+
+	for (int i = 0; i < steps; i++) {
+		update(dt / steps);
+	}
+
+
+}
+
+
+void detectAndSolveAllCollisions() {
+
+	for (uint i = 0; i < registry.physObjs.size(); i++) {
+		physObj* a = &registry.physObjs.components[i];
+
+
+		for (uint i2 = 0; i2 < registry.physObjs.size(); i2++) {
+			physObj* b = &registry.physObjs.components[i2];
+
+			if (a != b) {
+				detectAndResloveCollision(a, b);
+
+			}
+
+
+
+		}
+
+		
+
+	}
+
+
+}
+
+
+
+
+vec2 GRAV = { 0.f, 800.f };
+
+void updateAllObjPos(float dt) {
+
+
+	for (uint i = 0; i < registry.physObjs.size(); i++) {
+		physObj& obj = registry.physObjs.components[i];
+
+		for (int i2 = 0; i < obj.VertexCount; i++) {
+			updatePos(dt, *(obj.Vertices[i2]));
+		}
+		
+	}
+
+}
+
+void updateAllEdges() {
+	for (uint i = 0; i < registry.physObjs.size(); i++) {
+		physObj& obj = registry.physObjs.components[i];
+
+		updateEdges(obj);
+
+	}
+}
+
+void applyObjGrav() {
+	for (uint i = 0; i < registry.physObjs.size(); i++) {
+		physObj& obj = registry.physObjs.components[i];
+
+		for (int i2 = 0; i < obj.VertexCount; i++) {
+			accelerate(GRAV, *(obj.Vertices[i2]));
+		}
+
+	}
+}
+
+
+void updateAllCenters() {
+
+	for (uint i = 0; i < registry.physObjs.size(); i++) {
+		physObj& obj = registry.physObjs.components[i];
+
+		obj.center = findCenter(obj);
+
+	}
+
+
+}
+
+
+
+void applyGlobalConstraints() {
+
+	for (uint i = 0; i < registry.physObjs.size(); i++) {
+		physObj& obj = registry.physObjs.components[i];
+
+		for (int i2 = 0; i < obj.VertexCount; i++) {
+			if (obj.Vertices[i2]->pos.y < MIN_Y_COORD) {
+				obj.Vertices[i2]->pos.y = MIN_Y_COORD;
+			}
+				
+		}
+
+	}
+
+
+}
+
+ 
+
+void collisionResponse(CollisionEvent& e) {
+	vec2 CollisionVector = e.Normal * e.Depth;
+
+	Vertex_Phys* E1 = e.Edge->v1;
+	Vertex_Phys* E2 = e.Edge->v2;
+
+	float fac;
+	if (abs(E1->pos.x - E2->pos.x) > abs(E1->pos.y - E2->pos.y))
+		fac = (e.Vertex->pos.x - CollisionVector.x - E1->pos.x) / (E2->pos.x - E1->pos.x);
+	else
+		fac = (e.Vertex->pos.y - CollisionVector.y - E1->pos.y) / (E2->pos.y - E1->pos.y);
+
+	float Lambda = 1.0f / (fac * fac + (1 - fac) * (1 - fac));
+
+	E1->pos -= CollisionVector * (1 - fac) * 0.5f * Lambda;
+	E2->pos -= CollisionVector * fac * 0.5f * Lambda;
+
+	e.Vertex->pos += CollisionVector * 0.5f;
+}
