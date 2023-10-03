@@ -378,36 +378,35 @@ void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) 
 	physObj test1 = registry.physObjs.components[0];
 
 	Edge newEdge{};
-	newEdge.parentObj = &newObj;
+	
 
 
-
-	newObj.Edges[0].v1 = &(newObj.Vertices[0]);
-	newObj.Edges[0].v2 = &(newObj.Vertices[1]);
+	newObj.Edges[0].v1 = 0;
+	newObj.Edges[0].v2 = 1;
 	newObj.Edges[0].len = w;
 
 
-	newObj.Edges[1].v1 = &newObj.Vertices[1];
-	newObj.Edges[1].v2 = &newObj.Vertices[2];
+	newObj.Edges[1].v1 = 1;
+	newObj.Edges[1].v2 = 2;
 	newObj.Edges[1].len = h;
 
 	
 
-	newObj.Edges[2].v1 = &newObj.Vertices[2];
-	newObj.Edges[2].v2 = &newObj.Vertices[3];
+	newObj.Edges[2].v1 = 2;
+	newObj.Edges[2].v2 = 3;
 	newObj.Edges[2].len = w;
 
 	physObj test2 = registry.physObjs.components[0];
 
 
-	newObj.Edges[3].v1 = &newObj.Vertices[3];
-	newObj.Edges[3].v2 = &newObj.Vertices[0];
+	newObj.Edges[3].v1 = 3;
+	newObj.Edges[3].v2 = 0;
 	newObj.Edges[3].len = h;
 
 	
 
-	newObj.Edges[4].v1 = &newObj.Vertices[0];
-	newObj.Edges[4].v2 = &newObj.Vertices[2];
+	newObj.Edges[4].v1 = 0;
+	newObj.Edges[4].v2 = 2;
 	newObj.Edges[4].len = sqrt(h * h + w * w);
 
 	

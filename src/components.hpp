@@ -104,10 +104,10 @@ struct physObj;
 
 
 struct Edge {
-	Vertex_Phys* v1;
-	Vertex_Phys* v2;
+	int v1; //array indices for the vertex array
+	int v2;
 
-	physObj* parentObj;
+	
 
 	float len;
 

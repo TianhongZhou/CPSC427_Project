@@ -229,12 +229,9 @@ void WorldSystem::restart_game() {
 
 	Entity rectangle = createPolygonByVertex(renderer, { {220, 350}, { 220,220 }, { 400,220 }, { 400,350 } }, GEOMETRY_BUFFER_ID::RECT);
 
-	createNewRectangleTiedToEntity(rectangle, 180.f, 130.f, registry.motions.get(rectangle).position);
+	createNewRectangleTiedToEntity(rectangle, 180.f, 130.f, registry.motions.get(rectangle).position -vec2(0.0,150.0));
 	
 
-	Entity rectangle3 = createPolygonByVertex(renderer, { {220, 350}, { 220,220 }, { 400,220 }, { 400,350 } }, GEOMETRY_BUFFER_ID::RECT);
-
-	createNewRectangleTiedToEntity(rectangle3, 180.f, 130.f, registry.motions.get(rectangle3).position);
 
 
 

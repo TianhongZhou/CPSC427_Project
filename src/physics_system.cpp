@@ -29,7 +29,7 @@ bool collides(const Motion& motion1, const Motion& motion2)
 
 
 float MIN_Y_COORD = 700.0f;
-
+vec2 GRAV = { 0.f, 0.00007f };
 //struct Vertex_Phys {
 //	vec2 pos;
 //	vec2 oldPos;
@@ -70,6 +70,8 @@ struct CollisionEvent {
 	float Depth;
 	Edge* Edge;
 	Vertex_Phys* Vertex;
+
+	physObj* EdgeParent;
 };
 
 
@@ -172,7 +174,7 @@ void updateEdges(physObj& obj) {
 
 		Edge& e = obj.Edges[i];
 
-		vec2 v1v2 = e.v2->pos - e.v1->pos;
+		vec2 v1v2 = obj.Vertices[e.v2].pos - obj.Vertices[e.v1].pos;
 
 		float curr_len = length(v1v2);
 
@@ -180,8 +182,8 @@ void updateEdges(physObj& obj) {
 
 		vec2 direction = normalize(v1v2);
 
-		e.v1->pos += direction * diff * 0.5f;
-		e.v2->pos -= direction * diff * 0.5f;
+		obj.Vertices[e.v1].pos += direction * diff * 0.5f;
+		obj.Vertices[e.v2].pos -= direction * diff * 0.5f;
 
 
 	}
@@ -234,19 +236,19 @@ vec2 findCenter(const physObj& a) {
 void collisionResponse(CollisionEvent& e) {
 	vec2 CollisionVector = e.Normal * e.Depth;
 
-	Vertex_Phys* E1 = e.Edge->v1;
-	Vertex_Phys* E2 = e.Edge->v2;
+	int E1 = e.Edge->v1;
+	int E2 = e.Edge->v2;
 
 	float fac;
-	if (abs(E1->pos.x - E2->pos.x) > abs(E1->pos.y - E2->pos.y))
-		fac = (e.Vertex->pos.x - CollisionVector.x - E1->pos.x) / (E2->pos.x - E1->pos.x);
+	if (abs(e.EdgeParent->Vertices[E1].pos.x - e.EdgeParent->Vertices[E2].pos.x) > abs(e.EdgeParent->Vertices[E1].pos.y - e.EdgeParent->Vertices[E2].pos.y))
+		fac = (e.Vertex->pos.x - CollisionVector.x - e.EdgeParent->Vertices[E1].pos.x) / (e.EdgeParent->Vertices[E2].pos.x - e.EdgeParent->Vertices[E1].pos.x);
 	else
-		fac = (e.Vertex->pos.y - CollisionVector.y - E1->pos.y) / (E2->pos.y - E1->pos.y);
+		fac = (e.Vertex->pos.y - CollisionVector.y - e.EdgeParent->Vertices[E1].pos.y) / (e.EdgeParent->Vertices[E2].pos.y - e.EdgeParent->Vertices[E1].pos.y);
 
 	float Lambda = 1.0f / (fac * fac + (1 - fac) * (1 - fac));
 
-	E1->pos -= CollisionVector * (1 - fac) * 0.5f * Lambda;
-	E2->pos -= CollisionVector * fac * 0.5f * Lambda;
+	e.EdgeParent->Vertices[E1].pos -= CollisionVector * (1 - fac) * 0.5f * Lambda;
+	e.EdgeParent->Vertices[E2].pos -= CollisionVector * fac * 0.5f * Lambda;
 
 	e.Vertex->pos += CollisionVector * 0.5f;
 }
@@ -272,8 +274,8 @@ bool detectAndResloveCollision(physObj* a, physObj* b) {
 			parent = b;
 		}
 
-		vec2 Axis = vec2(currEdge->v1->pos.y - currEdge->v2->pos.y,
-			currEdge->v2->pos.x - currEdge->v1->pos.x);
+		vec2 Axis = vec2((*parent).Vertices[currEdge->v1].pos.y - (*parent).Vertices[currEdge->v2].pos.y,
+			(*parent).Vertices[currEdge->v2].pos.x - (*parent).Vertices[currEdge->v1].pos.x);
 		Axis = normalize(Axis);
 
 
@@ -301,7 +303,7 @@ bool detectAndResloveCollision(physObj* a, physObj* b) {
 			event.Normal = Axis;
 			event.Edge = currEdge;
 
-			
+			event.EdgeParent = parent;
 
 
 			//emplace this new event
@@ -314,7 +316,7 @@ bool detectAndResloveCollision(physObj* a, physObj* b) {
 	event.Depth = minDist;
 
 
-	if ((event.Edge->parentObj) != b) {
+	if ((event.EdgeParent) != b) {
 		physObj* temp = b;
 		b = a;
 		a = temp;
@@ -402,7 +404,7 @@ void detectAndSolveAllCollisions() {
 
 
 
-vec2 GRAV = { 0.f, 0.0005f};
+
 
 void updateAllObjPos(float dt) {
 
@@ -495,7 +497,7 @@ void update(float dt) {
 	applyGlobalConstraints();
 	updateAllEdges();
 	updateAllCenters();
-//	detectAndSolveAllCollisions();
+	detectAndSolveAllCollisions();
 	
 	updateAllMotionInfo();
 
