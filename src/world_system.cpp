@@ -219,24 +219,41 @@ void WorldSystem::restart_game() {
 	// player_salmon = createSalmon(renderer, { 100, 200 });
 	// registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
 	Entity player_ball = createBall(renderer, { 400, 400 });
+
+	Entity rectangle2 = createPolygonByVertex(renderer, { {220, 350}, { 220,220 }, { 300,220 }, { 300,350 } }, GEOMETRY_BUFFER_ID::OCT);
+
+	createNewRectangleTiedToEntity(rectangle2, 80.f, 130.f, registry.motions.get(rectangle2).position);
+
+	physObj test = registry.physObjs.components[0];
+
+
 	Entity rectangle = createPolygonByVertex(renderer, { {220, 350}, { 220,220 }, { 400,220 }, { 400,350 } }, GEOMETRY_BUFFER_ID::RECT);
 
 	createNewRectangleTiedToEntity(rectangle, 180.f, 130.f, registry.motions.get(rectangle).position);
 	
 
+	Entity rectangle3 = createPolygonByVertex(renderer, { {220, 350}, { 220,220 }, { 400,220 }, { 400,350 } }, GEOMETRY_BUFFER_ID::RECT);
+
+	createNewRectangleTiedToEntity(rectangle3, 180.f, 130.f, registry.motions.get(rectangle3).position);
 
 
-	Entity oct = createPolygonByVertex(renderer, {
-	{680.0f, 400.0f},
-	{660.56f, 460.56f},
-	{600.0f, 480.0f}, 
-	{539.44f, 460.56f}, 
-	{520.0f, 400.0f},
-	{539.44f, 339.44f},
-	{600.0f, 320.0f},
-	{660.56f, 339.44f}
-		}, GEOMETRY_BUFFER_ID::OCT);
-	Entity pinballenemy = createPinBallEnemy(renderer, { 400, 200 });
+
+	test = registry.physObjs.components[0];
+
+	physObj test2 = registry.physObjs.components[1];
+
+
+	//Entity oct = createPolygonByVertex(renderer, {
+	//{680.0f, 400.0f},
+	//{660.56f, 460.56f},
+	//{600.0f, 480.0f}, 
+	//{539.44f, 460.56f}, 
+	//{520.0f, 400.0f},
+	//{539.44f, 339.44f},
+	//{600.0f, 320.0f},
+	//{660.56f, 339.44f}
+	//	}, GEOMETRY_BUFFER_ID::OCT);
+	Entity pinballenemy = createPinBallEnemy(renderer, { 100, 700 });
 	registry.colors.insert(pinballenemy, { 1, 0, 0 });
 	Entity enemyWave = createEnemyWave(renderer, { 400, 600 });
 	registry.colors.insert(enemyWave, { 0, 0, 1 });

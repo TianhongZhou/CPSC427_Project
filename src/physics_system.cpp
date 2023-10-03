@@ -255,15 +255,21 @@ void collisionResponse(CollisionEvent& e) {
 bool detectAndResloveCollision(physObj* a, physObj* b) {
 
 	float minDist = 15000.0f;
-	CollisionEvent event;
+	CollisionEvent event{};
+
+	physObj* parent;
 
 	for (int i = 0; i < a->EdgesCount + b->EdgesCount; i++) {
 		Edge* currEdge;
 		if (i < a->EdgesCount) {
 			currEdge = &a->Edges[i];
+
+			parent = a;
 		}
 		else {
 			currEdge = &b->Edges[i - a->EdgesCount];
+
+			parent = b;
 		}
 
 		vec2 Axis = vec2(currEdge->v1->pos.y - currEdge->v2->pos.y,
@@ -295,6 +301,8 @@ bool detectAndResloveCollision(physObj* a, physObj* b) {
 			event.Normal = Axis;
 			event.Edge = currEdge;
 
+			
+
 
 			//emplace this new event
 
@@ -323,7 +331,7 @@ bool detectAndResloveCollision(physObj* a, physObj* b) {
 	float smallestDist = 20000.0f;
 
 
-	for (int i = 0; i < b->VertexCount; i++) {
+	for (int i = 0; i < a->VertexCount; i++) {
 		//Measure the distance of the vertex from the line using the line equation
 		float distance = dot(event.Normal, (a->Vertices[i].pos - b->center)); //questionable
 
@@ -338,7 +346,7 @@ bool detectAndResloveCollision(physObj* a, physObj* b) {
 
 	collisionResponse(event);
 
-
+	printf("collision!\n");
 	return true;
 
 
@@ -354,6 +362,14 @@ void accelerate(vec2 acc, Vertex_Phys& obj) {
 
 
 
+void updateAllEdges() {
+	for (uint i = 0; i < registry.physObjs.size(); i++) {
+		physObj& obj = registry.physObjs.components[i];
+
+		updateEdges(obj);
+
+	}
+}
 
 
 
@@ -368,6 +384,7 @@ void detectAndSolveAllCollisions() {
 
 			if (a != b) {
 				detectAndResloveCollision(a, b);
+				
 
 			}
 
@@ -385,7 +402,7 @@ void detectAndSolveAllCollisions() {
 
 
 
-vec2 GRAV = { 0.f, 0.00008f};
+vec2 GRAV = { 0.f, 0.0005f};
 
 void updateAllObjPos(float dt) {
 
@@ -395,21 +412,13 @@ void updateAllObjPos(float dt) {
 
 		for (int i2 = 0; i2 < obj.VertexCount; i2++) {
 			updatePos(dt, (obj.Vertices[i2]));
-			printf("x=%f, y=%f\n", obj.Vertices[i2].pos.x, obj.Vertices[i2].pos.y);
+//			printf("x=%f, y=%f\n", obj.Vertices[i2].pos.x, obj.Vertices[i2].pos.y);
 		}
 		
 	}
 
 }
 
-void updateAllEdges() {
-	for (uint i = 0; i < registry.physObjs.size(); i++) {
-		physObj& obj = registry.physObjs.components[i];
-
-		updateEdges(obj);
-
-	}
-}
 
 void applyObjGrav() {
 	for (uint i = 0; i < registry.physObjs.size(); i++) {
@@ -470,9 +479,9 @@ void updateAllMotionInfo() {
 
 		registry.motions.get(obj).position = registry.physObjs.get(obj).center;
 
-		printf("%f \n",registry.motions.get(obj).position.y);
+//		printf("%f \n",registry.motions.get(obj).position.y);
 		registry.motions.get(obj).angle = atan2(y, x);
-		printf("angle = %f \n", atan2(y, x));
+//		printf("angle = %f \n", atan2(y, x));
 	}
 
 }
@@ -482,12 +491,12 @@ void update(float dt) {
 	applyObjGrav();
 	updateAllObjPos(dt);
 
+	
 	applyGlobalConstraints();
-
 	updateAllEdges();
 	updateAllCenters();
-	detectAndSolveAllCollisions();
-
+//	detectAndSolveAllCollisions();
+	
 	updateAllMotionInfo();
 
 }

@@ -339,8 +339,13 @@ void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) 
 
 	//	auto& entity = Entity();
 
-	Vertex_Phys newV;
+	Vertex_Phys newV{};
 	registry.physObjs.emplace(e);
+
+
+	physObj test0 = registry.physObjs.components[0];
+
+
 
 	physObj& newObj = registry.physObjs.get(e);
 
@@ -370,42 +375,44 @@ void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) 
 
 	newObj.VertexCount = 4;
 
-	Edge newEdge;
+	physObj test1 = registry.physObjs.components[0];
+
+	Edge newEdge{};
 	newEdge.parentObj = &newObj;
 
 
 
-	newEdge.v1 = &newObj.Vertices[0];
-	newEdge.v2 = &newObj.Vertices[1];
-	newEdge.len = w;
-
-	newObj.Edges[0] = newEdge;
-
-	newEdge.v1 = &newObj.Vertices[1];
-	newEdge.v2 = &newObj.Vertices[2];
-	newEdge.len = h;
-
-	newObj.Edges[1] = newEdge;
-
-	newEdge.v1 = &newObj.Vertices[2];
-	newEdge.v2 = &newObj.Vertices[3];
-	newEdge.len = w;
-
-	newObj.Edges[2] = newEdge;
+	newObj.Edges[0].v1 = &(newObj.Vertices[0]);
+	newObj.Edges[0].v2 = &(newObj.Vertices[1]);
+	newObj.Edges[0].len = w;
 
 
-	newEdge.v1 = &newObj.Vertices[3];
-	newEdge.v2 = &newObj.Vertices[0];
-	newEdge.len = h;
+	newObj.Edges[1].v1 = &newObj.Vertices[1];
+	newObj.Edges[1].v2 = &newObj.Vertices[2];
+	newObj.Edges[1].len = h;
 
-	newObj.Edges[3] = newEdge;
+	
+
+	newObj.Edges[2].v1 = &newObj.Vertices[2];
+	newObj.Edges[2].v2 = &newObj.Vertices[3];
+	newObj.Edges[2].len = w;
+
+	physObj test2 = registry.physObjs.components[0];
 
 
-	newEdge.v1 = &newObj.Vertices[0];
-	newEdge.v2 = &newObj.Vertices[2];
-	newEdge.len = sqrt(h * h + w * w);
+	newObj.Edges[3].v1 = &newObj.Vertices[3];
+	newObj.Edges[3].v2 = &newObj.Vertices[0];
+	newObj.Edges[3].len = h;
 
-	newObj.Edges[4] = newEdge;
+	
+
+	newObj.Edges[4].v1 = &newObj.Vertices[0];
+	newObj.Edges[4].v2 = &newObj.Vertices[2];
+	newObj.Edges[4].len = sqrt(h * h + w * w);
+
+	
+
+
 
 	newObj.EdgesCount = 5;
 
