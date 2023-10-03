@@ -28,8 +28,14 @@ bool collides(const Motion& motion1, const Motion& motion2)
 
 
 
-float MIN_Y_COORD = 700.0f;
-vec2 GRAV = { 0.f, 0.00007f };
+float MAX_Y_COORD = 700.0f;
+
+float MIN_X_COORD = 0.0f;
+
+
+float MAX_X_COORD = 700.0f;
+
+vec2 GRAV = { 0.f, 0.0001f };
 //struct Vertex_Phys {
 //	vec2 pos;
 //	vec2 oldPos;
@@ -454,8 +460,17 @@ void applyGlobalConstraints() {
 		physObj& obj = registry.physObjs.components[i];
 
 		for (int i2 = 0; i2 < obj.VertexCount; i2++) {
-			if (obj.Vertices[i2].pos.y > MIN_Y_COORD) {
-				obj.Vertices[i2].pos.y = MIN_Y_COORD;
+			if (obj.Vertices[i2].pos.y > MAX_Y_COORD) {
+				obj.Vertices[i2].pos.y = MAX_Y_COORD;
+			}
+
+			if (obj.Vertices[i2].pos.x < MIN_X_COORD) {
+				obj.Vertices[i2].pos.x = MIN_X_COORD;
+			}
+
+
+			if (obj.Vertices[i2].pos.x > MAX_X_COORD) {
+				obj.Vertices[i2].pos.x = MAX_X_COORD;
 			}
 				
 		}
