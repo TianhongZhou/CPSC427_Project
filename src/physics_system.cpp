@@ -30,12 +30,14 @@ bool collides(const Motion& motion1, const Motion& motion2)
 
 float MAX_Y_COORD = 700.0f;
 
+float MIN_Y_COORD = 0.0f;
+
 float MIN_X_COORD = 0.0f;
 
 
 float MAX_X_COORD = 700.0f;
 
-vec2 GRAV = { 0.f, 0.0001f };
+vec2 GRAV = { 0.f, 0.0003f };
 //struct Vertex_Phys {
 //	vec2 pos;
 //	vec2 oldPos;
@@ -83,87 +85,6 @@ struct CollisionEvent {
 
 
 
-
-//void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) {
-//
-//	
-//
-////	auto& entity = Entity();
-//
-//	Vertex_Phys newV;
-//	registry.physObjs.emplace(e);
-//
-//	physObj& newObj = registry.physObjs.get(e);
-//
-//	newV.pos= vec2(centerPos.x - w / 2, centerPos.y + h / 2);
-//	newV.oldPos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
-//	newV.accel = vec2(0.0, 0.0);
-//
-//	
-//
-//	newObj.Vertices[0] = newV;
-//
-//	newV.pos = vec2(centerPos.x + w / 2, centerPos.y + h / 2);
-//	newV.oldPos = vec2(centerPos.x + w / 2, centerPos.y + h / 2);
-//	
-//	newObj.Vertices[1] = newV;
-//
-//	newV.pos = vec2(centerPos.x - w / 2, centerPos.y - h / 2);
-//	newV.oldPos = vec2(centerPos.x - w / 2, centerPos.y - h / 2);
-//
-//	newObj.Vertices[3] = newV;
-//
-//	newV.pos = vec2(centerPos.x + w / 2, centerPos.y - h / 2);
-//	newV.oldPos = vec2(centerPos.x + w / 2, centerPos.y - h / 2);
-//
-//
-//	newObj.Vertices[2] = newV;
-//
-//	newObj.VertexCount = 4;
-//
-//	Edge newEdge;
-//	newEdge.parentObj = &newObj;
-//
-//
-//
-//	newEdge.v1 = &newObj.Vertices[0];
-//	newEdge.v2 = &newObj.Vertices[1];
-//	newEdge.len = w;
-//
-//	newObj.Edges[0] = newEdge;
-//
-//	newEdge.v1 = &newObj.Vertices[1];
-//	newEdge.v2 = &newObj.Vertices[2];
-//	newEdge.len = h;
-//
-//	newObj.Edges[1] = newEdge;
-//
-//	newEdge.v1 = &newObj.Vertices[2];
-//	newEdge.v2 = &newObj.Vertices[3];
-//	newEdge.len = w;
-//
-//	newObj.Edges[2] = newEdge;
-//
-//
-//	newEdge.v1 = &newObj.Vertices[3];
-//	newEdge.v2 = &newObj.Vertices[0];
-//	newEdge.len = h;
-//
-//	newObj.Edges[3] = newEdge;
-//
-//
-//	newEdge.v1 = &newObj.Vertices[0];
-//	newEdge.v2 = &newObj.Vertices[2];
-//	newEdge.len = sqrt(h*h + w*w);
-//
-//	newObj.Edges[4] = newEdge;
-//
-//	newObj.EdgesCount = 5;
-//
-//	newObj.center = centerPos;
-//
-//
-//}
 
 
 
@@ -340,11 +261,10 @@ bool detectAndResloveCollision(physObj* a, physObj* b) {
 
 
 	for (int i = 0; i < a->VertexCount; i++) {
-		//Measure the distance of the vertex from the line using the line equation
+		
 		float distance = dot(event.Normal, (a->Vertices[i].pos - b->center)); //questionable
 
-		//If the measured distance is smaller than the smallest distance reported
-		//so far, set the smallest distance and the collision vertex
+		
 		if (distance < smallestDist) {
 			smallestDist = distance;
 			event.Vertex = &a->Vertices[i];
@@ -354,7 +274,7 @@ bool detectAndResloveCollision(physObj* a, physObj* b) {
 
 	collisionResponse(event);
 
-	printf("collision!\n");
+	
 	return true;
 
 
@@ -464,6 +384,11 @@ void applyGlobalConstraints() {
 				obj.Vertices[i2].pos.y = MAX_Y_COORD;
 			}
 
+
+			if (obj.Vertices[i2].pos.y < MIN_Y_COORD) {
+				obj.Vertices[i2].pos.y = MIN_Y_COORD;
+			}
+
 			if (obj.Vertices[i2].pos.x < MIN_X_COORD) {
 				obj.Vertices[i2].pos.x = MIN_X_COORD;
 			}
@@ -518,7 +443,7 @@ void update(float dt) {
 
 }
 
-void updateWithSubstep(float dt, int steps) {
+void updateWithSubstep(float dt, float steps) {
 
 	for (int i = 0; i < steps; i++) {
 		update(dt / steps);
@@ -531,49 +456,8 @@ void updateWithSubstep(float dt, int steps) {
 void PhysicsSystem::step(float elapsed_ms)
 {
 
-	updateWithSubstep(elapsed_ms, 8);
+	updateWithSubstep(elapsed_ms, 8.0f);
 
 
-	//// Move fish based on how much time has passed, this is to (partially) avoid
-	//// having entities move at different speed based on the machine.
-	//auto& motion_container = registry.motions;
-	//for(uint i = 0; i < motion_container.size(); i++)
-	//{
-	//	// !!! TODO A1: update motion.position based on step_seconds and motion.velocity
-	//	//Motion& motion = motion_container.components[i];
-	//	//Entity entity = motion_container.entities[i];
-	//	//float step_seconds = elapsed_ms / 1000.f;
-	//	(void)elapsed_ms; // placeholder to silence unused warning until implemented
-	//}
 
-	//// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	//// TODO A2: HANDLE PEBBLE UPDATES HERE
-	//// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	//// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	//// Check for collisions between all moving entities
-	//for(uint i = 0; i < motion_container.components.size(); i++)
-	//{
-	//	Motion& motion_i = motion_container.components[i];
-	//	Entity entity_i = motion_container.entities[i];
-	//	
-	//	// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
-	//	for(uint j = i+1; j < motion_container.components.size(); j++)
-	//	{
-	//		Motion& motion_j = motion_container.components[j];
-	//		if (collides(motion_i, motion_j))
-	//		{
-	//			Entity entity_j = motion_container.entities[j];
-	//			// Create a collisions event
-	//			// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
-	//			registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-	//			registry.collisions.emplace_with_duplicates(entity_j, entity_i);
-	//		}
-	//	}
-	//}
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: HANDLE PEBBLE collisions HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
