@@ -38,4 +38,6 @@ Entity createLine(vec2 position, vec2 size);
 // a pebble
 Entity createPebble(vec2 pos, vec2 size);
 
+void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos);
+
 
