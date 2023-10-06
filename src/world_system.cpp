@@ -219,6 +219,7 @@ void WorldSystem::restart_game() {
 	// player_salmon = createSalmon(renderer, { 100, 200 });
 	// registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
 	Entity player_ball = createBall(renderer, { 400, 400 });
+	// createNewRectangleTiedToEntity(player_ball, 12.f, 12.f, registry.motions.get(player_ball).position);
 
 	Entity rectangle2 = createPolygonByVertex(renderer, { {220, 350}, { 220,220 }, { 300,220 }, { 300,350 } }, GEOMETRY_BUFFER_ID::OCT);
 
@@ -231,9 +232,6 @@ void WorldSystem::restart_game() {
 
 	createNewRectangleTiedToEntity(rectangle, 180.f, 130.f, registry.motions.get(rectangle).position -vec2(0.0,150.0));
 	
-
-
-
 
 	test = registry.physObjs.components[0];
 
@@ -256,7 +254,7 @@ void WorldSystem::restart_game() {
 	registry.colors.insert(enemyWave, { 0, 0, 1 });
 	Entity room = createRoom(renderer, { 800, 400 });
 	Entity road = createRoad(renderer, { 800, 200 });
-	Entity player = createPlayer(renderer, { 800, 600 });
+	player = createPlayer(renderer, { 800, 600 });
 	Entity roomEnemy = createRoomEnemy(renderer, { 1000, 600 });
 	registry.colors.insert(roomEnemy, { 1, 0, 0 });
 
@@ -324,11 +322,39 @@ bool WorldSystem::is_over() const {
 
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE SALMON MOVEMENT HERE
-	// key is of 'type' GLFW_KEY_
-	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	Motion& motion = registry.motions.get(player);
+
+	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_UP) {
+		motion.velocity.y = -200.f;
+	}
+
+	if (action == GLFW_RELEASE && key == GLFW_KEY_UP) {
+		motion.velocity.y = 0.f;
+	}
+
+	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_DOWN) {
+		motion.velocity.y = 200.f;
+	}
+
+	if (action == GLFW_RELEASE && key == GLFW_KEY_DOWN) {
+		motion.velocity.y = 0.f;
+	}
+
+	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_LEFT) {
+		motion.velocity.x = -200.f;
+	}
+
+	if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT) {
+		motion.velocity.x = 0.f;
+	}
+
+	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_RIGHT) {
+		motion.velocity.x = 200.f;
+	}
+
+	if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT) {
+		motion.velocity.x = 0.f;
+	}
 
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
