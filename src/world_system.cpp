@@ -84,8 +84,10 @@ GLFWwindow* WorldSystem::create_window() {
 	glfwSetWindowUserPointer(window, this);
 	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
 	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
+	auto mouse_button_redirect = [](GLFWwindow* wnd, int button, int action, int mods) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_click(button, action, mods); };
 	glfwSetKeyCallback(window, key_redirect);
 	glfwSetCursorPosCallback(window, cursor_pos_redirect);
+	glfwSetMouseButtonCallback(window, mouse_button_redirect);
 
 	//////////////////////////////////////
 	// Loading music and sounds with SDL
@@ -400,4 +402,16 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 
 
 	(vec2)mouse_position; // dummy to avoid compiler warning
+}
+
+void WorldSystem::on_mouse_click(int button, int action, int mods) {
+	if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT) {
+		RenderRequest& renderRequest = registry.renderRequests.get(player);
+		renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERATTACK;
+	}
+	
+	if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_LEFT) {
+		RenderRequest& renderRequest = registry.renderRequests.get(player);
+		renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYER;
+	}
 }

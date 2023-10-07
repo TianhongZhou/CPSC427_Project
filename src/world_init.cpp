@@ -46,15 +46,14 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * -50.f;
+	motion.scale = mesh.original_size * 100.f;
 
-	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
-			EFFECT_ASSET_ID::SALMON,
-			GEOMETRY_BUFFER_ID::PLAYER });
+		{ TEXTURE_ASSET_ID::PLAYER,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }
@@ -72,11 +71,10 @@ Entity createRoomEnemy(RenderSystem* renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * -50.f;
 
-	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			EFFECT_ASSET_ID::SALMON,
 			GEOMETRY_BUFFER_ID::PLAYER });
 
@@ -96,11 +94,10 @@ Entity createRoad(RenderSystem* renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * 10.f;
 
-	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			EFFECT_ASSET_ID::SALMON,
 			GEOMETRY_BUFFER_ID::ROAD });
 
@@ -120,11 +117,10 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * 50.f;
 
-	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			EFFECT_ASSET_ID::SALMON,
 			GEOMETRY_BUFFER_ID::ROOM });
 
@@ -144,11 +140,10 @@ Entity createEnemyWave(RenderSystem* renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * 50.f;
 
-	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			EFFECT_ASSET_ID::SALMON,
 			GEOMETRY_BUFFER_ID::ENEMYWAVE });
 
@@ -168,11 +163,10 @@ Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * 50.f;
 
-	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			EFFECT_ASSET_ID::SALMON,
 			GEOMETRY_BUFFER_ID::PINBALLENEMY });
 
@@ -192,11 +186,10 @@ Entity createBall(RenderSystem* renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * 10.f;
 
-	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			EFFECT_ASSET_ID::SALMON,
 			GEOMETRY_BUFFER_ID::BALL });
 

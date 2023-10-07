@@ -161,7 +161,9 @@ struct physObj {
 enum class TEXTURE_ASSET_ID {
 	FISH = 0,
 	TURTLE = FISH + 1,
-	TEXTURE_COUNT = TURTLE + 1
+	PLAYER = TURTLE + 1,
+	PLAYERATTACK = PLAYER + 1,
+	TEXTURE_COUNT = PLAYERATTACK + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
