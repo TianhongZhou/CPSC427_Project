@@ -13,6 +13,10 @@
 
 #include "render_system.hpp"
 
+extern int GameSceneState;
+extern int InitCombat;
+
+
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
 class WorldSystem
@@ -31,12 +35,18 @@ public:
 
 	// Steps the game ahead by ms milliseconds
 	bool step(float elapsed_ms);
+	bool step_world(float elapsed_ms);
 
 	// Check for collisions
 	void handle_collisions();
+	void handle_collisions_world();
 
 	// Should the game be over ?
 	bool is_over()const;
+
+	// initialize combat
+	void init_combat();
+
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
@@ -45,6 +55,8 @@ private:
 
 	// restart level
 	void restart_game();
+
+
 
 	// OpenGL window handle
 	GLFWwindow* window;

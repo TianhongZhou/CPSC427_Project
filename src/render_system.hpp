@@ -81,6 +81,7 @@ public:
 
 	// Draw all entities
 	void draw();
+	void draw_world();
 
 	mat3 createProjectionMatrix();
 
