@@ -14,6 +14,10 @@ const size_t MAX_FISH = 5;
 const size_t TURTLE_DELAY_MS = 2000 * 3;
 const size_t FISH_DELAY_MS = 5000 * 3;
 
+// Game state global variables                            
+int GameSceneState = 0;
+int InitCombat = 0;
+
 // Create the fish world
 WorldSystem::WorldSystem()
 	: points(0)
@@ -206,6 +210,8 @@ void WorldSystem::restart_game() {
 	registry.list_all_components();
 	printf("Restarting\n");
 
+	GameSceneState = 0; // reset to world scene (we can make a function for combat restart)
+
 	// Reset the game speed
 	current_speed = 1.f;
 
@@ -218,8 +224,72 @@ void WorldSystem::restart_game() {
 	registry.list_all_components();
 
 	// Create a new salmon
-	// player_salmon = createSalmon(renderer, { 100, 200 });
-	// registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
+	player_salmon = createSalmon(renderer, { 100, 200 });
+	registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
+
+
+
+	//Entity player_ball = createBall(renderer, { 400, 400 });
+	//// createNewRectangleTiedToEntity(player_ball, 12.f, 12.f, registry.motions.get(player_ball).position);
+
+	//Entity rectangle2 = createPolygonByVertex(renderer, { {220, 350}, { 220,220 }, { 300,220 }, { 300,350 } }, GEOMETRY_BUFFER_ID::OCT);
+
+	//createNewRectangleTiedToEntity(rectangle2, 80.f, 130.f, registry.motions.get(rectangle2).position);
+
+	//physObj test = registry.physObjs.components[0];
+
+
+	//Entity rectangle = createPolygonByVertex(renderer, { {220, 350}, { 220,220 }, { 400,220 }, { 400,350 } }, GEOMETRY_BUFFER_ID::RECT);
+
+	//createNewRectangleTiedToEntity(rectangle, 180.f, 130.f, registry.motions.get(rectangle).position -vec2(0.0,150.0));
+	//
+
+	//test = registry.physObjs.components[0];
+
+	//physObj test2 = registry.physObjs.components[1];
+
+
+	////Entity oct = createPolygonByVertex(renderer, {
+	////{680.0f, 400.0f},
+	////{660.56f, 460.56f},
+	////{600.0f, 480.0f}, 
+	////{539.44f, 460.56f}, 
+	////{520.0f, 400.0f},
+	////{539.44f, 339.44f},
+	////{600.0f, 320.0f},
+	////{660.56f, 339.44f}
+	////	}, GEOMETRY_BUFFER_ID::OCT);
+	//Entity pinballenemy = createPinBallEnemy(renderer, { 100, 700 });
+	//registry.colors.insert(pinballenemy, { 1, 0, 0 });
+	//Entity enemyWave = createEnemyWave(renderer, { 400, 600 });
+	//registry.colors.insert(enemyWave, { 0, 0, 1 });
+	//Entity room = createRoom(renderer, { 800, 400 });
+	//Entity road = createRoad(renderer, { 800, 200 });
+	//player = createPlayer(renderer, { 800, 600 });
+	//Entity roomEnemy = createRoomEnemy(renderer, { 1000, 600 });
+	//registry.colors.insert(roomEnemy, { 1, 0, 0 });
+
+
+
+
+	// !! TODO A2: Enable static pebbles on the ground, for reference
+	// Create pebbles on the floor, use this for reference
+	/*
+	for (uint i = 0; i < 20; i++) {
+		int w, h;
+		glfwGetWindowSize(window, &w, &h);
+		float radius = 30 * (uniform_dist(rng) + 0.3f); // range 0.3 .. 1.3
+		Entity pebble = createPebble({ uniform_dist(rng) * w, h - uniform_dist(rng) * 20 }, 
+			         { radius, radius });
+		float brightness = uniform_dist(rng) * 0.5 + 0.5;
+		registry.colors.insert(pebble, { brightness, brightness, brightness});
+	}
+	*/
+}
+
+
+void WorldSystem::init_combat() {
+
 	Entity player_ball = createBall(renderer, { 400, 400 });
 	// createNewRectangleTiedToEntity(player_ball, 12.f, 12.f, registry.motions.get(player_ball).position);
 
@@ -232,8 +302,8 @@ void WorldSystem::restart_game() {
 
 	Entity rectangle = createPolygonByVertex(renderer, { {220, 350}, { 220,220 }, { 400,220 }, { 400,350 } }, GEOMETRY_BUFFER_ID::RECT);
 
-	createNewRectangleTiedToEntity(rectangle, 180.f, 130.f, registry.motions.get(rectangle).position -vec2(0.0,150.0));
-	
+	createNewRectangleTiedToEntity(rectangle, 180.f, 130.f, registry.motions.get(rectangle).position - vec2(0.0, 150.0));
+
 
 	test = registry.physObjs.components[0];
 
@@ -260,20 +330,8 @@ void WorldSystem::restart_game() {
 	Entity roomEnemy = createRoomEnemy(renderer, { 1000, 600 });
 	registry.colors.insert(roomEnemy, { 1, 0, 0 });
 
-	// !! TODO A2: Enable static pebbles on the ground, for reference
-	// Create pebbles on the floor, use this for reference
-	/*
-	for (uint i = 0; i < 20; i++) {
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-		float radius = 30 * (uniform_dist(rng) + 0.3f); // range 0.3 .. 1.3
-		Entity pebble = createPebble({ uniform_dist(rng) * w, h - uniform_dist(rng) * 20 }, 
-			         { radius, radius });
-		float brightness = uniform_dist(rng) * 0.5 + 0.5;
-		registry.colors.insert(pebble, { brightness, brightness, brightness});
-	}
-	*/
 }
+
 
 // Compute collisions between entities
 void WorldSystem::handle_collisions() {
@@ -324,7 +382,8 @@ bool WorldSystem::is_over() const {
 
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
-	Motion& motion = registry.motions.get(player);
+	
+	Motion& motion = (GameSceneState == 1) ? registry.motions.get(player) : registry.motions.get(player_salmon);
 
 	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_UP) {
 		motion.velocity.y = -200.f;
@@ -366,7 +425,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         restart_game();
 	}
 
-	if (action == GLFW_RELEASE && key == GLFW_KEY_P) {
+	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_P) {
 		registry.physObjs.components[0].Vertices[0].accel = vec2(0.0, -0.1);
 		
 	}
@@ -405,13 +464,190 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 }
 
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
-	if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT) {
-		RenderRequest& renderRequest = registry.renderRequests.get(player);
-		renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERATTACK;
+
+	if (GameSceneState == 1) {
+		if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT) {
+			RenderRequest& renderRequest = registry.renderRequests.get(player);
+			renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERATTACK;
+		}
+
+		if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_LEFT) {
+			RenderRequest& renderRequest = registry.renderRequests.get(player);
+			renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYER;
+		}
 	}
-	
-	if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_LEFT) {
-		RenderRequest& renderRequest = registry.renderRequests.get(player);
-		renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYER;
+}
+
+
+
+
+
+
+
+// ================================================== WORLD ===============================================================================
+
+
+
+
+
+
+// World functions
+
+// Update our game world
+bool WorldSystem::step_world(float elapsed_ms_since_last_update) {
+	// Updating window title with points
+	std::stringstream title_ss;
+	title_ss << "Points: " << points;
+	glfwSetWindowTitle(window, title_ss.str().c_str());
+
+	// Remove debug info from the last step
+	while (registry.debugComponents.entities.size() > 0)
+		registry.remove_all_components_of(registry.debugComponents.entities.back());
+
+	// Removing out of screen entities
+	auto& motion_container = registry.motions;
+
+	// Remove entities that leave the screen on the left side
+	// Iterate backwards to be able to remove without unterfering with the next object to visit
+	// (the containers exchange the last element with the current)
+	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i) {
+		Motion& motion = motion_container.components[i];
+		if (motion.position.x + abs(motion.scale.x) < 0.f) {
+			if (!registry.players.has(motion_container.entities[i])) // don't remove the player
+				registry.remove_all_components_of(motion_container.entities[i]);
+		}
 	}
+
+	//// Spawning new turtles
+	//next_turtle_spawn -= elapsed_ms_since_last_update * current_speed;
+	//if (registry.hardShells.components.size() <= MAX_TURTLES && next_turtle_spawn < 0.f) {
+	//	// Reset timer
+	//	next_turtle_spawn = (TURTLE_DELAY_MS / 2) + uniform_dist(rng) * (TURTLE_DELAY_MS / 2);
+	//	// Create turtle
+	//	Entity entity = createTurtle(renderer, {0,0});
+	//	// Setting random initial position and constant velocity
+	//	Motion& motion = registry.motions.get(entity);
+	//	motion.position =
+	//		vec2(window_width_px + 100.f, // 2c: spawn outside of screen
+	//			 50.f + uniform_dist(rng) * (window_height_px - 100.f));
+	//	motion.velocity = vec2(-100.f, 0.f);
+	//}
+
+	// Spawning new fish
+	next_fish_spawn -= elapsed_ms_since_last_update * current_speed;
+	if (registry.softShells.components.size() <= MAX_FISH && next_fish_spawn < 0.f) {
+		// !!!  TODO A1: Create new fish with createFish({0,0}), as for the Turtles above
+
+		//2c
+		// Reset timer
+		next_fish_spawn = (FISH_DELAY_MS / 2) + uniform_dist(rng) * (FISH_DELAY_MS / 2);
+		// Create fish
+		Entity entity = createFish(renderer, { 0,0 });
+		// Setting random initial position and constant velocity
+		Motion& motion = registry.motions.get(entity);
+		motion.position =
+			vec2(window_width_px + 100.f, // 2c: spawn outside of screen
+				50.f + uniform_dist(rng) * (window_height_px - 100.f));
+		motion.velocity = vec2(-200.f, 0.f);
+	}
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// TODO A2: HANDLE PEBBLE SPAWN HERE
+// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+// Processing the salmon state
+	assert(registry.screenStates.components.size() <= 1);
+	ScreenState& screen = registry.screenStates.components[0];
+
+	float min_timer_ms = 3000.f;
+	for (Entity entity : registry.deathTimers.entities) {
+		// progress timer
+		DeathTimer& timer = registry.deathTimers.get(entity);
+		timer.timer_ms -= elapsed_ms_since_last_update;
+		if (timer.timer_ms < min_timer_ms) {
+			min_timer_ms = timer.timer_ms;
+		}
+
+		// restart the game once the death timer expired
+		if (timer.timer_ms < 0) {
+			registry.deathTimers.remove(entity);
+			screen.screen_darken_factor = 0;
+			restart_game();
+			return true;
+		}
+	}
+	// reduce window brightness if any of the present salmons is dying
+	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
+
+	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death timer
+	// 3aii
+	//for (Entity entity : registry.lightUps.entities) {
+	//	// progress timer
+	//	LightUp& light_timer = registry.lightUps.get(entity);
+	//	light_timer.timer_ms -= elapsed_ms_since_last_update;
+
+	//	// stop lighting up when timer expires
+	//	if (light_timer.timer_ms < 0) {
+	//		registry.lightUps.remove(entity);
+	//	}
+	//}
+
+
+	return true;
+}
+
+
+
+// Compute collisions between entities
+void WorldSystem::handle_collisions_world() {
+	// Loop over all collisions detected by the physics system
+	auto& collisionsRegistry = registry.collisions;
+	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
+		// The entity and its collider
+		Entity entity = collisionsRegistry.entities[i];
+		Entity entity_other = collisionsRegistry.components[i].other_entity;
+
+		// For now, we are only interested in collisions that involve the salmon
+		if (registry.players.has(entity)) {
+			//Player& player = registry.players.get(entity);
+
+			// Checking Player - HardShell collisions
+			if (registry.hardShells.has(entity_other)) {
+				//// initiate death unless already dying
+				//if (!registry.deathTimers.has(entity)) {
+				//	// Scream, reset timer, and make the salmon sink
+				//	registry.deathTimers.emplace(entity);
+				//	Mix_PlayChannel(-1, salmon_dead_sound, 0);
+
+				//	//2e
+				//	Motion& salmon_motion = registry.motions.get(player_salmon);
+				//	salmon_motion.velocity = vec2(0.0, -100.0);
+				//	salmon_motion.angle = atan(1) * 4;
+
+				//	// !!! TODO A1: change the salmon orientation and color on death
+				//}
+			}
+			// Checking Player - SoftShell collisions
+			else if (registry.softShells.has(entity_other)) {
+				if (!registry.deathTimers.has(entity)) {
+					// chew, count points, and set the LightUp timer
+					registry.remove_all_components_of(entity_other);
+					Mix_PlayChannel(-1, salmon_eat_sound, 0);
+					++points;
+
+					//// 3aii
+					//registry.lightUps.emplace(entity);
+
+					registry.remove_all_components_of(entity); //remove salmon from world
+					GameSceneState = 1;
+					InitCombat = 1;
+
+					// !!! TODO A1: create a new struct called LightUp in components.hpp and add an instance to the salmon entity by modifying the ECS registry
+				}
+			}
+		}
+	}
+
+	// Remove all collisions from this simulation step
+	registry.collisions.clear();
 }

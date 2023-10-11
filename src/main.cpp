@@ -12,6 +12,10 @@
 
 using Clock = std::chrono::high_resolution_clock;
 
+// Game state global variables
+extern int GameSceneState;
+extern int InitCombat;
+
 // Entry point
 int main()
 {
@@ -45,12 +49,24 @@ int main()
 			(float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000;
 		t = now;
 
-		world_system.step(elapsed_ms);
-		physics_system.step(elapsed_ms);
+		if (GameSceneState == 0) {
+			world_system.step_world(elapsed_ms);
+			physics_system.step_world(elapsed_ms);
+			world_system.handle_collisions_world();
+			render_system.draw_world();
+		}
+		else if (GameSceneState == 1) {
 
-		world_system.handle_collisions();
+			if (InitCombat) {
+				world_system.init_combat();
+				InitCombat = 0;
+			}
 
-		render_system.draw();
+			world_system.step(elapsed_ms);
+			physics_system.step(elapsed_ms);
+			world_system.handle_collisions();
+			render_system.draw();
+		}
 	}
 
 	return EXIT_SUCCESS;

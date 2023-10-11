@@ -476,3 +476,72 @@ void PhysicsSystem::step(float elapsed_ms)
 	}
 
 }
+
+
+void PhysicsSystem::step_world(float elapsed_ms)
+{
+	// Move fish based on how much time has passed, this is to (partially) avoid
+	// having entities move at different speed based on the machine.
+	auto& motion_container = registry.motions;
+	for (uint i = 0; i < motion_container.size(); i++)
+	{
+		// !!! TODO A1: update motion.position based on step_seconds and motion.velocity
+		Motion& motion = motion_container.components[i];
+		// Entity entity = motion_container.entities[i];
+		float step_seconds = elapsed_ms / 1000.f;
+
+		//2a, 2d: separate velocity components and calculate based on angle
+		float v_x = motion.velocity.x * cos(motion.angle) + motion.velocity.y * sin(motion.angle);
+		float v_y = motion.velocity.x * sin(motion.angle) + motion.velocity.y * cos(motion.angle);
+		vec2 velocity = { v_x, v_y };
+
+		motion.position += velocity * step_seconds; 
+
+		// Boundary check
+		// Now we restrict everything, but we can choose what we want to restrict
+
+		if (motion.position.x < 0) {
+			motion.position.x = 0;
+		}
+		if (motion.position.y < 0) {
+			motion.position.y = 0;
+		}
+		if (motion.position.x > window_width_px) {
+			motion.position.x = window_width_px;
+		}
+		if (motion.position.y > window_height_px) {
+			motion.position.y = window_height_px;
+		}
+	}
+
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// TODO A2: HANDLE PEBBLE UPDATES HERE
+	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+	// Check for collisions between all moving entities
+	for (uint i = 0; i < motion_container.components.size(); i++)
+	{
+		Motion& motion_i = motion_container.components[i];
+		Entity entity_i = motion_container.entities[i];
+
+		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
+		for (uint j = i + 1; j < motion_container.components.size(); j++)
+		{
+			Motion& motion_j = motion_container.components[j];
+			if (collides(motion_i, motion_j))
+			{
+				Entity entity_j = motion_container.entities[j];
+				// Create a collisions event
+				// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
+				registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+				registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+			}
+		}
+	}
+
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// TODO A2: HANDLE PEBBLE collisions HERE
+	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+}
