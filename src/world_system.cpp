@@ -5,8 +5,6 @@
 // stlib
 #include <cassert>
 #include <sstream>
-#include <thread>
-#include <chrono>
 
 #include "physics_system.hpp"
 
