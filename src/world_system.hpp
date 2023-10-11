@@ -47,6 +47,9 @@ public:
 	// initialize combat
 	void init_combat();
 
+	//set main world stuff out of sight
+	void main_world_out();
+
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
@@ -65,12 +68,17 @@ private:
 	unsigned int points;
 
 	// Game state
+	int static const MAX_ROOM_NUM = 9;
+	int static const ENEM_NUM_PER_ROOM = 2;
+
 	RenderSystem* renderer;
 	float current_speed;
 	float next_turtle_spawn;
 	float next_fish_spawn;
 	Entity player_salmon;
 	Entity player;
+	std::array<Entity,MAX_ROOM_NUM> rooms;
+	std::array<Entity,MAX_ROOM_NUM * ENEM_NUM_PER_ROOM> roomEnemies;
 
 	// music references
 	Mix_Music* background_music;
