@@ -577,18 +577,33 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update) {
 // 	// reduce window brightness if any of the present salmons is dying
 // 	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
 
-	//Boundary check for player and enemy if they are in room boundary
+	//get room, player motion
 	Motion& playerMotion = registry.motions.get(player);
 	Motion& roomMotion = registry.motions.get(rooms[0]);
-	if (roomMotion.position.x - (roomMotion.scale.x/2) + 75.f > playerMotion.position.x) {
-		playerMotion.position.x = roomMotion.position.x - (roomMotion.scale.x/2) + 75.f;
-	} else if (roomMotion.position.x + (roomMotion.scale.x/2) - 25.f < playerMotion.position.x) {
-		playerMotion.position.x = roomMotion.position.x + (roomMotion.scale.x/2) - 25.f;
+
+	//Enemy chasing player
+	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i) {
+		if (registry.mainWorldEnemies.has(motion_container.entities[i])) {
+			Motion& enemyMotion = motion_container.components[i];
+			enemyMotion.angle = atan2(playerMotion.position.y - enemyMotion.position.y, playerMotion.position.x - enemyMotion.position.x);
+		}
 	}
-	if (roomMotion.position.y - (roomMotion.scale.y/2) + 75.f > playerMotion.position.y) {
-		playerMotion.position.y = roomMotion.position.y - (roomMotion.scale.y/2) + 75.f;
-	} else if (roomMotion.position.y + (roomMotion.scale.y/2) - 100.f < playerMotion.position.y) {
-		playerMotion.position.y = roomMotion.position.y + (roomMotion.scale.y/2) - 100.f;
+
+	//Boundary check for player and enemy if they are in room boundary
+	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i) {
+		if (registry.players.has(motion_container.entities[i]) || registry.mainWorldEnemies.has(motion_container.entities[i])) {
+			Motion& motion = motion_container.components[i];
+			if (roomMotion.position.x - (roomMotion.scale.x/2) + 75.f > motion.position.x) {
+				motion.position.x = roomMotion.position.x - (roomMotion.scale.x/2) + 75.f;
+			} else if (roomMotion.position.x + (roomMotion.scale.x/2) - 25.f < motion.position.x) {
+				motion.position.x = roomMotion.position.x + (roomMotion.scale.x/2) - 25.f;
+			}
+			if (roomMotion.position.y - (roomMotion.scale.y/2) + 75.f > motion.position.y) {
+				motion.position.y = roomMotion.position.y - (roomMotion.scale.y/2) + 75.f;
+			} else if (roomMotion.position.y + (roomMotion.scale.y/2) - 100.f < motion.position.y) {
+				motion.position.y = roomMotion.position.y + (roomMotion.scale.y/2) - 100.f;
+			}
+		}
 	}
 
 
