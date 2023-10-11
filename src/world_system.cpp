@@ -5,6 +5,8 @@
 // stlib
 #include <cassert>
 #include <sstream>
+#include <thread>
+#include <chrono>
 
 #include "physics_system.hpp"
 
@@ -463,7 +465,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
 
-	if (GameSceneState == 1) {
+	if (GameSceneState == 0) {
 		if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT) {
 			RenderRequest& renderRequest = registry.renderRequests.get(player);
 			renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERATTACK;
