@@ -71,7 +71,8 @@ Entity createRoomEnemy(RenderSystem* renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * -50.f;
 
-	registry.players.emplace(entity);
+	// registry.players.emplace(entity);
+	registry.mainWorldEnemies.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
@@ -107,7 +108,7 @@ Entity createRoad(RenderSystem* renderer, vec2 pos)
 Entity createRoom(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ROOM);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Setting initial motion values
@@ -115,14 +116,15 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 50.f;
+	motion.scale = mesh.original_size * 700.f;
 
-	registry.players.emplace(entity);
+	// registry.players.emplace(entity);
+	registry.rooms.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
-			EFFECT_ASSET_ID::SALMON,
-			GEOMETRY_BUFFER_ID::ROOM });
+		{ TEXTURE_ASSET_ID::GROUND,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }
@@ -242,7 +244,7 @@ Entity createFish(RenderSystem* renderer, vec2 position)
 	motion.scale = vec2({ -FISH_BB_WIDTH, FISH_BB_HEIGHT });
 
 	// Create an (empty) Fish component to be able to refer to all fish
-	registry.softShells.emplace(entity);
+	registry.mainWorldEnemies.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::FISH,
@@ -270,7 +272,7 @@ Entity createTurtle(RenderSystem* renderer, vec2 position)
 	motion.scale = vec2({ -TURTLE_BB_WIDTH, TURTLE_BB_HEIGHT });
 
 	// Create and (empty) Turtle component to be able to refer to all turtles
-	registry.hardShells.emplace(entity);
+	registry.rooms.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TURTLE,
@@ -314,7 +316,7 @@ Entity createPebble(vec2 pos, vec2 size)
 	motion.scale = size;
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
-	registry.hardShells.emplace(entity);
+	registry.rooms.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed

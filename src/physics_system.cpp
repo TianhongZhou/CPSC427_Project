@@ -524,8 +524,9 @@ void PhysicsSystem::step_world(float elapsed_ms)
 	{
 		Motion& motion_i = motion_container.components[i];
 		Entity entity_i = motion_container.entities[i];
-
-		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
+		
+		if (!registry.rooms.has(entity_i)) {
+			// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
 		for (uint j = i + 1; j < motion_container.components.size(); j++)
 		{
 			Motion& motion_j = motion_container.components[j];
@@ -537,6 +538,7 @@ void PhysicsSystem::step_world(float elapsed_ms)
 				registry.collisions.emplace_with_duplicates(entity_i, entity_j);
 				registry.collisions.emplace_with_duplicates(entity_j, entity_i);
 			}
+		}
 		}
 	}
 

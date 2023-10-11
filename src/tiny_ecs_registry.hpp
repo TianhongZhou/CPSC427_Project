@@ -19,8 +19,8 @@ public:
 	ComponentContainer<Mesh*> meshPtrs;
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<ScreenState> screenStates;
-	ComponentContainer<SoftShell> softShells;
-	ComponentContainer<HardShell> hardShells;
+	ComponentContainer<Enemy> mainWorldEnemies;
+	ComponentContainer<Room> rooms;
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<vec3> colors;
 	ComponentContainer<physObj> physObjs;
@@ -38,8 +38,8 @@ public:
 		registry_list.push_back(&meshPtrs);
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&screenStates);
-		registry_list.push_back(&softShells);
-		registry_list.push_back(&hardShells);
+		registry_list.push_back(&mainWorldEnemies);
+		registry_list.push_back(&rooms);
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&colors);
 		registry_list.push_back(&physObjs);
