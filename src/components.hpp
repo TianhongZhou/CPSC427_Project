@@ -69,6 +69,12 @@ struct DeathTimer
 	float timer_ms = 3000.f;
 };
 
+// A timer associated when entering combat scene
+struct EnterCombatTimer
+{
+    float timer_ms = 3000.f;
+};
+
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & salmon.vs.glsl)
 struct ColoredVertex
 {

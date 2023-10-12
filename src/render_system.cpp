@@ -63,7 +63,13 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		GLuint texture_id =
 			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
 
-		glBindTexture(GL_TEXTURE_2D, texture_id);
+
+        // enter combat?
+        GLint enter_combat_uloc = glGetUniformLocation(program, "enter_combat");
+        assert(enter_combat_uloc >= 0);
+        glUniform1i(enter_combat_uloc, registry.enterCombatTimer.has(entity));
+
+        glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::SALMON || render_request.used_effect == EFFECT_ASSET_ID::PEBBLE)
