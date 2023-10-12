@@ -10,6 +10,12 @@ struct Player
 
 };
 
+// Entity is a part of Combat
+struct Combat
+{
+
+};
+
 // Turtles have a hard shell
 struct Room
 {

@@ -15,8 +15,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	transform.translate(motion.position);
 	transform.rotate(motion.angle);
 	transform.scale(motion.scale);
-	// !!! TODO A1: add rotation to the chain of transformations, mind the order
-	// of transformations
 
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest &render_request = registry.renderRequests.get(entity);
@@ -185,9 +183,9 @@ void RenderSystem::drawToScreen()
 	gl_has_errors();
 }
 
-// Render our game world
+// Render combat world
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
-void RenderSystem::draw()
+void RenderSystem::draw_combat_scene()
 {
 	// Getting size of window
 	int w, h;
@@ -212,7 +210,7 @@ void RenderSystem::draw()
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
-		if (!registry.motions.has(entity))
+		if (!registry.motions.has(entity) || !registry.combat.has(entity))
 			continue;
 		// Note, its not very efficient to access elements indirectly via the entity
 		// albeit iterating through all Sprites in sequence. A good point to optimize
@@ -279,7 +277,7 @@ void RenderSystem::draw_world()
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
-		if (!registry.motions.has(entity))
+		if (!registry.motions.has(entity) || registry.combat.has(entity))
 			continue;
 		// Note, its not very efficient to access elements indirectly via the entity
 		// albeit iterating through all Sprites in sequence. A good point to optimize

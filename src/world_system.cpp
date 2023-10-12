@@ -222,7 +222,6 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-	// Create a new salmon
 	rooms[0] = createRoom(renderer, { 600, 400 });
 	roomEnemies[0] = createRoomEnemy(renderer, { 600, 400 });
 	player = createPlayer(renderer, { 350, 200 });
@@ -271,23 +270,6 @@ void WorldSystem::restart_game() {
 	//player = createPlayer(renderer, { 800, 600 });
 	//Entity roomEnemy = createRoomEnemy(renderer, { 1000, 600 });
 	//registry.colors.insert(roomEnemy, { 1, 0, 0 });
-
-
-
-
-	// !! TODO A2: Enable static pebbles on the ground, for reference
-	// Create pebbles on the floor, use this for reference
-	/*
-	for (uint i = 0; i < 20; i++) {
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-		float radius = 30 * (uniform_dist(rng) + 0.3f); // range 0.3 .. 1.3
-		Entity pebble = createPebble({ uniform_dist(rng) * w, h - uniform_dist(rng) * 20 }, 
-			         { radius, radius });
-		float brightness = uniform_dist(rng) * 0.5 + 0.5;
-		registry.colors.insert(pebble, { brightness, brightness, brightness});
-	}
-	*/
 }
 
 
@@ -423,12 +405,15 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         restart_game();
 	}
 
+    // Exit Combat
+    if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_X) {
+        exit_combat();
+    }
+
 	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_P) {
 		registry.physObjs.components[0].Vertices[0].accel = vec2(0.0, -0.1);
 		
 	}
-
-
 
 	// Debugging
 	if (key == GLFW_KEY_D) {
@@ -476,18 +461,14 @@ void WorldSystem::on_mouse_click(int button, int action, int mods) {
 	}
 }
 
-
-
-
-
+void WorldSystem::exit_combat() {
+    GameSceneState = 0;
+    rooms[0] = createRoom(renderer, { 600, 400 });
+    player = createPlayer(renderer, { 350, 200 });
+}
 
 
 // ================================================== WORLD ===============================================================================
-
-
-
-
-
 
 // World functions
 
