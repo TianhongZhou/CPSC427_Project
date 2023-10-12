@@ -16,4 +16,6 @@
 - ### Well defined game space boundaries
 - ### Correct collision processing including basic detection and avoidance. (preventing obvious penetrations)
 - ### Basic physics
+-   - createNewRectangleTiedToEntity in world_init.cpp
+-   - physObj component and various sub-components in components.hpp
 - ### Simple rendering effects
