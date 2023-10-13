@@ -15,7 +15,7 @@ vec2 get_bounding_box(const Motion& motion)
 bool collides(const Motion& motion1, const Motion& motion2)
 {
 	vec2 dp = motion1.position - motion2.position;
-	float dist_squared = dot(dp,dp);
+	float dist_squared = dot(dp, dp);
 	const vec2 other_bonding_box = get_bounding_box(motion1) / 2.f;
 	const float other_r_squared = dot(other_bonding_box, other_bonding_box);
 	const vec2 my_bonding_box = get_bounding_box(motion2) / 2.f;
@@ -223,10 +223,10 @@ bool detectAndResloveCollision(physObj* a, physObj* b) {
 			return false;
 
 		}
-		else if (abs(dist) < minDist){
+		else if (abs(dist) < minDist) {
 			minDist = abs(dist);
 
-			
+
 			event.Normal = Axis;
 			event.Edge = currEdge;
 
@@ -261,10 +261,10 @@ bool detectAndResloveCollision(physObj* a, physObj* b) {
 
 
 	for (int i = 0; i < a->VertexCount; i++) {
-		
+
 		float distance = dot(event.Normal, (a->Vertices[i].pos - b->center)); //questionable
 
-		
+
 		if (distance < smallestDist) {
 			smallestDist = distance;
 			event.Vertex = &a->Vertices[i];
@@ -274,7 +274,7 @@ bool detectAndResloveCollision(physObj* a, physObj* b) {
 
 	collisionResponse(event);
 
-	
+
 	return true;
 
 
@@ -312,7 +312,7 @@ void detectAndSolveAllCollisions() {
 
 			if (a != b) {
 				detectAndResloveCollision(a, b);
-				
+
 
 			}
 
@@ -320,7 +320,7 @@ void detectAndSolveAllCollisions() {
 
 		}
 
-		
+
 
 	}
 
@@ -340,9 +340,9 @@ void updateAllObjPos(float dt) {
 
 		for (int i2 = 0; i2 < obj.VertexCount; i2++) {
 			updatePos(dt, (obj.Vertices[i2]));
-//			printf("x=%f, y=%f\n", obj.Vertices[i2].pos.x, obj.Vertices[i2].pos.y);
+			//			printf("x=%f, y=%f\n", obj.Vertices[i2].pos.x, obj.Vertices[i2].pos.y);
 		}
-		
+
 	}
 
 }
@@ -397,7 +397,7 @@ void applyGlobalConstraints() {
 			if (obj.Vertices[i2].pos.x > MAX_X_COORD) {
 				obj.Vertices[i2].pos.x = MAX_X_COORD;
 			}
-				
+
 		}
 
 	}
@@ -405,7 +405,7 @@ void applyGlobalConstraints() {
 
 }
 
- 
+
 
 
 
@@ -421,9 +421,9 @@ void updateAllMotionInfo() {
 
 		registry.motions.get(obj).position = registry.physObjs.get(obj).center;
 
-//		printf("%f \n",registry.motions.get(obj).position.y);
+		//		printf("%f \n",registry.motions.get(obj).position.y);
 		registry.motions.get(obj).angle = atan2(y, x);
-//		printf("angle = %f \n", atan2(y, x));
+		//		printf("angle = %f \n", atan2(y, x));
 	}
 
 }
@@ -433,12 +433,12 @@ void update(float dt) {
 	applyObjGrav();
 	updateAllObjPos(dt);
 
-	
+
 	applyGlobalConstraints();
 	updateAllEdges();
 	updateAllCenters();
 	detectAndSolveAllCollisions();
-	
+
 	updateAllMotionInfo();
 
 }
@@ -495,7 +495,7 @@ void PhysicsSystem::step_world(float elapsed_ms)
 		float v_y = motion.velocity.x * sin(motion.angle) + motion.velocity.y * cos(motion.angle);
 		vec2 velocity = { v_x, v_y };
 
-		motion.position += velocity * step_seconds; 
+		motion.position += velocity * step_seconds;
 
 		// Boundary check
 		// Now we restrict everything, but we can choose what we want to restrict
@@ -524,21 +524,21 @@ void PhysicsSystem::step_world(float elapsed_ms)
 	{
 		Motion& motion_i = motion_container.components[i];
 		Entity entity_i = motion_container.entities[i];
-		
+
 		if (!registry.rooms.has(entity_i)) {
 			// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
-		for (uint j = i + 1; j < motion_container.components.size(); j++)
-		{
-			Motion& motion_j = motion_container.components[j];
-			if (collides(motion_i, motion_j))
+			for (uint j = i + 1; j < motion_container.components.size(); j++)
 			{
-				Entity entity_j = motion_container.entities[j];
-				// Create a collisions event
-				// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
-				registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-				registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+				Motion& motion_j = motion_container.components[j];
+				if (collides(motion_i, motion_j))
+				{
+					Entity entity_j = motion_container.entities[j];
+					// Create a collisions event
+					// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
+					registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+					registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+				}
 			}
-		}
 		}
 	}
 
