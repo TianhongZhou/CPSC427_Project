@@ -10,6 +10,12 @@ struct Player
 
 };
 
+// Entity is a part of Combat
+struct Combat
+{
+
+};
+
 // Turtles have a hard shell
 struct Room
 {
@@ -61,6 +67,12 @@ struct DebugComponent
 struct DeathTimer
 {
 	float timer_ms = 3000.f;
+};
+
+// A timer associated when entering combat scene
+struct EnterCombatTimer
+{
+    float timer_ms = 1000.f;
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & salmon.vs.glsl)

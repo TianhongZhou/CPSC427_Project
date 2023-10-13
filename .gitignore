@@ -10,13 +10,18 @@
 *.userosscache
 *.sln.docstates
 
+# intelliJ cache files
+.idea/
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
+./ext/project_path.hpp
 
 # Mono auto generated files
 mono_crash.*
 
 # Build results
+cmake-build-debug/
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
