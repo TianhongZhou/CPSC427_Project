@@ -489,6 +489,8 @@ void WorldSystem::on_mouse_click(int button, int action, int mods) {
 }
 
 void WorldSystem::exit_combat() {
+	while (registry.physObjs.entities.size() > 0)
+		registry.remove_all_components_of(registry.physObjs.entities.back());
     GameSceneState = 0;
 }
 
