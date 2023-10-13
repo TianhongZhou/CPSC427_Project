@@ -19,3 +19,5 @@
     - createNewRectangleTiedToEntity in world_init.cpp
     - physObj component and various sub-components in components.hpp
 - ### Simple rendering effects
+    -  	EnterCombatTimer in components.hpp
+    -  	textured.fs.glsl
