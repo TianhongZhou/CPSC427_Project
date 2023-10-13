@@ -13,8 +13,13 @@
 - ### Keyboard/mouse control of at least one character sprite. This can include changes in the set of rendered objects, object geometry, position, orientation, textures, colors, and other attributes
     - on_key and on_mouse_click in world_system.cpp
 - ### Randomized or hard-coded action of one or more characters/assets
+    - step_world in world_system.cpp
 - ### Well defined game space boundaries
+    - step_world in world_system.cpp
+    - step_world in physics_system.cpp
 - ### Correct collision processing including basic detection and avoidance. (preventing obvious penetrations)
+    - detectAndSolveAllCollisions in physics_system.cpp
+    - handle_collisions_world in world_system.cpp
 - ### Basic physics
     - createNewRectangleTiedToEntity in world_init.cpp
     - physObj component and various sub-components in components.hpp
