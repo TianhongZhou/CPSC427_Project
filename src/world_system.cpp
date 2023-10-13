@@ -180,27 +180,27 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     ScreenState &screen = registry.screenStates.components[0];
 
     float min_timer_ms = 3000.f;
-	for (Entity entity : registry.deathTimers.entities) {
-		// progress timer
-		DeathTimer& timer = registry.deathTimers.get(entity);
-		timer.timer_ms -= elapsed_ms_since_last_update;
-		if(timer.timer_ms < min_timer_ms){
-			min_timer_ms = timer.timer_ms;
-		}
+    for (Entity entity: registry.deathTimers.entities) {
+        // progress timer
+        DeathTimer &timer = registry.deathTimers.get(entity);
+        timer.timer_ms -= elapsed_ms_since_last_update;
+        if (timer.timer_ms < min_timer_ms) {
+            min_timer_ms = timer.timer_ms;
+        }
 
-		// restart the game once the death timer expired
-		if (timer.timer_ms < 0) {
-			registry.deathTimers.remove(entity);
-			screen.screen_darken_factor = 0;
+        // restart the game once the death timer expired
+        if (timer.timer_ms < 0) {
+            registry.deathTimers.remove(entity);
+            screen.screen_darken_factor = 0;
             restart_game();
-			return true;
-		}
-	}
-	// reduce window brightness if any of the present salmons is dying
-	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
+            return true;
+        }
+    }
+    // reduce window brightness if any of the present salmons is dying
+    screen.screen_darken_factor = 1 - min_timer_ms / 3000;
 
 
-	return true;
+    return true;
 }
 
 // Reset the world state to its initial state
@@ -380,40 +380,41 @@ bool WorldSystem::is_over() const {
 
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
-	
-	Motion& motion = registry.motions.get(player);
 
-	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_UP) {
-		motion.velocity.y = -200.f;
-	}
+    Motion &motion = registry.motions.get(player);
+    bool inCombat = registry.enterCombatTimer.has(player);
 
-	if (action == GLFW_RELEASE && key == GLFW_KEY_UP) {
-		motion.velocity.y = 0.f;
-	}
+    if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_UP && !inCombat) {
+        motion.velocity.y = -200.f;
+    }
 
-	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_DOWN) {
-		motion.velocity.y = 200.f;
-	}
+    if (action == GLFW_RELEASE && key == GLFW_KEY_UP) {
+        motion.velocity.y = 0.f;
+    }
 
-	if (action == GLFW_RELEASE && key == GLFW_KEY_DOWN) {
-		motion.velocity.y = 0.f;
-	}
+    if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_DOWN && !inCombat) {
+        motion.velocity.y = 200.f;
+    }
 
-	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_LEFT) {
-		motion.velocity.x = -200.f;
-	}
+    if (action == GLFW_RELEASE && key == GLFW_KEY_DOWN) {
+        motion.velocity.y = 0.f;
+    }
 
-	if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT) {
-		motion.velocity.x = 0.f;
-	}
+    if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_LEFT && !inCombat) {
+        motion.velocity.x = -200.f;
+    }
 
-	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_RIGHT) {
-		motion.velocity.x = 200.f;
-	}
+    if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT) {
+        motion.velocity.x = 0.f;
+    }
 
-	if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT) {
-		motion.velocity.x = 0.f;
-	}
+    if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_RIGHT && !inCombat) {
+        motion.velocity.x = 200.f;
+    }
+
+    if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT) {
+        motion.velocity.x = 0.f;
+    }
 
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
@@ -423,10 +424,21 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         restart_game();
 	}
 
-	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_P) {
-		registry.physObjs.components[0].Vertices[0].accel = vec2(0.0, -0.1);
-		
-	}
+    // Exit Combat
+    if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_X) {
+        exit_combat();
+    }
+
+    // Enter Combat
+    if (GameSceneState == 0 && action == GLFW_RELEASE && key == GLFW_KEY_C) {
+        GameSceneState = 1;
+        InitCombat = 1;
+    }
+
+    if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_P) {
+        registry.physObjs.components[0].Vertices[0].accel = vec2(0.0, -0.1);
+
+    }
 
 
 
@@ -476,18 +488,12 @@ void WorldSystem::on_mouse_click(int button, int action, int mods) {
 	}
 }
 
-
-
-
-
+void WorldSystem::exit_combat() {
+    GameSceneState = 0;
+}
 
 
 // ================================================== WORLD ===============================================================================
-
-
-
-
-
 
 // World functions
 
@@ -553,6 +559,25 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update) {
 // DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+    // handling entering combat state
+    float min_timer_ms = 3000.f;
+    for (Entity entity: registry.enterCombatTimer.entities) {
+        EnterCombatTimer &timer = registry.enterCombatTimer.get(entity);
+        timer.timer_ms -= elapsed_ms_since_last_update;
+        if (timer.timer_ms < min_timer_ms) {
+            min_timer_ms = timer.timer_ms;
+        }
+        if (timer.timer_ms < 0) {
+            if (registry.mainWorldEnemies.has(entity)) {
+                registry.remove_all_components_of(entity);
+            }
+            registry.enterCombatTimer.remove(entity);
+            GameSceneState = 1;
+            InitCombat = 1;
+        }
+    }
+
+
 // // Processing the salmon state
 // 	assert(registry.screenStates.components.size() <= 1);
 // 	ScreenState& screen = registry.screenStates.components[0];
@@ -614,34 +639,38 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update) {
 
 // Compute collisions between entities
 void WorldSystem::handle_collisions_world() {
-	// Loop over all collisions detected by the physics system
-	auto& collisionsRegistry = registry.collisions;
-	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
-		// The entity and its collider
-		Entity entity = collisionsRegistry.entities[i];
-		Entity entity_other = collisionsRegistry.components[i].other_entity;
-		if (registry.players.has(entity)) {
-			// Checking Player - Enemy collisions
-			if (registry.mainWorldEnemies.has(entity_other)) {
-				if (!registry.deathTimers.has(entity)) {
-					// registry.remove_all_components_of(entity); //remove salmon from world
-					registry.remove_all_components_of(entity_other);
-					// registry.remove_all_components_of(entity);
-					registry.remove_all_components_of(rooms[0]);
-					main_world_out();
-					GameSceneState = 1;
-					InitCombat = 1;
-				}
-			}
-		}
-	}
+    // Loop over all collisions detected by the physics system
+    auto &collisionsRegistry = registry.collisions;
+    for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
+        // The entity and its collider
+        Entity entity = collisionsRegistry.entities[i];
+        Entity entity_other = collisionsRegistry.components[i].other_entity;
+        if (registry.players.has(entity)) {
+            // Checking Player - Enemy collisions
+            if (registry.mainWorldEnemies.has(entity_other)) {
+                if (!registry.enterCombatTimer.has(entity)) {
+                    registry.enterCombatTimer.emplace(entity);
+                }
+                if (!registry.enterCombatTimer.has(entity_other)) {
+                    registry.enterCombatTimer.emplace(entity_other);
+                }
+                if (!registry.deathTimers.has(entity)) {
+                    // registry.remove_all_components_of(entity); //remove salmon from world
+//                    registry.remove_all_components_of(entity_other);
+                    // registry.remove_all_components_of(entity);
+//					registry.remove_all_components_of(rooms[0]);
+//					main_world_out();
+                }
+            }
+        }
+    }
 
 	// Remove all collisions from this simulation step
 	registry.collisions.clear();
 }
 
-//set main world stuff out of sight
-void WorldSystem::main_world_out() {
-	//set enemies, player, room, road invisible
-
-}
+////set main world stuff out of sight
+//void WorldSystem::main_world_out() {
+//	//set enemies, player, room, road invisible
+//
+//}
