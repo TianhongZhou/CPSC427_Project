@@ -300,18 +300,18 @@ void WorldSystem::init_combat() {
 
 	createNewRectangleTiedToEntity(rectangle2, 80.f, 130.f, registry.motions.get(rectangle2).position);
 
-	physObj test = registry.physObjs.components[0];
+	
 
 
-	Entity rectangle = createPolygonByVertex(renderer, { {220, 350}, { 220,220 }, { 400,220 }, { 400,350 } }, GEOMETRY_BUFFER_ID::RECT);
+	Entity flipper = createPolygonByVertex(renderer, { {300, 600}, { 300,580}, { 400,580 }, { 400,600 } }, GEOMETRY_BUFFER_ID::RECT);
 
-	createNewRectangleTiedToEntity(rectangle, 180.f, 130.f, registry.motions.get(rectangle).position - vec2(0.0, 150.0));
+	createNewRectangleTiedToEntity(flipper, 100.f, 20.f, registry.motions.get(flipper).position);
 
 
-	test = registry.physObjs.components[0];
+	playerFlipper pf;
+	registry.playerFlippers.insert(flipper, pf);
 
-	physObj test2 = registry.physObjs.components[1];
-
+	
 
 	//Entity oct = createPolygonByVertex(renderer, {
 	//{680.0f, 400.0f},
@@ -436,9 +436,31 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     }
 
     if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_P) {
-        registry.physObjs.components[0].Vertices[0].accel = vec2(0.0, -0.1);
+		Entity& flipper = registry.playerFlippers.entities[0];
+
+		physObj& flipperPhys = registry.physObjs.get(flipper);
+
+		flipperPhys.Vertices[3].accel += vec2(0.f, -0.8f);
 
     }
+
+	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_RIGHT) {
+		Entity& flipper = registry.playerFlippers.entities[0];
+
+		physObj& flipperPhys = registry.physObjs.get(flipper);
+
+		flipperPhys.Vertices[1].accel += vec2(0.1f, 0.f);
+
+	}
+
+	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_LEFT) {
+		Entity& flipper = registry.playerFlippers.entities[0];
+
+		physObj& flipperPhys = registry.physObjs.get(flipper);
+
+		flipperPhys.Vertices[1].accel += vec2(-0.1f, 0.f);
+
+	}
 
 
 
@@ -468,6 +490,16 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// xpos and ypos are relative to the top-left of the window, the salmon's
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+	if (registry.mousePosArray.size() == 0) {
+		Entity e;
+		mousePos mp;
+		mp.pos = mouse_position;
+		registry.mousePosArray.insert(e, mp);
+	}
+
+	registry.mousePosArray.components[0].pos = mouse_position;
 
 
 	(vec2)mouse_position; // dummy to avoid compiler warning

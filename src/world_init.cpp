@@ -349,6 +349,10 @@ void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) 
 
 
 
+//	0-----1
+//	|	  |
+//	3-----2
+
 	physObj& newObj = registry.physObjs.get(e);
 
 	newV.pos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
