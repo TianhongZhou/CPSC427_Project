@@ -28,14 +28,19 @@ bool collides(const Motion& motion1, const Motion& motion2)
 
 
 
-float MAX_Y_COORD = 700.0f;
+float MAX_Y_COORD = 750.0f;
 
 float MIN_Y_COORD = 0.0f;
 
 float MIN_X_COORD = 0.0f;
 
 
-float MAX_X_COORD = 700.0f;
+float FLIPPERHEIGHT = 700.f;
+
+float FLIPPERDELTA = 30.f;
+
+
+float MAX_X_COORD = 900.0f;
 
 vec2 GRAV = { 0.f, 0.0003f };
 //struct Vertex_Phys {
@@ -429,17 +434,70 @@ void updateAllMotionInfo() {
 }
 
 
+void flipperConstraints() {
+
+	for (uint i = 0; i < registry.playerFlippers.size(); i++) {
+		Entity& flipper = registry.playerFlippers.entities[i];
+
+		physObj& flipperPhys = registry.physObjs.get(flipper);
+
+		if (flipperPhys.Vertices[1].pos.y != FLIPPERHEIGHT) {
+			flipperPhys.Vertices[1].pos.y = FLIPPERHEIGHT;
+		}
+
+		if (flipperPhys.Vertices[3].pos.y > FLIPPERHEIGHT + FLIPPERDELTA) {
+			flipperPhys.Vertices[3].pos.y = FLIPPERHEIGHT + FLIPPERDELTA;
+		}
+
+		if (flipperPhys.Vertices[3].pos.y < FLIPPERHEIGHT - FLIPPERDELTA) {
+			flipperPhys.Vertices[3].pos.y = FLIPPERHEIGHT - FLIPPERDELTA;
+		}
+
+	}
+
+	//if (registry.mousePosArray.size() != 0) {
+
+	//	vec2 mouse_position = registry.mousePosArray.components[0].pos;
+
+	//	if (mouse_position.x < 1000.0f && mouse_position.x > 0.0f && mouse_position.y < 1000.0f && mouse_position.y > 0.0f) {
+
+	//	for (uint i = 0; i < registry.playerFlippers.size(); i++) {
+	//		Entity& flipper = registry.playerFlippers.entities[i];
+
+	//		physObj& flipperPhys = registry.physObjs.get(flipper);
+
+	//		for (int k = 0; k < flipperPhys.VertexCount; k++) {
+	//			flipperPhys.Vertices[k].pos.x = mouse_position.x;
+	//			flipperPhys.Vertices[k].oldPos.x = mouse_position.x;
+	//		}
+
+	//	}
+	//}
+
+	//}
+
+}
+
+
 void update(float dt) {
+	
 	applyObjGrav();
 	updateAllObjPos(dt);
+	Entity& flipper = registry.playerFlippers.entities[0];
 
-
+	flipperConstraints();
+	physObj& flipperPhys = registry.physObjs.get(flipper);
 	applyGlobalConstraints();
 	updateAllEdges();
+	flipperPhys = registry.physObjs.get(flipper);
 	updateAllCenters();
+	flipperPhys = registry.physObjs.get(flipper);
 	detectAndSolveAllCollisions();
+	flipperPhys = registry.physObjs.get(flipper);
 
 	updateAllMotionInfo();
+	
+	flipperPhys = registry.physObjs.get(flipper);
 
 }
 
@@ -453,10 +511,13 @@ void updateWithSubstep(float dt, float steps) {
 }
 
 
+
+
+
 void PhysicsSystem::step(float elapsed_ms)
 {
 
-	updateWithSubstep(elapsed_ms, 8.0f);
+	updateWithSubstep(elapsed_ms, 4.0f);
 
 	auto& motion_container = registry.motions;
 	for (uint i = 0; i < motion_container.size(); i++)

@@ -140,7 +140,16 @@ struct physObj {
 };
 
 
+struct playerFlipper {
 
+
+
+};
+
+
+struct mousePos {
+	vec2 pos;
+};
 
 
 
