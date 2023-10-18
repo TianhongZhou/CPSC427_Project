@@ -26,6 +26,13 @@
 - ### Simple rendering effects
     -  	EnterCombatTimer in components.hpp
     -  	textured.fs.glsl
+- ### Animation: Implement sprite sheet animation or an equivalent animation system
+    - struct SpriteSheet in components.hpp
+    - spriteSheets in tiny_ecs_registry.hpp
+    - sprite_sheet_path in common.hpp
+    - on_mouse_click in world_system.cpp
+    - draw_world in render_system.cpp
+    - textured.vs.glsl
 
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:

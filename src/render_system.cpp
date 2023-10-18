@@ -69,6 +69,34 @@ void RenderSystem::drawTexturedMesh(Entity entity,
         assert(enter_combat_uloc >= 0);
         glUniform1i(enter_combat_uloc, registry.enterCombatTimer.has(entity));
 
+		if (registry.spriteSheets.has(entity)) {
+			SpriteSheet& spriteSheet = registry.spriteSheets.get(entity);
+			glUniform2f(glGetUniformLocation(program, "spritesheetSize"), (float)spriteSheet.spriteSheetWidth, (float)spriteSheet.spriteSheetHeight);
+			float currentFrameX = spriteSheet.currentFrame % spriteSheet.spriteSheetWidth;
+			float currentFrameY = spriteSheet.currentFrame / spriteSheet.spriteSheetWidth;
+			glUniform2f(glGetUniformLocation(program, "currentFrame"), currentFrameX, currentFrameY);
+
+			spriteSheet.frameAccumulator += spriteSheet.frameIncrement;
+			if (spriteSheet.frameAccumulator >= 1.0f) {
+				spriteSheet.currentFrame++;
+				spriteSheet.frameAccumulator -= 1.0f;
+			}
+			if (spriteSheet.currentFrame >= spriteSheet.totalFrames) {
+				if (spriteSheet.loop) {
+					spriteSheet.currentFrame = 0;
+				}
+				else {
+					RenderRequest& renderRequest = registry.renderRequests.get(entity);
+					renderRequest.used_texture = spriteSheet.origin;
+					registry.spriteSheets.remove(entity);
+				}
+			}
+		}
+		else {
+			glUniform2f(glGetUniformLocation(program, "spritesheetSize"), 1.0, 1.0);
+			glUniform2f(glGetUniformLocation(program, "currentFrame"), 0.0, 0.0);
+		}
+
         glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
 	}
@@ -213,6 +241,7 @@ void RenderSystem::draw_combat_scene()
 							  // sprites back to front
 	gl_has_errors();
 	mat3 projection_2D = createProjectionMatrix();
+
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
@@ -280,6 +309,7 @@ void RenderSystem::draw_world()
 	// sprites back to front
 	gl_has_errors();
 	mat3 projection_2D = createProjectionMatrix();
+
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
