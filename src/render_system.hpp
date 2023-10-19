@@ -41,7 +41,8 @@ class RenderSystem {
 			textures_path("turtle.png"),
 			textures_path("player.png"),
 	        textures_path("player_attack.png"),
-			textures_path("ground.png") };
+			textures_path("ground.png"),
+			sprite_sheet_path("main_character_attack.png")};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -73,7 +74,7 @@ public:
 
 	void initializeGlGeometryBuffers();
 	// Initialize the screen texture used as intermediate render target
-	// The draw loop first renders to this texture, then it is used for the water
+	// The draw_combat_scene loop first renders to this texture, then it is used for the water
 	// shader
 	bool initScreenTexture();
 
@@ -81,7 +82,7 @@ public:
 	~RenderSystem();
 
 	// Draw all entities
-	void draw();
+	void draw_combat_scene();
 	void draw_world();
 
 	mat3 createProjectionMatrix();
