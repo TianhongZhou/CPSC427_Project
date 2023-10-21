@@ -11,6 +11,12 @@ struct Player
 
 };
 
+// Entity is a part of Combat
+struct Combat
+{
+
+};
+
 // Main world room
 struct Room
 {
@@ -64,6 +70,12 @@ struct DebugComponent
 struct DeathTimer
 {
 	float timer_ms = 3000.f;
+};
+
+// A timer associated when entering combat scene
+struct EnterCombatTimer
+{
+    float timer_ms = 1000.f;
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & salmon.vs.glsl)
@@ -131,7 +143,16 @@ struct physObj {
 };
 
 
+struct playerFlipper {
 
+
+
+};
+
+
+struct mousePos {
+	vec2 pos;
+};
 
 
 
@@ -167,7 +188,8 @@ enum class TEXTURE_ASSET_ID {
 	PLAYER = TURTLE + 1,
 	PLAYERATTACK = PLAYER + 1,
 	GROUND = PLAYERATTACK + 1,
-	TEXTURE_COUNT = GROUND + 1
+	PLAYERATTACKSPRITESHEET = GROUND + 1,
+	TEXTURE_COUNT = PLAYERATTACKSPRITESHEET + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -205,3 +227,14 @@ struct RenderRequest {
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 };
 
+struct SpriteSheet {
+	TEXTURE_ASSET_ID sprite;
+	int currentFrame = 0;
+	int totalFrames;
+	float frameIncrement;
+	float frameAccumulator;
+	int spriteSheetWidth;
+	int spriteSheetHeight;
+	bool loop = false;
+	TEXTURE_ASSET_ID origin;
+};

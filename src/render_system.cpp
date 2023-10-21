@@ -15,8 +15,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	transform.translate(motion.position);
 	transform.rotate(motion.angle);
 	transform.scale(motion.scale);
-	// !!! TODO A1: add rotation to the chain of transformations, mind the order
-	// of transformations
 
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest &render_request = registry.renderRequests.get(entity);
@@ -65,7 +63,41 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		GLuint texture_id =
 			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
 
-		glBindTexture(GL_TEXTURE_2D, texture_id);
+
+        // enter combat?
+        GLint enter_combat_uloc = glGetUniformLocation(program, "enter_combat");
+        assert(enter_combat_uloc >= 0);
+        glUniform1i(enter_combat_uloc, registry.enterCombatTimer.has(entity));
+
+		if (registry.spriteSheets.has(entity)) {
+			SpriteSheet& spriteSheet = registry.spriteSheets.get(entity);
+			glUniform2f(glGetUniformLocation(program, "spritesheetSize"), (float)spriteSheet.spriteSheetWidth, (float)spriteSheet.spriteSheetHeight);
+			float currentFrameX = spriteSheet.currentFrame % spriteSheet.spriteSheetWidth;
+			float currentFrameY = spriteSheet.currentFrame / spriteSheet.spriteSheetWidth;
+			glUniform2f(glGetUniformLocation(program, "currentFrame"), currentFrameX, currentFrameY);
+
+			spriteSheet.frameAccumulator += spriteSheet.frameIncrement;
+			if (spriteSheet.frameAccumulator >= 1.0f) {
+				spriteSheet.currentFrame++;
+				spriteSheet.frameAccumulator -= 1.0f;
+			}
+			if (spriteSheet.currentFrame >= spriteSheet.totalFrames) {
+				if (spriteSheet.loop) {
+					spriteSheet.currentFrame = 0;
+				}
+				else {
+					RenderRequest& renderRequest = registry.renderRequests.get(entity);
+					renderRequest.used_texture = spriteSheet.origin;
+					registry.spriteSheets.remove(entity);
+				}
+			}
+		}
+		else {
+			glUniform2f(glGetUniformLocation(program, "spritesheetSize"), 1.0, 1.0);
+			glUniform2f(glGetUniformLocation(program, "currentFrame"), 0.0, 0.0);
+		}
+
+        glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::SALMON || render_request.used_effect == EFFECT_ASSET_ID::PEBBLE)
@@ -185,9 +217,9 @@ void RenderSystem::drawToScreen()
 	gl_has_errors();
 }
 
-// Render our game world
+// Render combat world
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
-void RenderSystem::draw()
+void RenderSystem::draw_combat_scene()
 {
 	// Getting size of window
 	int w, h;
@@ -209,10 +241,11 @@ void RenderSystem::draw()
 							  // sprites back to front
 	gl_has_errors();
 	mat3 projection_2D = createProjectionMatrix();
+
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
-		if (!registry.motions.has(entity))
+		if (!registry.motions.has(entity) || !registry.combat.has(entity))
 			continue;
 		// Note, its not very efficient to access elements indirectly via the entity
 		// albeit iterating through all Sprites in sequence. A good point to optimize
@@ -276,10 +309,11 @@ void RenderSystem::draw_world()
 	// sprites back to front
 	gl_has_errors();
 	mat3 projection_2D = createProjectionMatrix();
+
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
-		if (!registry.motions.has(entity))
+		if (!registry.motions.has(entity) || registry.combat.has(entity))
 			continue;
 		// Note, its not very efficient to access elements indirectly via the entity
 		// albeit iterating through all Sprites in sequence. A good point to optimize

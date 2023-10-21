@@ -47,6 +47,9 @@ public:
 	// initialize combat
 	void init_combat();
 
+    // exit combat
+    void exit_combat();
+
 	//set main world stuff out of sight
 	void main_world_out();
 

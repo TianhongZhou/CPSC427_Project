@@ -7,7 +7,10 @@ Entity createPolygonByVertex(RenderSystem* renderer, const std::vector<vec2>& ve
 {
 	auto entity = Entity();
 
-	// Generate a custom mesh based on the provided vertices
+    // add as a combat element
+    registry.combat.emplace(entity);
+
+    // Generate a custom mesh based on the provided vertices
 	Mesh& mesh = renderer->getMesh(id);
 	mesh.fromVertices(vertices,
 		mesh.vertices,
@@ -113,7 +116,7 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
 
-	// Setting initial motion values
+    // Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = pos;
 	motion.angle = 0.f;
@@ -146,6 +149,7 @@ Entity createEnemyWave(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMYWAVE);
+    registry.combat.emplace(entity);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Setting initial motion values
@@ -171,7 +175,9 @@ Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos)
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PINBALLENEMY);
 	registry.meshPtrs.emplace(entity, &mesh);
 
-	// Setting initial motion values
+    registry.combat.emplace(entity);
+
+    // Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = pos;
 	motion.angle = 0.f;
@@ -193,6 +199,8 @@ Entity createBall(RenderSystem* renderer, vec2 pos)
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::BALL);
 	registry.meshPtrs.emplace(entity, &mesh);
+
+    registry.combat.emplace(entity);
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -350,10 +358,13 @@ void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) 
 	Vertex_Phys newV{};
 	registry.physObjs.emplace(e);
 
-
 	physObj test0 = registry.physObjs.components[0];
 
 
+
+//	0-----1
+//	|	  |
+//	3-----2
 
 	physObj& newObj = registry.physObjs.get(e);
 
