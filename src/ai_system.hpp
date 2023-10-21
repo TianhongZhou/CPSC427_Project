@@ -12,5 +12,7 @@
 class AISystem
 {
 public:
+	void step_world(float elapsed_ms);
+
 	void step(float elapsed_ms);
 };

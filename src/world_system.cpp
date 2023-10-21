@@ -224,9 +224,7 @@ void WorldSystem::restart_game() {
 
 	// Create a new salmon
 	rooms[0] = createRoom(renderer, { 600, 400 });
-	roomEnemies[0] = createRoomEnemy(renderer, { 600, 400 });
 	player = createPlayer(renderer, { 350, 200 });
-	registry.colors.insert(roomEnemies[0], { 1, 0, 0 });
 	// player_salmon = createSalmon(renderer, { 10, 20 });
 	// registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
 
@@ -580,14 +578,6 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update) {
 	//get room, player motion
 	Motion& playerMotion = registry.motions.get(player);
 	Motion& roomMotion = registry.motions.get(rooms[0]);
-
-	//Enemy chasing player
-	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i) {
-		if (registry.mainWorldEnemies.has(motion_container.entities[i])) {
-			Motion& enemyMotion = motion_container.components[i];
-			enemyMotion.angle = atan2(playerMotion.position.y - enemyMotion.position.y, playerMotion.position.x - enemyMotion.position.x);
-		}
-	}
 
 	//Boundary check for player and enemy if they are in room boundary
 	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i) {

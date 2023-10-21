@@ -69,7 +69,6 @@ private:
 
 	// Game state
 	int static const MAX_ROOM_NUM = 9;
-	int static const ENEM_NUM_PER_ROOM = 2;
 
 	RenderSystem* renderer;
 	float current_speed;
@@ -78,7 +77,6 @@ private:
 	Entity player_salmon;
 	Entity player;
 	std::array<Entity,MAX_ROOM_NUM> rooms;
-	std::array<Entity,MAX_ROOM_NUM * ENEM_NUM_PER_ROOM> roomEnemies;
 
 	// music references
 	Mix_Music* background_music;
