@@ -224,9 +224,69 @@ void WorldSystem::restart_game() {
 
 	// Create a new salmon
 	rooms[0] = createRoom(renderer, { 600, 400 });
-	roomEnemies[0] = createRoomEnemy(renderer, { 600, 400 });
 	player = createPlayer(renderer, { 350, 200 });
-	registry.colors.insert(roomEnemies[0], { 1, 0, 0 });
+	// player_salmon = createSalmon(renderer, { 10, 20 });
+	// registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
+
+
+
+	//Entity player_ball = createBall(renderer, { 400, 400 });
+	//// createNewRectangleTiedToEntity(player_ball, 12.f, 12.f, registry.motions.get(player_ball).position);
+
+	//Entity rectangle2 = createPolygonByVertex(renderer, { {220, 350}, { 220,220 }, { 300,220 }, { 300,350 } }, GEOMETRY_BUFFER_ID::OCT);
+
+	//createNewRectangleTiedToEntity(rectangle2, 80.f, 130.f, registry.motions.get(rectangle2).position);
+
+	//physObj test = registry.physObjs.components[0];
+
+
+	//Entity rectangle = createPolygonByVertex(renderer, { {220, 350}, { 220,220 }, { 400,220 }, { 400,350 } }, GEOMETRY_BUFFER_ID::RECT);
+
+	//createNewRectangleTiedToEntity(rectangle, 180.f, 130.f, registry.motions.get(rectangle).position -vec2(0.0,150.0));
+	//
+
+	//test = registry.physObjs.components[0];
+
+	//physObj test2 = registry.physObjs.components[1];
+
+
+	////Entity oct = createPolygonByVertex(renderer, {
+	////{680.0f, 400.0f},
+	////{660.56f, 460.56f},
+	////{600.0f, 480.0f}, 
+	////{539.44f, 460.56f}, 
+	////{520.0f, 400.0f},
+	////{539.44f, 339.44f},
+	////{600.0f, 320.0f},
+	////{660.56f, 339.44f}
+	////	}, GEOMETRY_BUFFER_ID::OCT);
+	//Entity pinballenemy = createPinBallEnemy(renderer, { 100, 700 });
+	//registry.colors.insert(pinballenemy, { 1, 0, 0 });
+	//Entity enemyWave = createEnemyWave(renderer, { 400, 600 });
+	//registry.colors.insert(enemyWave, { 0, 0, 1 });
+	//Entity room = createRoom(renderer, { 800, 400 });
+	//Entity road = createRoad(renderer, { 800, 200 });
+	//player = createPlayer(renderer, { 800, 600 });
+	//Entity roomEnemy = createRoomEnemy(renderer, { 1000, 600 });
+	//registry.colors.insert(roomEnemy, { 1, 0, 0 });
+
+
+
+
+	// !! TODO A2: Enable static pebbles on the ground, for reference
+	// Create pebbles on the floor, use this for reference
+	/*
+	for (uint i = 0; i < 20; i++) {
+		int w, h;
+		glfwGetWindowSize(window, &w, &h);
+		float radius = 30 * (uniform_dist(rng) + 0.3f); // range 0.3 .. 1.3
+		Entity pebble = createPebble({ uniform_dist(rng) * w, h - uniform_dist(rng) * 20 }, 
+			         { radius, radius });
+		float brightness = uniform_dist(rng) * 0.5 + 0.5;
+		registry.colors.insert(pebble, { brightness, brightness, brightness});
+	}
+	*/
+
 }
 
 
@@ -582,14 +642,6 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update) {
 	//get room, player motion
 	Motion& playerMotion = registry.motions.get(player);
 	Motion& roomMotion = registry.motions.get(rooms[0]);
-
-	//Enemy chasing player
-	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i) {
-		if (registry.mainWorldEnemies.has(motion_container.entities[i])) {
-			Motion& enemyMotion = motion_container.components[i];
-			enemyMotion.angle = atan2(playerMotion.position.y - enemyMotion.position.y, playerMotion.position.x - enemyMotion.position.x);
-		}
-	}
 
 	//Boundary check for player and enemy if they are in room boundary
 	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i) {

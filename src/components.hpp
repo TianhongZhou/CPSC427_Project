@@ -1,6 +1,7 @@
 #pragma once
 #include "common.hpp"
 #include <vector>
+#include <array>
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
@@ -16,16 +17,18 @@ struct Combat
 
 };
 
-// Turtles have a hard shell
+// Main world room
 struct Room
 {
-
+	std::array<Entity,3> enemies;
 };
 
-// Fish and Salmon have a soft shell
+// Main world enemy
 struct Enemy
 {
-
+	bool seePlayer = false;
+	float randomMoveTimer = 0.1f;
+	float haltTimer = 0.3f;
 };
 
 // All data relevant to the shape and motion of entities
