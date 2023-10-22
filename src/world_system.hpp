@@ -6,6 +6,7 @@
 // stlib
 #include <vector>
 #include <random>
+#include <unordered_set>
 
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
@@ -89,4 +90,6 @@ private:
 	// C++ random number generator
 	std::default_random_engine rng;
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
+
+	std::unordered_set<int> pressedKeys;
 };

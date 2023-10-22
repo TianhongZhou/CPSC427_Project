@@ -380,40 +380,102 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 
+	if (action == GLFW_PRESS) {
+		pressedKeys.insert(key);
+	}
+
+	if (action == GLFW_RELEASE) {
+		pressedKeys.erase(key);
+	}
+
     Motion &motion = registry.motions.get(player);
     bool inCombat = registry.enterCombatTimer.has(player);
 
-    if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_UP && !inCombat) {
-        motion.velocity.y = -200.f;
-    }
+	bool conflictUpAndDown = pressedKeys.count(GLFW_KEY_UP) && pressedKeys.count(GLFW_KEY_DOWN);
+	bool conflictLeftAndRight = pressedKeys.count(GLFW_KEY_LEFT) && pressedKeys.count(GLFW_KEY_RIGHT);
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_UP) {
-        motion.velocity.y = 0.f;
-    }
+	if (!conflictUpAndDown && (key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) && (action == GLFW_PRESS || action == GLFW_REPEAT) && !inCombat) 
+	{
+		motion.velocity.y = (key == GLFW_KEY_UP) ? -200.f : 200.f;
+	}
+	else if (conflictUpAndDown) 
+	{
+		motion.velocity.y = 0.f;
+	}
 
-    if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_DOWN && !inCombat) {
-        motion.velocity.y = 200.f;
-    }
+	if (!conflictLeftAndRight && (key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) && (action == GLFW_PRESS || action == GLFW_REPEAT) && !inCombat) 
+	{
+		motion.velocity.x = (key == GLFW_KEY_LEFT) ? -200.f : 200.f;
+	}
+	else if (conflictLeftAndRight) 
+	{
+		motion.velocity.x = 0.f;
+	}
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_DOWN) {
-        motion.velocity.y = 0.f;
-    }
+	if (action == GLFW_RELEASE) 
+	{
+		if ((key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) && !conflictUpAndDown) 
+		{
+			if (pressedKeys.count(GLFW_KEY_UP)) 
+			{
+				motion.velocity.y = -200.f;
+			}
+			else if (pressedKeys.count(GLFW_KEY_DOWN)) 
+			{
+				motion.velocity.y = 200.f;
+			}
+			else 
+			{
+				motion.velocity.y = 0.f;
+			}
+		}
 
-    if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_LEFT && !inCombat) {
-        motion.velocity.x = -200.f;
-    }
+		if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) && !conflictLeftAndRight) 
+		{
+			if (pressedKeys.count(GLFW_KEY_LEFT)) 
+			{
+				motion.velocity.x = -200.f;
+			}
+			else if (pressedKeys.count(GLFW_KEY_RIGHT)) 
+			{
+				motion.velocity.x = 200.f;
+			}
+			else 
+			{
+				motion.velocity.x = 0.f;
+			}
+		}
+	}
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT) {
-        motion.velocity.x = 0.f;
-    }
-
-    if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_RIGHT && !inCombat) {
-        motion.velocity.x = 200.f;
-    }
-
-    if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT) {
-        motion.velocity.x = 0.f;
-    }
+	if ((motion.velocity.x == 0.f) && (motion.velocity.y == 0.f))
+	{
+		if (registry.spriteSheets.has(player))
+		{
+			SpriteSheet& spriteSheet = registry.spriteSheets.get(player);
+			RenderRequest& renderRequest = registry.renderRequests.get(player);
+			renderRequest.used_texture = spriteSheet.origin;
+			registry.spriteSheets.remove(player);
+		}
+	}
+	else
+	{
+		if (!registry.spriteSheets.has(player)) {
+			SpriteSheet& spriteSheet = registry.spriteSheets.emplace_with_duplicates(player);
+			spriteSheet.sprite = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;
+			spriteSheet.frameIncrement = 0.06f;
+			spriteSheet.frameAccumulator = 0.0f;
+			spriteSheet.spriteSheetHeight = 1;
+			spriteSheet.spriteSheetWidth = 6;
+			spriteSheet.totalFrames = 6;
+			spriteSheet.origin = TEXTURE_ASSET_ID::PLAYER;
+			spriteSheet.loop = true;
+			if (motion.velocity.x < 0.f) {
+				spriteSheet.xFlip = true;
+			}
+			RenderRequest& renderRequest = registry.renderRequests.get(player);
+			renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;
+		}
+	}
 
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
@@ -507,10 +569,15 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
 
 	if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT && GameSceneState == 0) {
+		bool temp = false;
 		if (registry.spriteSheets.has(player)) {
-			return;
+			SpriteSheet& spriteSheet = registry.spriteSheets.get(player);
+			if (spriteSheet.sprite == TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET) {
+				return;
+			}
+			temp = spriteSheet.xFlip;
 		}
-		SpriteSheet& spriteSheet = registry.spriteSheets.emplace(player);
+		SpriteSheet& spriteSheet = registry.spriteSheets.emplace_with_duplicates(player);
 		spriteSheet.sprite = TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET;
 		spriteSheet.frameIncrement = 0.06f;
 		spriteSheet.frameAccumulator = 0.0f;
@@ -518,6 +585,7 @@ void WorldSystem::on_mouse_click(int button, int action, int mods) {
 		spriteSheet.spriteSheetWidth = 6;
 		spriteSheet.totalFrames = 6;
 		spriteSheet.origin = TEXTURE_ASSET_ID::PLAYER;
+		spriteSheet.xFlip = temp;
 		RenderRequest& renderRequest = registry.renderRequests.get(player);
 		renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET;
 	}
