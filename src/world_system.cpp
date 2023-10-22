@@ -224,9 +224,69 @@ void WorldSystem::restart_game() {
 
 	// Create a new salmon
 	rooms[0] = createRoom(renderer, { 600, 400 });
-	roomEnemies[0] = createRoomEnemy(renderer, { 600, 400 });
 	player = createPlayer(renderer, { 350, 200 });
-	registry.colors.insert(roomEnemies[0], { 1, 0, 0 });
+	// player_salmon = createSalmon(renderer, { 10, 20 });
+	// registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
+
+
+
+	//Entity player_ball = createBall(renderer, { 400, 400 });
+	//// createNewRectangleTiedToEntity(player_ball, 12.f, 12.f, registry.motions.get(player_ball).position);
+
+	//Entity rectangle2 = createPolygonByVertex(renderer, { {220, 350}, { 220,220 }, { 300,220 }, { 300,350 } }, GEOMETRY_BUFFER_ID::OCT);
+
+	//createNewRectangleTiedToEntity(rectangle2, 80.f, 130.f, registry.motions.get(rectangle2).position);
+
+	//physObj test = registry.physObjs.components[0];
+
+
+	//Entity rectangle = createPolygonByVertex(renderer, { {220, 350}, { 220,220 }, { 400,220 }, { 400,350 } }, GEOMETRY_BUFFER_ID::RECT);
+
+	//createNewRectangleTiedToEntity(rectangle, 180.f, 130.f, registry.motions.get(rectangle).position -vec2(0.0,150.0));
+	//
+
+	//test = registry.physObjs.components[0];
+
+	//physObj test2 = registry.physObjs.components[1];
+
+
+	////Entity oct = createPolygonByVertex(renderer, {
+	////{680.0f, 400.0f},
+	////{660.56f, 460.56f},
+	////{600.0f, 480.0f}, 
+	////{539.44f, 460.56f}, 
+	////{520.0f, 400.0f},
+	////{539.44f, 339.44f},
+	////{600.0f, 320.0f},
+	////{660.56f, 339.44f}
+	////	}, GEOMETRY_BUFFER_ID::OCT);
+	//Entity pinballenemy = createPinBallEnemy(renderer, { 100, 700 });
+	//registry.colors.insert(pinballenemy, { 1, 0, 0 });
+	//Entity enemyWave = createEnemyWave(renderer, { 400, 600 });
+	//registry.colors.insert(enemyWave, { 0, 0, 1 });
+	//Entity room = createRoom(renderer, { 800, 400 });
+	//Entity road = createRoad(renderer, { 800, 200 });
+	//player = createPlayer(renderer, { 800, 600 });
+	//Entity roomEnemy = createRoomEnemy(renderer, { 1000, 600 });
+	//registry.colors.insert(roomEnemy, { 1, 0, 0 });
+
+
+
+
+	// !! TODO A2: Enable static pebbles on the ground, for reference
+	// Create pebbles on the floor, use this for reference
+	/*
+	for (uint i = 0; i < 20; i++) {
+		int w, h;
+		glfwGetWindowSize(window, &w, &h);
+		float radius = 30 * (uniform_dist(rng) + 0.3f); // range 0.3 .. 1.3
+		Entity pebble = createPebble({ uniform_dist(rng) * w, h - uniform_dist(rng) * 20 }, 
+			         { radius, radius });
+		float brightness = uniform_dist(rng) * 0.5 + 0.5;
+		registry.colors.insert(pebble, { brightness, brightness, brightness});
+	}
+	*/
+
 }
 
 
@@ -320,40 +380,102 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 
+	if (action == GLFW_PRESS) {
+		pressedKeys.insert(key);
+	}
+
+	if (action == GLFW_RELEASE) {
+		pressedKeys.erase(key);
+	}
+
     Motion &motion = registry.motions.get(player);
     bool inCombat = registry.enterCombatTimer.has(player);
 
-    if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_UP && !inCombat) {
-        motion.velocity.y = -200.f;
-    }
+	bool conflictUpAndDown = pressedKeys.count(GLFW_KEY_UP) && pressedKeys.count(GLFW_KEY_DOWN);
+	bool conflictLeftAndRight = pressedKeys.count(GLFW_KEY_LEFT) && pressedKeys.count(GLFW_KEY_RIGHT);
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_UP) {
-        motion.velocity.y = 0.f;
-    }
+	if (!conflictUpAndDown && (key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) && (action == GLFW_PRESS || action == GLFW_REPEAT) && !inCombat) 
+	{
+		motion.velocity.y = (key == GLFW_KEY_UP) ? -200.f : 200.f;
+	}
+	else if (conflictUpAndDown) 
+	{
+		motion.velocity.y = 0.f;
+	}
 
-    if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_DOWN && !inCombat) {
-        motion.velocity.y = 200.f;
-    }
+	if (!conflictLeftAndRight && (key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) && (action == GLFW_PRESS || action == GLFW_REPEAT) && !inCombat) 
+	{
+		motion.velocity.x = (key == GLFW_KEY_LEFT) ? -200.f : 200.f;
+	}
+	else if (conflictLeftAndRight) 
+	{
+		motion.velocity.x = 0.f;
+	}
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_DOWN) {
-        motion.velocity.y = 0.f;
-    }
+	if (action == GLFW_RELEASE) 
+	{
+		if ((key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) && !conflictUpAndDown) 
+		{
+			if (pressedKeys.count(GLFW_KEY_UP)) 
+			{
+				motion.velocity.y = -200.f;
+			}
+			else if (pressedKeys.count(GLFW_KEY_DOWN)) 
+			{
+				motion.velocity.y = 200.f;
+			}
+			else 
+			{
+				motion.velocity.y = 0.f;
+			}
+		}
 
-    if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_LEFT && !inCombat) {
-        motion.velocity.x = -200.f;
-    }
+		if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) && !conflictLeftAndRight) 
+		{
+			if (pressedKeys.count(GLFW_KEY_LEFT)) 
+			{
+				motion.velocity.x = -200.f;
+			}
+			else if (pressedKeys.count(GLFW_KEY_RIGHT)) 
+			{
+				motion.velocity.x = 200.f;
+			}
+			else 
+			{
+				motion.velocity.x = 0.f;
+			}
+		}
+	}
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT) {
-        motion.velocity.x = 0.f;
-    }
-
-    if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_RIGHT && !inCombat) {
-        motion.velocity.x = 200.f;
-    }
-
-    if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT) {
-        motion.velocity.x = 0.f;
-    }
+	if ((motion.velocity.x == 0.f) && (motion.velocity.y == 0.f))
+	{
+		if (registry.spriteSheets.has(player))
+		{
+			SpriteSheet& spriteSheet = registry.spriteSheets.get(player);
+			RenderRequest& renderRequest = registry.renderRequests.get(player);
+			renderRequest.used_texture = spriteSheet.origin;
+			registry.spriteSheets.remove(player);
+		}
+	}
+	else
+	{
+		if (!registry.spriteSheets.has(player)) {
+			SpriteSheet& spriteSheet = registry.spriteSheets.emplace_with_duplicates(player);
+			spriteSheet.sprite = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;
+			spriteSheet.frameIncrement = 0.06f;
+			spriteSheet.frameAccumulator = 0.0f;
+			spriteSheet.spriteSheetHeight = 1;
+			spriteSheet.spriteSheetWidth = 6;
+			spriteSheet.totalFrames = 6;
+			spriteSheet.origin = TEXTURE_ASSET_ID::PLAYER;
+			spriteSheet.loop = true;
+			if (motion.velocity.x < 0.f) {
+				spriteSheet.xFlip = true;
+			}
+			RenderRequest& renderRequest = registry.renderRequests.get(player);
+			renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;
+		}
+	}
 
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
@@ -447,10 +569,15 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
 
 	if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT && GameSceneState == 0) {
+		bool temp = false;
 		if (registry.spriteSheets.has(player)) {
-			return;
+			SpriteSheet& spriteSheet = registry.spriteSheets.get(player);
+			if (spriteSheet.sprite == TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET) {
+				return;
+			}
+			temp = spriteSheet.xFlip;
 		}
-		SpriteSheet& spriteSheet = registry.spriteSheets.emplace(player);
+		SpriteSheet& spriteSheet = registry.spriteSheets.emplace_with_duplicates(player);
 		spriteSheet.sprite = TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET;
 		spriteSheet.frameIncrement = 0.06f;
 		spriteSheet.frameAccumulator = 0.0f;
@@ -458,6 +585,7 @@ void WorldSystem::on_mouse_click(int button, int action, int mods) {
 		spriteSheet.spriteSheetWidth = 6;
 		spriteSheet.totalFrames = 6;
 		spriteSheet.origin = TEXTURE_ASSET_ID::PLAYER;
+		spriteSheet.xFlip = temp;
 		RenderRequest& renderRequest = registry.renderRequests.get(player);
 		renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET;
 	}
@@ -582,14 +710,6 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update) {
 	//get room, player motion
 	Motion& playerMotion = registry.motions.get(player);
 	Motion& roomMotion = registry.motions.get(rooms[0]);
-
-	//Enemy chasing player
-	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i) {
-		if (registry.mainWorldEnemies.has(motion_container.entities[i])) {
-			Motion& enemyMotion = motion_container.components[i];
-			enemyMotion.angle = atan2(playerMotion.position.y - enemyMotion.position.y, playerMotion.position.x - enemyMotion.position.x);
-		}
-	}
 
 	//Boundary check for player and enemy if they are in room boundary
 	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i) {

@@ -1,5 +1,7 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
+#include <iostream>
+#include <random>
 
 Entity createPolygonByVertex(RenderSystem* renderer, const std::vector<vec2>& vertices, GEOMETRY_BUFFER_ID id)
 {
@@ -49,7 +51,7 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 100.f;
+	motion.scale = mesh.original_size * 60.f;
 
 	registry.players.emplace(entity);
 	registry.renderRequests.insert(
@@ -123,11 +125,22 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
 
 	// registry.players.emplace(entity);
 	registry.rooms.emplace(entity);
+
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::GROUND,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
+
+	std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> distribution1(-450.0f, 450.0f);
+    std::uniform_real_distribution<float> distribution2(0.0f, 1.0f);
+	Room& room = registry.rooms.get(entity);
+	for (int i=0; i<3; i++) {
+		room.enemies[i] = createRoomEnemy(renderer, { pos[0]+distribution1(gen), pos[1]+distribution1(gen) });
+		registry.colors.insert(room.enemies[i], { distribution2(gen), distribution2(gen), distribution2(gen) });
+	}
 
 	return entity;
 }

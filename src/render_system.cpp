@@ -75,6 +75,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			float currentFrameX = spriteSheet.currentFrame % spriteSheet.spriteSheetWidth;
 			float currentFrameY = spriteSheet.currentFrame / spriteSheet.spriteSheetWidth;
 			glUniform2f(glGetUniformLocation(program, "currentFrame"), currentFrameX, currentFrameY);
+			glUniform1i(glGetUniformLocation(program, "xFlip"), spriteSheet.xFlip ? 1 : 0);
 
 			spriteSheet.frameAccumulator += spriteSheet.frameIncrement;
 			if (spriteSheet.frameAccumulator >= 1.0f) {
@@ -95,6 +96,8 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		else {
 			glUniform2f(glGetUniformLocation(program, "spritesheetSize"), 1.0, 1.0);
 			glUniform2f(glGetUniformLocation(program, "currentFrame"), 0.0, 0.0);
+			bool shouldxFlipThisEntity = motion.velocity.x < 0;
+			glUniform1i(glGetUniformLocation(program, "xFlip"), shouldxFlipThisEntity ? 1 : 0);
 		}
 
         glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -327,8 +330,4 @@ void RenderSystem::draw_world()
 	glfwSwapBuffers(window);
 	gl_has_errors();
 }
-
-
-
-
 

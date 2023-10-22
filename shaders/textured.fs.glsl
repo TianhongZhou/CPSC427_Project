@@ -7,14 +7,24 @@ in vec2 texcoord;
 uniform sampler2D sampler0;
 uniform vec3 fcolor;
 uniform int enter_combat;
+uniform int xFlip;
+uniform vec2 spritesheetSize;
 
 // Output color
 layout(location = 0) out  vec4 color;
 
 void main()
 {
-	color = vec4(fcolor, 1.0) * texture(sampler0, vec2(texcoord.x, texcoord.y));
-	if (enter_combat == 1) {
-		color = vec4(1.0, 0.0, 0.0, 1.0) * texture(sampler0, vec2(texcoord.x, texcoord.y));
-	}
+    vec2 uv = texcoord;
+
+    if (xFlip == 1) {
+        float frameWidth = 1.0 / spritesheetSize.x;
+        float frameOffset = floor(uv.x / frameWidth) * frameWidth;
+        uv.x = frameOffset + frameWidth - (uv.x - frameOffset);
+    }
+
+    color = vec4(fcolor, 1.0) * texture(sampler0, uv);
+    if (enter_combat == 1) {
+        color = vec4(1.0, 0.0, 0.0, 1.0) * texture(sampler0, uv);
+    }
 }
