@@ -29,6 +29,14 @@ struct Enemy
 	bool seePlayer = false;
 	float randomMoveTimer = 0.1f;
 	float haltTimer = 0.3f;
+	vec2 roomPositon;
+	float roomScale;
+};
+
+// A timer that will highlight a room enemy
+struct HighLightEnemy
+{
+	float timer_ms = 1000.f;
 };
 
 // All data relevant to the shape and motion of entities
