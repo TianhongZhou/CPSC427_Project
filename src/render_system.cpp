@@ -121,12 +121,11 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		if (render_request.used_effect == EFFECT_ASSET_ID::SALMON)
 		{
-			// Light up?
-			GLint light_up_uloc = glGetUniformLocation(program, "light_up");
-			assert(light_up_uloc >= 0);
-
-			// !!! TODO A1: set the light_up shader variable using glUniform1i,
-			// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
+			// HighLight Enemy
+			GLint highlight_uloc = glGetUniformLocation(program, "highlight");
+			assert(highlight_uloc >= 0);
+			const int li = registry.highLightEnemies.has(entity) ? 1 : 0;
+			glUniform1i(highlight_uloc, li);
 			gl_has_errors();
 		}
 	}
@@ -212,6 +211,14 @@ void RenderSystem::drawToScreen()
 
 	glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
 	gl_has_errors();
+
+	// Flicker
+	GLint flicker_uloc = glGetUniformLocation(water_program, "flicker");
+	assert(flicker_uloc >= 0);
+	const int li = registry.enterCombatTimer.size()>0?1:0;
+	glUniform1i(flicker_uloc, li);
+	gl_has_errors();
+
 	// Draw
 	glDrawElements(
 		GL_TRIANGLES, 3, GL_UNSIGNED_SHORT,
