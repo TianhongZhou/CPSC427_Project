@@ -3,6 +3,28 @@
 #include <iostream>
 #include <random>
 
+Entity createShadow(RenderSystem* renderer, vec2 pos)
+{
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = mesh.original_size * 300.f;
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::SHADOW,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
 Entity createPolygonByVertex(RenderSystem* renderer, const std::vector<vec2>& vertices, GEOMETRY_BUFFER_ID id)
 {
 	auto entity = Entity();
@@ -43,7 +65,7 @@ Entity createPolygonByVertex(RenderSystem* renderer, const std::vector<vec2>& ve
 Entity createPlayer(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PLAYER);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Setting initial motion values
@@ -51,7 +73,7 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 60.f;
+	motion.scale = mesh.original_size * 100.f;
 
 	registry.players.emplace(entity);
 	registry.renderRequests.insert(
@@ -66,7 +88,7 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPostion, float roomScale)
 {
 	auto entity = Entity();
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PLAYER);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Setting initial motion values
@@ -74,15 +96,15 @@ Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPostion, float
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = vec2(50.f,0.f);
-	motion.scale = mesh.original_size * -50.f;
+	motion.scale = mesh.original_size * 100.f;
 
 	// registry.players.emplace(entity);
 	registry.mainWorldEnemies.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
-			EFFECT_ASSET_ID::SALMON,
-			GEOMETRY_BUFFER_ID::PLAYER });
+		{ TEXTURE_ASSET_ID::PLAYER,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
 	Enemy& ene = registry.mainWorldEnemies.get(entity);
 	ene.roomPositon = roomPostion;
 	ene.roomScale = roomScale;
