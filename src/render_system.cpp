@@ -179,7 +179,7 @@ void RenderSystem::drawShadow(Entity entity, const mat3& projection, const float
 
 	Transform transform;
 	transform.translate(motion.position);
-	transform.translate(vec2(-8, height / 2 - 35));
+	transform.translate(vec2(-8, height / 2 + 10));
 	transform.rotate(angleRadians);
 	transform.scale(motion.scale);
 	transform.scale(vec2(1.0f, 3.0f));
