@@ -84,6 +84,7 @@ struct DeathTimer
 struct EnterCombatTimer
 {
     float timer_ms = 1000.f;
+	std::vector<Entity> engagedEnemeis;
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & salmon.vs.glsl)
@@ -206,7 +207,9 @@ enum class TEXTURE_ASSET_ID {
 	GROUND = PLAYERATTACK + 1,
 	PLAYERATTACKSPRITESHEET = GROUND + 1,
 	PLAYERWALKSPRITESHEET = PLAYERATTACKSPRITESHEET + 1,
-	SHADOW = PLAYERWALKSPRITESHEET + 1,
+	ENEMYATTACKSPRITESHEET = PLAYERWALKSPRITESHEET + 1,
+	ENEMYWALKSPRITESHEET = ENEMYATTACKSPRITESHEET + 1,
+	SHADOW = ENEMYWALKSPRITESHEET + 1,
 	TEXTURE_COUNT = SHADOW + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
@@ -247,7 +250,7 @@ struct RenderRequest {
 };
 
 struct SpriteSheet {
-	TEXTURE_ASSET_ID sprite;
+	TEXTURE_ASSET_ID next_sprite;
 	int currentFrame = 0;
 	int totalFrames;
 	float frameIncrement;
