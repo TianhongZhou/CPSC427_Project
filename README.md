@@ -42,6 +42,9 @@
     - draw_world in render_system.cpp
     - struct Light in components.hpp
     - lights in tiny_ecs_registry.hpp
+    - shadow.png in textures
+    - drawShadow in render_system.cpp
+    - createShadow in world_init.cpp
 
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:
