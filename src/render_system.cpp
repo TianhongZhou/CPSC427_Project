@@ -163,28 +163,32 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	gl_has_errors();
 }
 
-void RenderSystem::drawShadow(Entity entity, const mat3& projection, const float angleRadians, const vec2 scale)
+void RenderSystem::drawShadow(Entity entity, const mat3& projection, const float angleRadians, const vec2 scale, int width, int height)
 {
 	Motion& motion = registry.motions.get(entity);
 
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest& render_request = registry.renderRequests.get(entity);
 
-	GLuint textureID = (GLuint)registry.renderRequests.get(entity).used_texture;
-	GLint width, height;
+	//GLuint textureID = (GLuint)registry.renderRequests.get(entity).used_texture;
+	//GLint width, height;
 
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
-	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+	//glBindTexture(GL_TEXTURE_2D, textureID);
+	//glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+	//glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+
+	vec2 texture_size = vec2((int)width, (int)height);
 
 	Transform transform;
 	transform.translate(motion.position);
-	transform.translate(vec2(-8, height / 2 + 10));
+	transform.translate(vec2(0, height / 2.0f));
 	transform.rotate(angleRadians);
+	texture_size = vec2(1.0f, 3.0f) * texture_size;
+	texture_size = scale * texture_size;
+	transform.translate(vec2(width / 2, -texture_size.y));
 	transform.scale(motion.scale);
 	transform.scale(vec2(1.0f, 3.0f));
 	transform.scale(scale);
-	transform.translate(vec2(0.0f, -0.3f));
 
 	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
 	assert(used_effect_enum != (GLuint)EFFECT_ASSET_ID::EFFECT_COUNT);
@@ -227,16 +231,43 @@ void RenderSystem::drawShadow(Entity entity, const mat3& projection, const float
 		gl_has_errors();
 
 		assert(registry.renderRequests.has(entity));
-		GLuint texture_id =
-			texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::SHADOW];
+		//GLuint texture_id = texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::SHADOW];
+		GLuint texture_id = texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
 
 		GLint enter_combat_uloc = glGetUniformLocation(program, "enter_combat");
 		assert(enter_combat_uloc >= 0);
 		glUniform1i(enter_combat_uloc, registry.enterCombatTimer.has(entity));
 
-		glUniform2f(glGetUniformLocation(program, "spritesheetSize"), 1.0, 1.0);
-		glUniform2f(glGetUniformLocation(program, "currentFrame"), 0.0, 0.0);
-		glUniform1i(glGetUniformLocation(program, "xFlip"), 0);
+		if (registry.spriteSheets.has(entity)) {
+			SpriteSheet& spriteSheet = registry.spriteSheets.get(entity);
+			glUniform2f(glGetUniformLocation(program, "spritesheetSize"), (float)spriteSheet.spriteSheetWidth, (float)spriteSheet.spriteSheetHeight);
+			float currentFrameX = spriteSheet.currentFrame % spriteSheet.spriteSheetWidth;
+			float currentFrameY = spriteSheet.currentFrame / spriteSheet.spriteSheetWidth;
+			glUniform2f(glGetUniformLocation(program, "currentFrame"), currentFrameX, currentFrameY);
+			glUniform1i(glGetUniformLocation(program, "xFlip"), spriteSheet.xFlip ? 1 : 0);
+
+			spriteSheet.frameAccumulator += spriteSheet.frameIncrement;
+			if (spriteSheet.frameAccumulator >= 1.0f) {
+				spriteSheet.currentFrame++;
+				spriteSheet.frameAccumulator -= 1.0f;
+			}
+			if (spriteSheet.currentFrame >= spriteSheet.totalFrames) {
+				if (spriteSheet.loop) {
+					spriteSheet.currentFrame = 0;
+				}
+				else {
+					RenderRequest& renderRequest = registry.renderRequests.get(entity);
+					renderRequest.used_texture = spriteSheet.origin;
+					registry.spriteSheets.remove(entity);
+				}
+			}
+		}
+		else {
+			glUniform2f(glGetUniformLocation(program, "spritesheetSize"), 1.0, 1.0);
+			glUniform2f(glGetUniformLocation(program, "currentFrame"), 0.0, 0.0);
+			bool shouldxFlipThisEntity = motion.velocity.x < 0;
+			glUniform1i(glGetUniformLocation(program, "xFlip"), shouldxFlipThisEntity ? 1 : 0);
+		}
 
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
@@ -248,7 +279,7 @@ void RenderSystem::drawShadow(Entity entity, const mat3& projection, const float
 
 	// Getting uniform locations for glUniform* calls
 	GLint color_uloc = glGetUniformLocation(program, "fcolor");
-	const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
+	const vec3 color = vec3(0);
 	glUniform3fv(color_uloc, 1, (float*)&color);
 	gl_has_errors();
 
@@ -493,11 +524,11 @@ void RenderSystem::draw_world()
 
 			vec2 scale = vec2(1.0f, glm::length(entityPosition - lightPosition) / (light.haloRadius + light.haloSoftness));
 
-			if (scale.y < 0.31)
-			{
-				scale.y = 0.31;
-			}
-			drawShadow(entity, projection_2D, M_PI / 2 - angle, scale);
+			//if (scale.y < 0.31)
+			//{
+			//	scale.y = 0.31;
+			//}
+			drawShadow(entity, projection_2D, M_PI / 2 - angle, scale, 20, 40);
 		}
 
 		drawTexturedMesh(entity, projection_2D);
