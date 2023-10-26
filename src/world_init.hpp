@@ -13,6 +13,8 @@ const float TURTLE_BB_HEIGHT = 0.4f * 202.f;
 
 // the ball
 Entity createBall(RenderSystem* renderer, vec2 pos);
+// the shadow
+Entity createShadow(RenderSystem* renderer, vec2 pos);
 // the polygon
 Entity createPolygonByVertex(RenderSystem* renderer, const std::vector<vec2>& vertices, GEOMETRY_BUFFER_ID id);
 // the pin ball enemy

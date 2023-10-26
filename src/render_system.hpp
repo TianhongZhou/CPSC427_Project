@@ -45,7 +45,8 @@ class RenderSystem {
 			sprite_sheet_path("main_character_attack.png"),
 			sprite_sheet_path("main_character_walk.png"),
 			sprite_sheet_path("enemy_attack.png"),
-			sprite_sheet_path("enemy_walk.png")
+			sprite_sheet_path("enemy_walk.png"),
+			textures_path("shadow.png") 
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -56,8 +57,7 @@ class RenderSystem {
 		shader_path("salmon"),
 		shader_path("textured"),
 		shader_path("water"),
-		shader_path("post"),
-		shader_path("shadow")
+		shader_path("post")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
@@ -98,7 +98,7 @@ private:
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
 	void draw_lights(GLuint post_program, std::vector<Light> lights, float aspectRatio);
-	void drawShadow(Entity entity, const mat3& projection, const vec2& shadowOffset);
+	void drawShadow(Entity entity, const mat3& projection, const float angleRadians, const vec2 scale);
 
 	// Window handle
 	GLFWwindow* window;

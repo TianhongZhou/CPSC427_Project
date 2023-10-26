@@ -52,7 +52,6 @@ void AISystem::step_world(float elapsed_ms)
 				} else if (-yDiff>enemy.roomScale*0.4) {
 					enemyMotion.angle = -M_PI/2;
 				}
-
 				// Randomly move in room
 				if (enemy.randomMoveTimer <= 0.0f)
 				{

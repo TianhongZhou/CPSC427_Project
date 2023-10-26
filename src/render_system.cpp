@@ -3,6 +3,7 @@
 #include <SDL.h>
 
 #include "tiny_ecs_registry.hpp"
+#include "world_init.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
 void RenderSystem::drawTexturedMesh(Entity entity,
@@ -14,7 +15,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	// thus ORDER IS IMPORTANT
 	Transform transform;
 	transform.translate(motion.position);
-	transform.rotate(motion.angle);
+	// transform.rotate(motion.angle);
 	transform.scale(motion.scale);
 
 	assert(registry.renderRequests.has(entity));
@@ -162,26 +163,38 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	gl_has_errors();
 }
 
-void RenderSystem::drawShadow(Entity entity, const mat3& projection, const vec2& shadowOffset)
+void RenderSystem::drawShadow(Entity entity, const mat3& projection, const float angleRadians, const vec2 scale)
 {
 	Motion& motion = registry.motions.get(entity);
 
-	// Transformation code
-	Transform transform;
-	transform.translate(motion.position);
-	transform.rotate(motion.angle);
-	transform.scale(motion.scale);
-
+	assert(registry.renderRequests.has(entity));
 	const RenderRequest& render_request = registry.renderRequests.get(entity);
 
-	const GLuint shadowProgram = (GLuint)effects[(GLuint)EFFECT_ASSET_ID::SHADOW];
-	glUseProgram(shadowProgram);
-	gl_has_errors();
+	GLuint textureID = (GLuint)registry.renderRequests.get(entity).used_texture;
+	GLint width, height;
+
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+
+	Transform transform;
+	transform.translate(motion.position);
+	transform.translate(vec2(-8, height / 2 - 35));
+	transform.rotate(angleRadians);
+	transform.scale(motion.scale);
+	transform.scale(vec2(1.0f, 3.0f));
+	transform.scale(scale);
+	transform.translate(vec2(0.0f, -0.3f));
+
+	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
+	assert(used_effect_enum != (GLuint)EFFECT_ASSET_ID::EFFECT_COUNT);
+	const GLuint program = (GLuint)effects[used_effect_enum];
 
 	// Setting shaders
-	glUseProgram(shadowProgram);
+	glUseProgram(program);
 	gl_has_errors();
 
+	assert(render_request.used_geometry != GEOMETRY_BUFFER_ID::GEOMETRY_COUNT);
 	const GLuint vbo = vertex_buffers[(GLuint)render_request.used_geometry];
 	const GLuint ibo = index_buffers[(GLuint)render_request.used_geometry];
 
@@ -193,55 +206,68 @@ void RenderSystem::drawShadow(Entity entity, const mat3& projection, const vec2&
 	// Input data location as in the vertex buffer
 	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED)
 	{
-		GLint in_position_loc = glGetAttribLocation(shadowProgram, "in_position");
-		GLint in_texcoord_loc = glGetAttribLocation(shadowProgram, "in_texcoord");
+		GLint in_position_loc = glGetAttribLocation(program, "in_position");
+		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
 		gl_has_errors();
+		assert(in_texcoord_loc >= 0);
 
 		glEnableVertexAttribArray(in_position_loc);
-		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)0);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(TexturedVertex), (void*)0);
 		gl_has_errors();
 
 		glEnableVertexAttribArray(in_texcoord_loc);
-		glVertexAttribPointer(in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));
+		glVertexAttribPointer(
+			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+			(void*)sizeof(
+				vec3)); // note the stride to skip the preceeding vertex position
 
 		// Enabling and binding texture to slot 0
 		glActiveTexture(GL_TEXTURE0);
 		gl_has_errors();
 
-		GLuint texture_id = texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+		assert(registry.renderRequests.has(entity));
+		GLuint texture_id =
+			texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::SHADOW];
+
+		GLint enter_combat_uloc = glGetUniformLocation(program, "enter_combat");
+		assert(enter_combat_uloc >= 0);
+		glUniform1i(enter_combat_uloc, registry.enterCombatTimer.has(entity));
+
+		glUniform2f(glGetUniformLocation(program, "spritesheetSize"), 1.0, 1.0);
+		glUniform2f(glGetUniformLocation(program, "currentFrame"), 0.0, 0.0);
+		glUniform1i(glGetUniformLocation(program, "xFlip"), 0);
+
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
-
-		// Setting the shadow offset in the shader
-		GLint shadow_offset_loc = glGetUniformLocation(shadowProgram, "shadowOffset");
-		glUniform2f(shadow_offset_loc, shadowOffset.x, shadowOffset.y);
 	}
 	else
 	{
-		assert(false && "Only textured render requests are supported for shadows");
+		assert(false && "Type of render request not supported");
 	}
 
 	// Getting uniform locations for glUniform* calls
-	GLint color_uloc = glGetUniformLocation(shadowProgram, "fcolor");
-	const vec3 shadowColor = vec3(0, 0, 0);  // Assuming black shadow for now
-	glUniform3fv(color_uloc, 1, (float*)&shadowColor);
+	GLint color_uloc = glGetUniformLocation(program, "fcolor");
+	const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
+	glUniform3fv(color_uloc, 1, (float*)&color);
 	gl_has_errors();
 
-	// Get number of indices from index buffer
+	// Get number of indices from index buffer, which has elements uint16_t
 	GLint size = 0;
 	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
 	gl_has_errors();
 
 	GLsizei num_indices = size / sizeof(uint16_t);
+	// GLsizei num_triangles = num_indices / 3;
 
 	GLint currProgram;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+	// Setting uniform values to the currently bound program
 	GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
 	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
 	GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
 	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
 	gl_has_errors();
-
 	// Drawing of num_indices/3 triangles specified in the index buffer
 	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
 	gl_has_errors();
@@ -423,7 +449,7 @@ void RenderSystem::draw_world()
 			(renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET))
 		{
 			light.screenPosition = vec2(motion.position.x / w, (h - motion.position.y) / h);
-			light.haloRadius = 0.12f;
+			light.haloRadius = 0.2f;
 			light.lightColor = vec3(1.0f, 1.0f, 1.0f);
 			light.haloSoftness = 0.05f;
 			light.priority = 2;
@@ -433,36 +459,46 @@ void RenderSystem::draw_world()
 
 	mat3 projection_2D = createProjectionMatrix();
 
-	const GLuint shadow_program = effects[(GLuint)EFFECT_ASSET_ID::SHADOW];
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
 		if (!registry.motions.has(entity) || registry.combat.has(entity))
 			continue;
 
+		RenderRequest& renderRequest = registry.renderRequests.get(entity);
+		if (renderRequest.used_texture == TEXTURE_ASSET_ID::SHADOW)
+		{
+			continue;
+		}
+
 		Motion& motion = registry.motions.get(entity);
 
 		for (Light light : lights)
 		{
-			glm::vec2 lightPosition = glm::vec2(light.screenPosition.x * w, h - (light.screenPosition.y * h));
-			glm::vec2 entityPosition = motion.position;
+			glm::vec2 lightPosition = light.screenPosition;
+			glm::vec2 entityPosition = vec2(motion.position.x / w, (h - motion.position.y) / h);
 			glm::vec2 shadowOffset = glm::normalize(lightPosition - entityPosition) * 10.0f;
+			glm::vec4 shadowColor = glm::vec4(1.0, 0.0, 0.0, 1.0);
 
-			glUseProgram(shadow_program);
-			glUniform2f(glGetUniformLocation(shadow_program, "shadowOffset"), shadowOffset.x, shadowOffset.y);
-			glUniform4f(glGetUniformLocation(shadow_program, "shadowColor"), 1.0, 0.0, 0.0, 1.0);
-			glUniform1i(glGetUniformLocation(shadow_program, "isShadow"), 1);
+			if (entityPosition == lightPosition) {
+				continue;
+			}
+			if (glm::length(entityPosition - lightPosition) >= (light.haloRadius + light.haloSoftness)) {
+				continue;
+			}
 
-			drawTexturedMesh(entity, projection_2D);
+			float dy = entityPosition.y - lightPosition.y;
+			float dx = entityPosition.x - lightPosition.x;
+			float angle = atan2(dy, dx);
+
+			vec2 scale = vec2(1.0f, glm::length(entityPosition - lightPosition) / (light.haloRadius + light.haloSoftness));
+
+			if (scale.y < 0.31)
+			{
+				scale.y = 0.31;
+			}
+			drawShadow(entity, projection_2D, M_PI / 2 - angle, scale);
 		}
-
-		glUseProgram(shadow_program);
-		glUniform2f(glGetUniformLocation(shadow_program, "shadowOffset"), 0.0, 0.0);
-		glUniform4f(glGetUniformLocation(shadow_program, "shadowColor"), 0.0, 0.0, 0.0, 0.0);
-		glUniform1i(glGetUniformLocation(shadow_program, "isShadow"), 0);
 
 		drawTexturedMesh(entity, projection_2D);
 	}
