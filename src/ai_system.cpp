@@ -88,4 +88,32 @@ void AISystem::step_world(float elapsed_ms)
 			}
 		}
 	}
+
+	for (int i = 0; i < registry.mainWorldEnemies.entities.size(); i++) {
+		Entity entity = registry.mainWorldEnemies.entities[i];
+		Enemy& enemy = registry.mainWorldEnemies.get(entity);
+
+		// If the player is within half the enemy's field of view, enemy attack
+		if (enemy.seePlayer == true) {
+			// (distanceToPlayer <= (ENEMY_VERSION_LENGTH / 2)) &&
+
+			SpriteSheet& spriteSheet = registry.spriteSheets.emplace_with_duplicates(entity);
+			spriteSheet.next_sprite = TEXTURE_ASSET_ID::ENEMYATTACKSPRITESHEET;
+			spriteSheet.frameIncrement = 0.04f;
+			spriteSheet.frameAccumulator = 0.0f;
+			spriteSheet.spriteSheetHeight = 1;
+			spriteSheet.spriteSheetWidth = 9;
+			spriteSheet.totalFrames = 9;
+			spriteSheet.origin = TEXTURE_ASSET_ID::ENEMYWALKSPRITESHEET;
+			spriteSheet.loop = true;
+			Motion& motion = registry.motions.get(entity);
+			if (motion.velocity.x < 0.f)
+			{
+				spriteSheet.xFlip = true;
+			}
+
+			RenderRequest& renderRequest = registry.renderRequests.get(entity);
+			renderRequest.used_texture = TEXTURE_ASSET_ID::ENEMYATTACKSPRITESHEET;
+		}
+	}
 }
