@@ -52,10 +52,10 @@ int main()
 		t = now;
 
 		if (GameSceneState == 0) {
+			world_system.handle_collisions_world();
 			world_system.step_world(elapsed_ms);
 			ai_system.step_world(elapsed_ms);
 			physics_system.step_world(elapsed_ms);
-			world_system.handle_collisions_world();
 			render_system.draw_world();
 		}
 		else if (GameSceneState == 1) {

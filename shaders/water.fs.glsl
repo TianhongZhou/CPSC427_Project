@@ -41,7 +41,7 @@ void main()
 
     vec4 in_color = texture(screen_texture, coord);
 
-	if (flicker!=0) {
+	if (flicker==1) {
 		color = color_shift(in_color);
 	} else {
 		color = in_color;
