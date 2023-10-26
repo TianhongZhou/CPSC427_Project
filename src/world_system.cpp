@@ -411,7 +411,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		if (!registry.spriteSheets.has(player))
 		{
 			SpriteSheet &spriteSheet = registry.spriteSheets.emplace_with_duplicates(player);
-			spriteSheet.sprite = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;
+			spriteSheet.next_sprite = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;
 			spriteSheet.frameIncrement = 0.06f;
 			spriteSheet.frameAccumulator = 0.0f;
 			spriteSheet.spriteSheetHeight = 1;
@@ -530,14 +530,14 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 		if (registry.spriteSheets.has(player))
 		{
 			SpriteSheet &spriteSheet = registry.spriteSheets.get(player);
-			if (spriteSheet.sprite == TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET)
+			if (spriteSheet.next_sprite == TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET)
 			{
 				return;
 			}
 			temp = spriteSheet.xFlip;
 		}
 		SpriteSheet &spriteSheet = registry.spriteSheets.emplace_with_duplicates(player);
-		spriteSheet.sprite = TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET;
+		spriteSheet.next_sprite = TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET;
 		spriteSheet.frameIncrement = 0.06f;
 		spriteSheet.frameAccumulator = 0.0f;
 		spriteSheet.spriteSheetHeight = 1;

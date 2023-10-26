@@ -30,8 +30,10 @@
     - struct SpriteSheet in components.hpp
     - spriteSheets in tiny_ecs_registry.hpp
     - sprite_sheet_path in common.hpp
+    - createRoomEnemy in world_init.cpp
     - on_mouse_click in world_system.cpp
-    - draw_world in render_system.cpp
+    - on_key in world_system.cpp
+    - drawTexturedMesh in render_system.cpp
     - textured.vs.glsl
     - textured.fs.glsl
 - ### 2D Dynamic Shadow

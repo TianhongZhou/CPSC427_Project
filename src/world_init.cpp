@@ -74,18 +74,34 @@ Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPostion, float
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = vec2(50.f,0.f);
-	motion.scale = mesh.original_size * -50.f;
+	motion.scale = mesh.original_size * -55.f;
 
 	// registry.players.emplace(entity);
 	registry.mainWorldEnemies.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
-			EFFECT_ASSET_ID::SALMON,
-			GEOMETRY_BUFFER_ID::PLAYER });
+		{ TEXTURE_ASSET_ID::ENEMYWALKSPRITESHEET,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
 	Enemy& ene = registry.mainWorldEnemies.get(entity);
 	ene.roomPositon = roomPostion;
 	ene.roomScale = roomScale;
+
+	SpriteSheet& spriteSheet = registry.spriteSheets.emplace(entity);
+	spriteSheet.next_sprite = TEXTURE_ASSET_ID::ENEMYWALKSPRITESHEET;
+	spriteSheet.frameIncrement = 0.04f;
+	spriteSheet.frameAccumulator = 0.0f;
+	spriteSheet.spriteSheetHeight = 1;
+	spriteSheet.spriteSheetWidth = 6;
+	spriteSheet.totalFrames = 6;
+	spriteSheet.origin = TEXTURE_ASSET_ID::ENEMYWALKSPRITESHEET;
+	spriteSheet.loop = true;
+	if (motion.velocity.x < 0.f)
+	{
+		spriteSheet.xFlip = true;
+	}
+	/*RenderRequest& renderRequest = registry.renderRequests.get(player);
+	renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;*/
 
 	return entity;
 }
