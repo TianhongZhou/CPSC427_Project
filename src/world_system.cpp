@@ -5,6 +5,7 @@
 // stlib
 #include <cassert>
 #include <sstream>
+#include <algorithm>
 
 #include "physics_system.hpp"
 
@@ -705,9 +706,10 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 			{
 				registry.remove_all_components_of(entity);
 			}
-			registry.enterCombatTimer.remove(entity);
 			GameSceneState = 1;
 			InitCombat = 1;
+			printf("\n%d\n", registry.enterCombatTimer.get(entity).engagedEnemeis.size());
+			registry.enterCombatTimer.remove(entity);
 		}
 	}
 
@@ -769,20 +771,29 @@ void WorldSystem::handle_collisions_world()
 	for (uint i = 0; i < collisionsRegistry.components.size(); i++)
 	{
 		// The entity and its collider
-		Entity entity = collisionsRegistry.entities[i];
-		Entity entity_other = collisionsRegistry.components[i].other_entity;
-		if (registry.players.has(entity))
+		Entity playerC = collisionsRegistry.entities[i];
+		Entity enemy = collisionsRegistry.components[i].other_entity;
+		if (registry.players.has(playerC))
 		{
 			// Checking Player - Enemy collisions
-			if (registry.mainWorldEnemies.has(entity_other))
+			if (registry.mainWorldEnemies.has(enemy))
 			{
-				if (!registry.enterCombatTimer.has(entity))
+				if (!registry.enterCombatTimer.has(playerC))
 				{
-					registry.enterCombatTimer.emplace(entity);
-				}
-				if (!registry.enterCombatTimer.has(entity_other))
-				{
-					registry.enterCombatTimer.emplace(entity_other);
+					registry.enterCombatTimer.emplace(playerC);
+					registry.enterCombatTimer.get(playerC).engagedEnemeis.push_back(enemy);
+				} else {
+					std::vector<Entity> vec = registry.enterCombatTimer.get(playerC).engagedEnemeis;
+					int find = 0;
+					for (unsigned int j = 0; j < vec.size(); j++) {
+    					if (vec[j]==enemy) {
+							find = 1;
+							break;
+						}
+  					}
+					if (!find) {
+        				registry.enterCombatTimer.get(playerC).engagedEnemeis.push_back(enemy);
+    				}
 				}
 			}
 		}

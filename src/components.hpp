@@ -84,6 +84,7 @@ struct DeathTimer
 struct EnterCombatTimer
 {
     float timer_ms = 1000.f;
+	std::vector<Entity> engagedEnemeis;
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & salmon.vs.glsl)
