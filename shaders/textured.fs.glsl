@@ -9,6 +9,8 @@ uniform vec3 fcolor;
 uniform int enter_combat;
 uniform int xFlip;
 uniform vec2 spritesheetSize;
+uniform sampler2D shadowMap;
+uniform mat4 lightSpaceMatrix;
 
 // Output color
 layout(location = 0) out  vec4 color;

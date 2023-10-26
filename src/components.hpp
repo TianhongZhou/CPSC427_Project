@@ -155,6 +155,14 @@ struct mousePos {
 };
 
 
+struct Light {
+	vec2 screenPosition;
+	float haloRadius;
+	vec3 lightColor;
+	float haloSoftness;
+	int priority;
+};
+
 
 
 
@@ -200,7 +208,9 @@ enum class EFFECT_ASSET_ID {
 	SALMON = PEBBLE + 1,
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
-	EFFECT_COUNT = WATER + 1,
+	POST = WATER + 1,
+	SHADOW = POST + 1,
+	EFFECT_COUNT = SHADOW + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

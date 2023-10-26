@@ -3,6 +3,7 @@
 #include <SDL.h>
 
 #include "tiny_ecs_registry.hpp"
+#include <glm/gtc/type_ptr.hpp>
 
 void RenderSystem::drawTexturedMesh(Entity entity,
 									const mat3 &projection)
@@ -162,6 +163,92 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	gl_has_errors();
 }
 
+void RenderSystem::drawShadow(Entity entity, const mat3& projection, const vec2& shadowOffset)
+{
+	Motion& motion = registry.motions.get(entity);
+
+	// Transformation code
+	Transform transform;
+	transform.translate(motion.position);
+	transform.rotate(motion.angle);
+	transform.scale(motion.scale);
+
+	const RenderRequest& render_request = registry.renderRequests.get(entity);
+
+	const GLuint shadowProgram = (GLuint)effects[(GLuint)EFFECT_ASSET_ID::SHADOW];
+	glUseProgram(shadowProgram);
+	gl_has_errors();
+
+	// Setting shaders
+	glUseProgram(shadowProgram);
+	gl_has_errors();
+
+	const GLuint vbo = vertex_buffers[(GLuint)render_request.used_geometry];
+	const GLuint ibo = index_buffers[(GLuint)render_request.used_geometry];
+
+	// Setting vertex and index buffers
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	gl_has_errors();
+
+	// Input data location as in the vertex buffer
+	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED)
+	{
+		GLint in_position_loc = glGetAttribLocation(shadowProgram, "in_position");
+		GLint in_texcoord_loc = glGetAttribLocation(shadowProgram, "in_texcoord");
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_position_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)0);
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_texcoord_loc);
+		glVertexAttribPointer(in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));
+
+		// Enabling and binding texture to slot 0
+		glActiveTexture(GL_TEXTURE0);
+		gl_has_errors();
+
+		GLuint texture_id = texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		gl_has_errors();
+
+		// Setting the shadow offset in the shader
+		GLint shadow_offset_loc = glGetUniformLocation(shadowProgram, "shadowOffset");
+		glUniform2f(shadow_offset_loc, shadowOffset.x, shadowOffset.y);
+	}
+	else
+	{
+		assert(false && "Only textured render requests are supported for shadows");
+	}
+
+	// Getting uniform locations for glUniform* calls
+	GLint color_uloc = glGetUniformLocation(shadowProgram, "fcolor");
+	const vec3 shadowColor = vec3(0, 0, 0);  // Assuming black shadow for now
+	glUniform3fv(color_uloc, 1, (float*)&shadowColor);
+	gl_has_errors();
+
+	// Get number of indices from index buffer
+	GLint size = 0;
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	gl_has_errors();
+
+	GLsizei num_indices = size / sizeof(uint16_t);
+
+	GLint currProgram;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+	GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
+	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
+	GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
+	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
+	gl_has_errors();
+
+	// Drawing of num_indices/3 triangles specified in the index buffer
+	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
+	gl_has_errors();
+}
+
+
 // draw the intermediate texture to the screen, with some distortion to simulate
 // water
 void RenderSystem::drawToScreen()
@@ -311,23 +398,139 @@ void RenderSystem::draw_world()
 	// and alpha blending, one would have to sort
 	// sprites back to front
 	gl_has_errors();
+
+	std::vector<Light> lights = {};
+
+	for (Entity entity : registry.lights.entities)
+	{
+		if (!registry.lights.has(entity))
+		{
+			continue;
+		}
+
+		RenderRequest& renderRequest = registry.renderRequests.get(entity);
+		Motion& motion = registry.motions.get(entity);
+		Light& light = registry.lights.get(entity);
+		if ((renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYER) ||
+			(renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET) ||
+			(renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET))
+		{
+			light.screenPosition = vec2(motion.position.x / w, (h - motion.position.y) / h);
+			light.haloRadius = 0.12f;
+			light.lightColor = vec3(1.0f, 1.0f, 1.0f);
+			light.haloSoftness = 0.05f;
+			light.priority = 2;
+		}
+		lights.push_back(light);
+	}
+
 	mat3 projection_2D = createProjectionMatrix();
+
+	const GLuint shadow_program = effects[(GLuint)EFFECT_ASSET_ID::SHADOW];
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
 		if (!registry.motions.has(entity) || registry.combat.has(entity))
 			continue;
-		// Note, its not very efficient to access elements indirectly via the entity
-		// albeit iterating through all Sprites in sequence. A good point to optimize
+
+		Motion& motion = registry.motions.get(entity);
+
+		for (Light light : lights)
+		{
+			glm::vec2 lightPosition = glm::vec2(light.screenPosition.x * w, h - (light.screenPosition.y * h));
+			glm::vec2 entityPosition = motion.position;
+			glm::vec2 shadowOffset = glm::normalize(lightPosition - entityPosition) * 10.0f;
+
+			glUseProgram(shadow_program);
+			glUniform2f(glGetUniformLocation(shadow_program, "shadowOffset"), shadowOffset.x, shadowOffset.y);
+			glUniform4f(glGetUniformLocation(shadow_program, "shadowColor"), 1.0, 0.0, 0.0, 1.0);
+			glUniform1i(glGetUniformLocation(shadow_program, "isShadow"), 1);
+
+			drawTexturedMesh(entity, projection_2D);
+		}
+
+		glUseProgram(shadow_program);
+		glUniform2f(glGetUniformLocation(shadow_program, "shadowOffset"), 0.0, 0.0);
+		glUniform4f(glGetUniformLocation(shadow_program, "shadowColor"), 0.0, 0.0, 0.0, 0.0);
+		glUniform1i(glGetUniformLocation(shadow_program, "isShadow"), 0);
+
 		drawTexturedMesh(entity, projection_2D);
 	}
 
 	// Truely render to the screen
 	drawToScreen();
 
+	// Make the screen black
+	float quadVertices[] = {
+	   -1.0f,  1.0f,  0.0f, 1.0f,
+	   -1.0f, -1.0f,  0.0f, 0.0f,
+		1.0f, -1.0f,  1.0f, 0.0f,
+
+	   -1.0f,  1.0f,  0.0f, 1.0f,
+		1.0f, -1.0f,  1.0f, 0.0f,
+		1.0f,  1.0f,  1.0f, 1.0f
+	};
+	unsigned int quadVAO, quadVBO;
+	glGenVertexArrays(1, &quadVAO);
+	glGenBuffers(1, &quadVBO);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	const GLuint post_program = effects[(GLuint)EFFECT_ASSET_ID::POST];
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(post_program);
+
+	glUniform1i(glGetUniformLocation(post_program, "screenTexture"), 0);
+
+	// Draw lights
+	draw_lights(post_program, lights, (float)h / (float)w);
+
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
 	// flicker-free display with a double buffer
 	glfwSwapBuffers(window);
 	gl_has_errors();
 }
 
+
+void RenderSystem::draw_lights(GLuint post_program, std::vector<Light> lights, float aspectRatio)
+{
+	std::sort(lights.begin(), lights.end(), [](const Light& a, const Light& b) {
+		return a.priority > b.priority;
+		});
+
+	std::vector<glm::vec2> lightPositions = {};
+	std::vector<float> lightRadii = {};
+	std::vector<float> lightSoftnesses = {};
+	std::vector<glm::vec3> lightColors = {};
+	std::vector<int> prioritys = {};
+
+	for (int i = 0; i < lights.size(); ++i) {
+		lightPositions.push_back(lights[i].screenPosition);
+		lightRadii.push_back(lights[i].haloRadius);
+		lightSoftnesses.push_back(lights[i].haloSoftness);
+		lightColors.push_back(lights[i].lightColor);
+	}
+
+	for (int i = 0; i < lightPositions.size(); ++i) {
+		glUniform2fv(glGetUniformLocation(post_program, ("positions[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(lightPositions[i]));
+		glUniform1f(glGetUniformLocation(post_program, ("radii[" + std::to_string(i) + "]").c_str()), lightRadii[i]);
+		glUniform1f(glGetUniformLocation(post_program, ("softnesses[" + std::to_string(i) + "]").c_str()), lightSoftnesses[i]);
+		glUniform3fv(glGetUniformLocation(post_program, ("colors[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(lightColors[i]));
+	}
+
+	glUniform1i(glGetUniformLocation(post_program, "numLights"), lightPositions.size());
+	glUniform1f(glGetUniformLocation(post_program, "aspectRatio"), aspectRatio);
+	gl_has_errors();
+}

@@ -52,7 +52,9 @@ class RenderSystem {
 		shader_path("pebble"),
 		shader_path("salmon"),
 		shader_path("textured"),
-		shader_path("water")		
+		shader_path("water"),
+		shader_path("post"),
+		shader_path("shadow")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
@@ -92,6 +94,8 @@ private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
+	void draw_lights(GLuint post_program, std::vector<Light> lights, float aspectRatio);
+	void drawShadow(Entity entity, const mat3& projection, const vec2& shadowOffset);
 
 	// Window handle
 	GLFWwindow* window;
