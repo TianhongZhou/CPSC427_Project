@@ -247,7 +247,7 @@ struct RenderRequest {
 };
 
 struct SpriteSheet {
-	TEXTURE_ASSET_ID sprite;
+	TEXTURE_ASSET_ID next_sprite;
 	int currentFrame = 0;
 	int totalFrames;
 	float frameIncrement;
