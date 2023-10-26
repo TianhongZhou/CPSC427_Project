@@ -164,6 +164,14 @@ struct mousePos {
 };
 
 
+struct Light {
+	vec2 screenPosition;
+	float haloRadius;
+	vec3 lightColor;
+	float haloSoftness;
+	int priority;
+};
+
 
 
 
@@ -199,7 +207,10 @@ enum class TEXTURE_ASSET_ID {
 	GROUND = PLAYERATTACK + 1,
 	PLAYERATTACKSPRITESHEET = GROUND + 1,
 	PLAYERWALKSPRITESHEET = PLAYERATTACKSPRITESHEET + 1,
-	TEXTURE_COUNT = PLAYERWALKSPRITESHEET + 1
+	ENEMYATTACKSPRITESHEET = PLAYERWALKSPRITESHEET + 1,
+	ENEMYWALKSPRITESHEET = ENEMYATTACKSPRITESHEET + 1,
+	SHADOW = ENEMYWALKSPRITESHEET + 1,
+	TEXTURE_COUNT = SHADOW + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -209,7 +220,8 @@ enum class EFFECT_ASSET_ID {
 	SALMON = PEBBLE + 1,
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
-	EFFECT_COUNT = WATER + 1,
+	POST = WATER + 1,
+	EFFECT_COUNT = POST + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
@@ -238,7 +250,7 @@ struct RenderRequest {
 };
 
 struct SpriteSheet {
-	TEXTURE_ASSET_ID sprite;
+	TEXTURE_ASSET_ID next_sprite;
 	int currentFrame = 0;
 	int totalFrames;
 	float frameIncrement;

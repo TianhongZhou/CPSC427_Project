@@ -40,10 +40,14 @@ class RenderSystem {
 			textures_path("fish.png"),
 			textures_path("turtle.png"),
 			textures_path("player.png"),
-	        textures_path("player_attack.png"),
+			textures_path("player_attack.png"),
 			textures_path("ground.png"),
 			sprite_sheet_path("main_character_attack.png"),
-			sprite_sheet_path("main_character_walk.png") };
+			sprite_sheet_path("main_character_walk.png"),
+			sprite_sheet_path("enemy_attack.png"),
+			sprite_sheet_path("enemy_walk.png"),
+			textures_path("shadow.png") 
+	};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -52,7 +56,8 @@ class RenderSystem {
 		shader_path("pebble"),
 		shader_path("salmon"),
 		shader_path("textured"),
-		shader_path("water")		
+		shader_path("water"),
+		shader_path("post")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
@@ -92,6 +97,8 @@ private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
+	void draw_lights(GLuint post_program, std::vector<Light> lights, float aspectRatio);
+	void drawShadow(Entity entity, const mat3& projection, const float angleRadians, const vec2 scale);
 
 	// Window handle
 	GLFWwindow* window;

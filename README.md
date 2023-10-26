@@ -30,9 +30,21 @@
     - struct SpriteSheet in components.hpp
     - spriteSheets in tiny_ecs_registry.hpp
     - sprite_sheet_path in common.hpp
+    - createRoomEnemy in world_init.cpp
     - on_mouse_click in world_system.cpp
-    - draw_world in render_system.cpp
+    - on_key in world_system.cpp
+    - drawTexturedMesh in render_system.cpp
     - textured.vs.glsl
+    - textured.fs.glsl
+- ### 2D Dynamic Shadow
+    - post.fs.glsl
+    - post.vs.glsl
+    - draw_world in render_system.cpp
+    - struct Light in components.hpp
+    - lights in tiny_ecs_registry.hpp
+    - shadow.png in textures
+    - drawShadow in render_system.cpp
+    - createShadow in world_init.cpp
 
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:

@@ -337,7 +337,7 @@ bool loadEffectFromFile(
 	}
 	if (!gl_compile_shader(fragment))
 	{
-		fprintf(stderr, "Vertex compilation failed");
+		fprintf(stderr, "Fragment compilation failed");
 		assert(false);
 		return false;
 	}

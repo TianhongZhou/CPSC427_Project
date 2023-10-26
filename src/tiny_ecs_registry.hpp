@@ -30,6 +30,7 @@ public:
 	ComponentContainer<mousePos> mousePosArray;
 	ComponentContainer<SpriteSheet> spriteSheets;
 	ComponentContainer<HighLightEnemy> highLightEnemies;
+	ComponentContainer<Light> lights;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -52,6 +53,7 @@ public:
 		registry_list.push_back(&mousePosArray);
 		registry_list.push_back(&spriteSheets);
 		registry_list.push_back(&highLightEnemies);
+		registry_list.push_back(&lights);
 	}
 
 	void clear_all_components() {
