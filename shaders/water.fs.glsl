@@ -3,6 +3,7 @@
 uniform sampler2D screen_texture;
 uniform float time;
 uniform float screen_darken_factor;
+uniform int flicker;
 
 in vec2 texcoord;
 
@@ -22,8 +23,9 @@ vec4 color_shift(vec4 in_color)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// TODO A1: HANDLE THE COLOR SHIFTING HERE (you may want to make it blue-ish)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	return in_color;
+	float factor = (sin(time*2)+1)/2;
+	vec4 faded_color = in_color*factor;
+	return faded_color;
 }
 
 vec4 fade_color(vec4 in_color) 
@@ -38,6 +40,10 @@ void main()
 	vec2 coord = distort(texcoord);
 
     vec4 in_color = texture(screen_texture, coord);
-    color = color_shift(in_color);
-    color = fade_color(color);
+
+	if (flicker!=0) {
+		color = color_shift(in_color);
+	} else {
+		color = in_color;
+	}
 }

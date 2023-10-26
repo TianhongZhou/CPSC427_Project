@@ -29,6 +29,7 @@ public:
 	ComponentContainer<playerFlipper> playerFlippers;
 	ComponentContainer<mousePos> mousePosArray;
 	ComponentContainer<SpriteSheet> spriteSheets;
+	ComponentContainer<HighLightEnemy> highLightEnemies;
 	ComponentContainer<Light> lights;
 
 	// constructor that adds all containers for looping over them
@@ -51,6 +52,7 @@ public:
 		registry_list.push_back(&playerFlippers);
 		registry_list.push_back(&mousePosArray);
 		registry_list.push_back(&spriteSheets);
+		registry_list.push_back(&highLightEnemies);
 		registry_list.push_back(&lights);
 	}
 
