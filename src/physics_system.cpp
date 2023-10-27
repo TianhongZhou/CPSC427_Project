@@ -561,7 +561,7 @@ void PhysicsSystem::step_world(float elapsed_ms)
 		// Boundary check
 		// Now we restrict everything, but we can choose what we want to restrict
 
-		if (motion.position.x < 0) {
+		/*if (motion.position.x < 0) {
 			motion.position.x = 0;
 		}
 		if (motion.position.y < 0) {
@@ -572,6 +572,31 @@ void PhysicsSystem::step_world(float elapsed_ms)
 		}
 		if (motion.position.y > window_height_px) {
 			motion.position.y = window_height_px;
+		}*/
+
+
+
+		// Bounce of side walls
+
+		if (motion.position.x < 0) {
+			vec2 curr_v = motion.velocity;
+			motion.position.x = 20;
+			motion.velocity = vec2(-curr_v.x, curr_v.y);
+		}
+		if (motion.position.y < 0) {
+			vec2 curr_v = motion.velocity;
+			motion.position.y = 20;
+			motion.velocity = vec2(curr_v.x, -curr_v.y);
+		}
+		if (motion.position.x > window_width_px) {
+			vec2 curr_v = motion.velocity;
+			motion.position.x = window_width_px - 20;
+			motion.velocity = vec2(-curr_v.x, curr_v.y);
+		}
+		if (motion.position.y > window_height_px) {
+			vec2 curr_v = motion.velocity;
+			motion.position.y = window_height_px - 20;
+			motion.velocity = vec2(curr_v.x, -curr_v.y);
 		}
 	}
 
