@@ -4,8 +4,6 @@
 Entity createPolygonByVertex(RenderSystem* renderer, const std::vector<vec2>& vertices, GEOMETRY_BUFFER_ID id)
 {
 	auto entity = Entity();
-
-    // add as a combat element
     registry.combat.emplace(entity);
 
     // Generate a custom mesh based on the provided vertices
