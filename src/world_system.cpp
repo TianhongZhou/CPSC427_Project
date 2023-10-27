@@ -243,6 +243,20 @@ void WorldSystem::restart_game()
 	rooms[0] = createRoom(renderer, { 600, 400 });
 	player = createPlayer(renderer, { 350, 200 });
 	registry.lights.emplace(player);
+
+
+	int w, h;
+	glfwGetWindowSize(window, &w, &h);
+	// Add a ball
+	Entity entity = createPebble({ 0,0 }, { 0,0 }); //intialized below
+	Motion& motion = registry.motions.get(entity);
+	motion.position = {400, 400};
+	motion.scale = {30, 30};
+	motion.angle = 0; 
+	motion.velocity = { 200, 200 };
+
+
+	registry.colors.insert(entity, { 1, 1, 1 });
 }
 
 void WorldSystem::init_combat()
@@ -708,21 +722,21 @@ void WorldSystem::handle_collisions_world()
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other_entity;
-		if (registry.players.has(entity))
-		{
-			// Checking Player - Enemy collisions
-			if (registry.mainWorldEnemies.has(entity_other))
-			{
-				if (!registry.enterCombatTimer.has(entity))
-				{
-					registry.enterCombatTimer.emplace(entity);
-				}
-				if (!registry.enterCombatTimer.has(entity_other))
-				{
-					registry.enterCombatTimer.emplace(entity_other);
-				}
-			}
-		}
+		//if (registry.players.has(entity))
+		//{
+		//	// Checking Player - Enemy collisions
+		//	if (registry.mainWorldEnemies.has(entity_other))
+		//	{
+		//		if (!registry.enterCombatTimer.has(entity))
+		//		{
+		//			registry.enterCombatTimer.emplace(entity);
+		//		}
+		//		if (!registry.enterCombatTimer.has(entity_other))
+		//		{
+		//			registry.enterCombatTimer.emplace(entity_other);
+		//		}
+		//	}
+		//}
 	}
 
 	// Remove all collisions from this simulation step
