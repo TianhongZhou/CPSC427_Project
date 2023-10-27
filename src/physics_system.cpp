@@ -165,7 +165,7 @@ vec2 findCenter(const physObj& a) {
 
 }
 
-void collisionResponse(CollisionEvent& e) {
+void collisionResponse(CollisionEvent& e, bool otherObjMoveable, float otherObjCoef) {
 	vec2 CollisionVector = e.Normal * e.Depth;
 
 	int E1 = e.Edge->v1;
@@ -179,10 +179,17 @@ void collisionResponse(CollisionEvent& e) {
 
 	float Lambda = 1.0f / (fac * fac + (1 - fac) * (1 - fac));
 
-	e.EdgeParent->Vertices[E1].pos -= CollisionVector * (1 - fac) * 0.5f * Lambda;
-	e.EdgeParent->Vertices[E2].pos -= CollisionVector * fac * 0.5f * Lambda;
 
-	e.Vertex->pos += CollisionVector * 0.5f;
+	if (e.EdgeParent->moveable) {
+
+		e.EdgeParent->Vertices[E1].pos -= CollisionVector * (1 - fac) * 0.5f * Lambda * e.EdgeParent->knockbackCoef;
+		e.EdgeParent->Vertices[E2].pos -= CollisionVector * fac * 0.5f * Lambda * e.EdgeParent->knockbackCoef;
+	}
+
+
+	if (otherObjMoveable) {
+		e.Vertex->pos += CollisionVector * 0.5f * otherObjCoef;
+	}
 }
 
 
@@ -277,7 +284,7 @@ bool detectAndResloveCollision(physObj* a, physObj* b) {
 	}
 
 
-	collisionResponse(event);
+	collisionResponse(event, a->moveable, a->knockbackCoef);
 
 
 	return true;
@@ -299,8 +306,10 @@ void updateAllEdges() {
 	for (uint i = 0; i < registry.physObjs.size(); i++) {
 		physObj& obj = registry.physObjs.components[i];
 
-		updateEdges(obj);
 
+		if (obj.moveable) {
+			updateEdges(obj);
+		}
 	}
 }
 
@@ -357,8 +366,12 @@ void applyObjGrav() {
 	for (uint i = 0; i < registry.physObjs.size(); i++) {
 		physObj& obj = registry.physObjs.components[i];
 
-		for (int i2 = 0; i2 < obj.VertexCount; i2++) {
-			accelerate(GRAV, (obj.Vertices[i2]));
+		if (obj.moveable) {
+
+			for (int i2 = 0; i2 < obj.VertexCount; i2++) {
+				accelerate(GRAV, (obj.Vertices[i2]));
+			}
+
 		}
 
 	}

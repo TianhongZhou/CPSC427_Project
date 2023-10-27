@@ -252,13 +252,19 @@ void WorldSystem::init_combat()
 	Entity player_ball = createBall(renderer, {400, 400});
 	// createNewRectangleTiedToEntity(player_ball, 12.f, 12.f, registry.motions.get(player_ball).position);
 
-	Entity rectangle2 = createPolygonByVertex(renderer, {{220, 350}, {220, 220}, {300, 220}, {300, 350}}, GEOMETRY_BUFFER_ID::OCT);
+	Entity rectangle2 = createPolygonByVertex(renderer, {{220, 450}, {220, 320}, {300, 320}, {300, 450}}, GEOMETRY_BUFFER_ID::OCT);
 
-	createNewRectangleTiedToEntity(rectangle2, 80.f, 130.f, registry.motions.get(rectangle2).position);
+	createNewRectangleTiedToEntity(rectangle2, 80.f, 130.f, registry.motions.get(rectangle2).position, false, 1.0);
+
+
+
+	Entity rectangle3 = createPolygonByVertex(renderer, { {220, 250}, {220, 120}, {300, 120}, {300, 250} }, GEOMETRY_BUFFER_ID::OCT);
+
+	createNewRectangleTiedToEntity(rectangle3, 80.f, 130.f, registry.motions.get(rectangle3).position, true, 1.0);
 
 	Entity flipper = createPolygonByVertex(renderer, {{300, 600}, {300, 580}, {400, 580}, {400, 600}}, GEOMETRY_BUFFER_ID::RECT);
 
-	createNewRectangleTiedToEntity(flipper, 100.f, 20.f, registry.motions.get(flipper).position);
+	createNewRectangleTiedToEntity(flipper, 100.f, 20.f, registry.motions.get(flipper).position, true,0.2);
 
 	playerFlipper pf;
 	registry.playerFlippers.insert(flipper, pf);
