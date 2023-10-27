@@ -307,9 +307,9 @@ void updateAllEdges() {
 		physObj& obj = registry.physObjs.components[i];
 
 
-		if (obj.moveable) {
-			updateEdges(obj);
-		}
+		
+		updateEdges(obj);
+		
 	}
 }
 
