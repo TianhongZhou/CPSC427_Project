@@ -50,8 +50,9 @@ public:
     // exit combat
     void exit_combat();
 
-	//set main world stuff out of sight
-	void main_world_out();
+    // removes world objects from the rendering list
+    void hide_world();
+
 
 private:
 	// Input callback functions
@@ -91,4 +92,5 @@ private:
 	// C++ random number generator
 	std::default_random_engine rng;
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
+
 };

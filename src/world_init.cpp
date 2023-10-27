@@ -43,8 +43,10 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PLAYER);
 	registry.meshPtrs.emplace(entity, &mesh);
+    registry.mainWorld.emplace(entity);
 
-	// Setting initial motion values
+
+    // Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = pos;
 	motion.angle = 0.f;
@@ -66,8 +68,9 @@ Entity createRoomEnemy(RenderSystem* renderer, vec2 pos)
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PLAYER);
 	registry.meshPtrs.emplace(entity, &mesh);
+    registry.mainWorld.emplace(entity);
 
-	// Setting initial motion values
+    // Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = pos;
 	motion.angle = 0.f;
@@ -113,6 +116,7 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
+    registry.mainWorld.emplace(entity);
 
     // Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -121,7 +125,6 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * 700.f;
 
-	// registry.players.emplace(entity);
 	registry.rooms.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
@@ -214,7 +217,7 @@ Entity createSalmon(RenderSystem* renderer, vec2 pos)
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SALMON);
 	registry.meshPtrs.emplace(entity, &mesh);
 
-	// Setting initial motion values
+    // Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = pos;
 	motion.angle = 0.f;

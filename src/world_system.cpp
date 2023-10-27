@@ -169,12 +169,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	//	motion.velocity = vec2(-100.f, 0.f);
 	//}
 
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: HANDLE PEBBLE SPAWN HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 	// Processing the salmon state
 	assert(registry.screenStates.components.size() <= 1);
     ScreenState &screen = registry.screenStates.components[0];
@@ -229,7 +223,6 @@ void WorldSystem::restart_game() {
 	registry.colors.insert(roomEnemies[0], { 1, 0, 0 });
 }
 
-
 void WorldSystem::init_combat() {
 
 	Entity player_ball = createBall(renderer, { 400, 400 });
@@ -239,18 +232,12 @@ void WorldSystem::init_combat() {
 
 	createNewRectangleTiedToEntity(rectangle2, 80.f, 130.f, registry.motions.get(rectangle2).position);
 
-	
-
-
 	Entity flipper = createPolygonByVertex(renderer, { {300, 600}, { 300,580}, { 400,580 }, { 400,600 } }, GEOMETRY_BUFFER_ID::RECT);
 
 	createNewRectangleTiedToEntity(flipper, 100.f, 20.f, registry.motions.get(flipper).position);
 
-
 	playerFlipper pf;
 	registry.playerFlippers.insert(flipper, pf);
-
-	
 
 	//Entity oct = createPolygonByVertex(renderer, {
 	//{680.0f, 400.0f},
@@ -464,8 +451,9 @@ void WorldSystem::on_mouse_click(int button, int action, int mods) {
 }
 
 void WorldSystem::exit_combat() {
-	while (registry.physObjs.entities.size() > 0)
-		registry.remove_all_components_of(registry.physObjs.entities.back());
+	while (registry.combat.entities.size() > 0)
+		registry.remove_all_components_of(registry.combat.entities.back());
+
     GameSceneState = 0;
 }
 
@@ -645,9 +633,3 @@ void WorldSystem::handle_collisions_world() {
 	// Remove all collisions from this simulation step
 	registry.collisions.clear();
 }
-
-////set main world stuff out of sight
-//void WorldSystem::main_world_out() {
-//	//set enemies, player, room, road invisible
-//
-//}
