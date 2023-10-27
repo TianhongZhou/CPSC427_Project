@@ -36,6 +36,8 @@
     - drawTexturedMesh in render_system.cpp
     - textured.vs.glsl
     - textured.fs.glsl
+- ### Assets: Introduce new sprite and background assets (background music & attacking sound)
+    - create_window in world_system.cpp
 - ### 2D Dynamic Shadow
     - post.fs.glsl
     - post.vs.glsl

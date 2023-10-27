@@ -33,9 +33,9 @@ WorldSystem::~WorldSystem()
 	if (background_music != nullptr)
 		Mix_FreeMusic(background_music);
 	if (salmon_dead_sound != nullptr)
-		Mix_FreeChunk(salmon_dead_sound);
-	if (salmon_eat_sound != nullptr)
-		Mix_FreeChunk(salmon_eat_sound);
+		// Mix_FreeChunk(salmon_dead_sound);
+	if (player_attack_sound != nullptr)
+		Mix_FreeChunk(player_attack_sound);
 	Mix_CloseAudio();
 
 	// Destroy all created components
@@ -115,16 +115,16 @@ GLFWwindow *WorldSystem::create_window()
 		return nullptr;
 	}
 
-	background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
+	background_music = Mix_LoadMUS(audio_path("Pinball Music.wav").c_str());
 	salmon_dead_sound = Mix_LoadWAV(audio_path("salmon_dead.wav").c_str());
-	salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav").c_str());
+	player_attack_sound = Mix_LoadWAV(audio_path("Attack Sound.wav").c_str());
 
-	if (background_music == nullptr || salmon_dead_sound == nullptr || salmon_eat_sound == nullptr)
+	if (background_music == nullptr || salmon_dead_sound == nullptr || player_attack_sound == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-				audio_path("music.wav").c_str(),
+				audio_path("Pinball Music.mp3").c_str(),
 				audio_path("salmon_dead.wav").c_str(),
-				audio_path("salmon_eat.wav").c_str());
+				audio_path("Attack Sound.wav").c_str());
 		return nullptr;
 	}
 
@@ -305,10 +305,9 @@ void WorldSystem::handle_collisions()
 				{
 					// chew, count points, and set the LightUp timer
 					registry.remove_all_components_of(entity_other);
-					Mix_PlayChannel(-1, salmon_eat_sound, 0);
+					// Mix_PlayChannel(-1, player_attack_sound, 0);
 					++points;
 
-					// !!! TODO A1: create a new struct called LightUp in components.hpp and add an instance to the salmon entity by modifying the ECS registry
 				}
 			}
 		}
@@ -548,6 +547,8 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 		spriteSheet.xFlip = temp;
 		RenderRequest &renderRequest = registry.renderRequests.get(player);
 		renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET;
+
+		Mix_PlayChannel(-1, player_attack_sound, 0);
 	}
 }
 
