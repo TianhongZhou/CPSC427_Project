@@ -95,8 +95,17 @@ void AISystem::step_world(float elapsed_ms)
 
 		// If the player is within half the enemy's field of view, enemy attack
 		if (enemy.seePlayer == true) {
-			// (distanceToPlayer <= (ENEMY_VERSION_LENGTH / 2)) &&
 
+			bool temp = false;
+			if (registry.spriteSheets.has(entity))
+			{
+				SpriteSheet& spriteSheet = registry.spriteSheets.get(entity);
+				if (spriteSheet.next_sprite == TEXTURE_ASSET_ID::ENEMYATTACKSPRITESHEET)
+				{
+					continue;
+				}
+				temp = spriteSheet.xFlip;
+			}
 			SpriteSheet& spriteSheet = registry.spriteSheets.emplace_with_duplicates(entity);
 			spriteSheet.next_sprite = TEXTURE_ASSET_ID::ENEMYATTACKSPRITESHEET;
 			spriteSheet.frameIncrement = 0.04f;
@@ -106,11 +115,7 @@ void AISystem::step_world(float elapsed_ms)
 			spriteSheet.totalFrames = 9;
 			spriteSheet.origin = TEXTURE_ASSET_ID::ENEMYWALKSPRITESHEET;
 			spriteSheet.loop = true;
-			Motion& motion = registry.motions.get(entity);
-			if (motion.velocity.x < 0.f)
-			{
-				spriteSheet.xFlip = true;
-			}
+			spriteSheet.xFlip = temp;
 
 			RenderRequest& renderRequest = registry.renderRequests.get(entity);
 			renderRequest.used_texture = TEXTURE_ASSET_ID::ENEMYATTACKSPRITESHEET;

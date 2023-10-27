@@ -98,7 +98,7 @@ private:
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
 	void draw_lights(GLuint post_program, std::vector<Light> lights, float aspectRatio);
-	void drawShadow(Entity entity, const mat3& projection, const float angleRadians, const vec2 scale, int width, int height);
+	void drawShadow(Entity entity, const mat3& projection, const float angleRadians, const vec2 scale);
 
 	// Window handle
 	GLFWwindow* window;
