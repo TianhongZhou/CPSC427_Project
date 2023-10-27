@@ -163,19 +163,19 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	gl_has_errors();
 }
 
-void RenderSystem::drawShadow(Entity entity, const mat3& projection, const float angleRadians, const vec2 scale, int width, int height)
+void RenderSystem::drawShadow(Entity entity, const mat3& projection, const float angleRadians, const vec2 scale)
 {
 	Motion& motion = registry.motions.get(entity);
 
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest& render_request = registry.renderRequests.get(entity);
 
-	//GLuint textureID = (GLuint)registry.renderRequests.get(entity).used_texture;
-	//GLint width, height;
+	GLuint textureID = (GLuint)registry.renderRequests.get(entity).used_texture;
+	GLint width, height;
 
-	//glBindTexture(GL_TEXTURE_2D, textureID);
-	//glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
-	//glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
 
 	vec2 texture_size = vec2((int)width, (int)height);
 
@@ -185,7 +185,7 @@ void RenderSystem::drawShadow(Entity entity, const mat3& projection, const float
 	transform.rotate(angleRadians);
 	texture_size = vec2(1.0f, 3.0f) * texture_size;
 	texture_size = scale * texture_size;
-	transform.translate(vec2(width / 2, -texture_size.y));
+	transform.translate(vec2(0, -texture_size.y));
 	transform.scale(motion.scale);
 	transform.scale(vec2(1.0f, 3.0f));
 	transform.scale(scale);
@@ -528,7 +528,7 @@ void RenderSystem::draw_world()
 			//{
 			//	scale.y = 0.31;
 			//}
-			drawShadow(entity, projection_2D, M_PI / 2 - angle, scale, 20, 40);
+			drawShadow(entity, projection_2D, M_PI / 2 - angle, scale);
 		}
 
 		drawTexturedMesh(entity, projection_2D);
