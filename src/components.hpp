@@ -148,7 +148,9 @@ struct physObj {
 	int VertexCount;
 	int EdgesCount;
 
+	bool moveable;
 
+	float knockbackCoef;
 };
 
 

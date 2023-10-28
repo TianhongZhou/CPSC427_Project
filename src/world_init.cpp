@@ -391,7 +391,7 @@ Entity createPebble(vec2 pos, vec2 size)
 
 
 
-void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) {
+void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos, bool moveable, float knockbackCoef) {
 
 
 
@@ -409,6 +409,9 @@ void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) 
 //	3-----2
 
 	physObj& newObj = registry.physObjs.get(e);
+
+	newObj.moveable = moveable;
+	newObj.knockbackCoef = knockbackCoef;
 
 	newV.pos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
 	newV.oldPos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
