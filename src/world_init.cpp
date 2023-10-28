@@ -85,7 +85,7 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
-Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPostion, float roomScale)
+Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPostion, float roomScale, bool keyFrame)
 {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
@@ -109,6 +109,7 @@ Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPostion, float
 	Enemy& ene = registry.mainWorldEnemies.get(entity);
 	ene.roomPositon = roomPostion;
 	ene.roomScale = roomScale;
+	ene.keyFrame = keyFrame;
 
 	SpriteSheet& spriteSheet = registry.spriteSheets.emplace(entity);
 	spriteSheet.next_sprite = TEXTURE_ASSET_ID::ENEMYWALKSPRITESHEET;
@@ -180,7 +181,7 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
     std::uniform_real_distribution<float> distribution2(0.0f, 1.0f);
 	Room& room = registry.rooms.get(entity);
 	for (int i=0; i<3; i++) {
-		room.enemies[i] = createRoomEnemy(renderer, { pos[0]+distribution1(gen), pos[1]+distribution1(gen), }, pos, 700.f);
+		room.enemies[i] = createRoomEnemy(renderer, { pos[0]+distribution1(gen), pos[1]+distribution1(gen), }, pos, 700.f, false);
 		registry.colors.insert(room.enemies[i], { distribution2(gen), distribution2(gen), distribution2(gen) });
 	}
 
@@ -391,7 +392,7 @@ Entity createPebble(vec2 pos, vec2 size)
 
 
 
-void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos, bool moveable, float knockbackCoef) {
+void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) {
 
 
 
@@ -409,9 +410,6 @@ void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos, 
 //	3-----2
 
 	physObj& newObj = registry.physObjs.get(e);
-
-	newObj.moveable = moveable;
-	newObj.knockbackCoef = knockbackCoef;
 
 	newV.pos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
 	newV.oldPos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
