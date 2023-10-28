@@ -526,6 +526,8 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 
 	if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT && GameSceneState == 0)
 	{
+		Mix_PlayChannel(-1, player_attack_sound, 0);
+
 		bool temp = false;
 		if (registry.spriteSheets.has(player))
 		{
@@ -538,7 +540,7 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 		}
 		SpriteSheet &spriteSheet = registry.spriteSheets.emplace_with_duplicates(player);
 		spriteSheet.next_sprite = TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET;
-		spriteSheet.frameIncrement = 0.06f;
+		spriteSheet.frameIncrement = 0.08f;
 		spriteSheet.frameAccumulator = 0.0f;
 		spriteSheet.spriteSheetHeight = 1;
 		spriteSheet.spriteSheetWidth = 6;
@@ -548,7 +550,6 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 		RenderRequest &renderRequest = registry.renderRequests.get(player);
 		renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET;
 
-		Mix_PlayChannel(-1, player_attack_sound, 0);
 	}
 }
 

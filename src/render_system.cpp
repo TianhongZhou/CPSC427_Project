@@ -181,14 +181,15 @@ void RenderSystem::drawShadow(Entity entity, const mat3& projection, const float
 
 	Transform transform;
 	transform.translate(motion.position);
-	transform.translate(vec2(0, height / 2.0f));
+	transform.translate(vec2(-10, height / 2.0f + 20));
 	transform.rotate(angleRadians);
 	texture_size = vec2(1.0f, 3.0f) * texture_size;
-	texture_size = scale * texture_size;
-	transform.translate(vec2(0, -texture_size.y));
+	//texture_size = scale * texture_size;
+	//transform.translate(vec2(20, -texture_size.y+20));
 	transform.scale(motion.scale);
 	transform.scale(vec2(1.0f, 3.0f));
 	transform.scale(scale);
+	transform.translate(render_request.textureOffset);
 
 	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
 	assert(used_effect_enum != (GLuint)EFFECT_ASSET_ID::EFFECT_COUNT);
@@ -493,11 +494,23 @@ void RenderSystem::draw_world()
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
+		RenderRequest& renderRequest = registry.renderRequests.get(entity);
+		if (renderRequest.used_texture != TEXTURE_ASSET_ID::GROUND)
+		{
+			continue;
+		}
+
+		drawTexturedMesh(entity, projection_2D);
+	}
+
+	// Draw all textured meshes that have a position and size component
+	for (Entity entity : registry.renderRequests.entities)
+	{
 		if (!registry.motions.has(entity) || registry.combat.has(entity))
 			continue;
 
 		RenderRequest& renderRequest = registry.renderRequests.get(entity);
-		if (renderRequest.used_texture == TEXTURE_ASSET_ID::SHADOW)
+		if (renderRequest.used_texture == TEXTURE_ASSET_ID::GROUND)
 		{
 			continue;
 		}
@@ -508,8 +521,6 @@ void RenderSystem::draw_world()
 		{
 			glm::vec2 lightPosition = light.screenPosition;
 			glm::vec2 entityPosition = vec2(motion.position.x / w, (h - motion.position.y) / h);
-			glm::vec2 shadowOffset = glm::normalize(lightPosition - entityPosition) * 10.0f;
-			glm::vec4 shadowColor = glm::vec4(1.0, 0.0, 0.0, 1.0);
 
 			if (entityPosition == lightPosition) {
 				continue;
@@ -529,6 +540,21 @@ void RenderSystem::draw_world()
 			//	scale.y = 0.31;
 			//}
 			drawShadow(entity, projection_2D, M_PI / 2 - angle, scale);
+		}
+
+		//drawTexturedMesh(entity, projection_2D);
+	}
+
+	// Draw all textured meshes that have a position and size component
+	for (Entity entity : registry.renderRequests.entities)
+	{
+		if (!registry.motions.has(entity) || registry.combat.has(entity))
+			continue;
+
+		RenderRequest& renderRequest = registry.renderRequests.get(entity);
+		if (renderRequest.used_texture == TEXTURE_ASSET_ID::GROUND)
+		{
+			continue;
 		}
 
 		drawTexturedMesh(entity, projection_2D);
