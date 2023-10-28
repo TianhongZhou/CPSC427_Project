@@ -245,18 +245,18 @@ void WorldSystem::restart_game()
 	registry.lights.emplace(player);
 
 
-	int w, h;
-	glfwGetWindowSize(window, &w, &h);
-	// Add a ball
-	Entity entity = createPebble({ 0,0 }, { 0,0 }); //intialized below
-	Motion& motion = registry.motions.get(entity);
-	motion.position = {400, 400};
-	motion.scale = {30, 30};
-	motion.angle = 0; 
-	motion.velocity = { 200, 200 };
+	//int w, h;
+	//glfwGetWindowSize(window, &w, &h);
+	//// Add a ball
+	//Entity entity = createPebble({ 0,0 }, { 0,0 }); //intialized below
+	//Motion& motion = registry.motions.get(entity);
+	//motion.position = {400, 400};
+	//motion.scale = {30, 30};
+	//motion.angle = 0; 
+	//motion.velocity = { 200, 200 };
 
 
-	registry.colors.insert(entity, { 1, 1, 1 });
+	//registry.colors.insert(entity, { 1, 1, 1 });
 }
 
 void WorldSystem::init_combat()
@@ -561,6 +561,25 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 		spriteSheet.xFlip = temp;
 		RenderRequest &renderRequest = registry.renderRequests.get(player);
 		renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET;
+
+
+		// Create PEBBLE
+		Entity entity = createPebble({ 0,0 }, { 0,0 }); //intialized below
+		// A2 2b: Setting random initial direction, velocity, size
+		Motion& motion = registry.motions.get(entity);
+		motion.position = registry.motions.get(player).position;
+
+		float radius = 30; //* (uniform_dist(rng) + 0.3f);
+		motion.scale = { radius, radius };
+		motion.angle = 0; // Do we have to set angle? Just use velocity?
+
+		//motion.velocity = vec2(200.f + uniform_dist(rng)*200, 100.f - uniform_dist(rng)*200);
+		float angle = registry.motions.get(player).angle;
+		vec2 velocity = vec2(200.f + uniform_dist(rng) * 200, 100.f - uniform_dist(rng) * 200);
+		motion.velocity.x = velocity.x * cos(angle) + velocity.y * sin(angle);
+		motion.velocity.y = velocity.x * sin(angle) + velocity.y * cos(angle);
+
+		registry.colors.insert(entity, { 0, 1, 0 });
 	}
 }
 
@@ -602,43 +621,38 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 				registry.remove_all_components_of(motion_container.entities[i]);
 		}
 	}
+	
+	// enemy shoot
+	next_turtle_spawn -= elapsed_ms_since_last_update * current_speed;
+	if (registry.enemyBullets.components.size() <= MAX_TURTLES && next_turtle_spawn < 0.f) {
+		// Reset timer
+		next_turtle_spawn = (TURTLE_DELAY_MS / 2) + uniform_dist(rng) * (TURTLE_DELAY_MS / 2);
 
-	//// Spawning new turtles
-	// next_turtle_spawn -= elapsed_ms_since_last_update * current_speed;
-	// if (registry.rooms.components.size() <= MAX_TURTLES && next_turtle_spawn < 0.f) {
-	//	// Reset timer
-	//	next_turtle_spawn = (TURTLE_DELAY_MS / 2) + uniform_dist(rng) * (TURTLE_DELAY_MS / 2);
-	//	// Create turtle
-	//	Entity entity = createTurtle(renderer, {0,0});
-	//	// Setting random initial position and constant velocity
-	//	Motion& motion = registry.motions.get(entity);
-	//	motion.position =
-	//		vec2(window_width_px + 100.f, // 2c: spawn outside of screen
-	//			 50.f + uniform_dist(rng) * (window_height_px - 100.f));
-	//	motion.velocity = vec2(-100.f, 0.f);
-	// }
+		auto& enemy_container = registry.mainWorldEnemies;
 
-	// Spawning new fish
-	// next_fish_spawn -= elapsed_ms_since_last_update * current_speed;
-	// if (registry.mainWorldEnemies.components.size() <= MAX_FISH && next_fish_spawn < 0.f) {
-	// 	// !!!  TODO A1: Create new fish with createFish({0,0}), as for the Turtles above
+		for (int i = (int)enemy_container.components.size() - 1; i >= 0; --i)
+		{	
+			Enemy& enemy_motion = enemy_container.components[i];
 
-	// 	//2c
-	// 	// Reset timer
-	// 	next_fish_spawn = (FISH_DELAY_MS / 2) + uniform_dist(rng) * (FISH_DELAY_MS / 2);
-	// 	// Create fish
-	// 	Entity entity = createFish(renderer, { 0,0 });
-	// 	// Setting random initial position and constant velocity
-	// 	Motion& motion = registry.motions.get(entity);
-	// 	motion.position =
-	// 		vec2(window_width_px + 100.f, // 2c: spawn outside of screen
-	// 			50.f + uniform_dist(rng) * (window_height_px - 100.f));
-	// 	motion.velocity = vec2(-200.f, 0.f);
-	// }
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: HANDLE PEBBLE SPAWN HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			// Create PEBBLE
+			Entity entity = createPebble({ 0,0 }, { 0,0 }); //intialized below
+			// A2 2b: Setting random initial direction, velocity, size
+			Motion& motion = registry.motions.get(entity);
+			motion.position = enemy_motion.roomPositon;
+
+			float radius = 30; //* (uniform_dist(rng) + 0.3f);
+			motion.scale = { radius, radius };
+			motion.angle = 0; // Do we have to set angle? Just use velocity?
+
+			//motion.velocity = vec2(200.f + uniform_dist(rng)*200, 100.f - uniform_dist(rng)*200);
+			float angle = 0; // registry.motions.get(room.enemies[i]).angle;
+			vec2 velocity = vec2(200.f + uniform_dist(rng) * 200, 100.f - uniform_dist(rng) * 200);
+			motion.velocity.x = velocity.x * cos(angle) + velocity.y * sin(angle);
+			motion.velocity.y = velocity.x * sin(angle) + velocity.y * cos(angle);
+
+			registry.colors.insert(entity, { 1, 0, 0 });
+		}
+	}
 
 	// handling entering combat state
 	float min_timer_ms = 3000.f;

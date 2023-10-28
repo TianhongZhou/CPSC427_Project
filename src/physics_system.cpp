@@ -14,7 +14,7 @@ vec2 get_bounding_box(const Motion& motion)
 // surely implement a more accurate detection
 bool collides(const Motion& motion1, const Motion& motion2)
 {
-	vec2 dp = motion1.position - motion2.position;
+	/*vec2 dp = motion1.position - motion2.position;
 	float dist_squared = dot(dp, dp);
 	const vec2 other_bonding_box = get_bounding_box(motion1) / 2.f;
 	const float other_r_squared = dot(other_bonding_box, other_bonding_box);
@@ -23,7 +23,12 @@ bool collides(const Motion& motion1, const Motion& motion2)
 	const float r_squared = max(other_r_squared, my_r_squared);
 	if (dist_squared < r_squared)
 		return true;
-	return false;
+	return false;*/
+
+	vec2 dp = motion1.position - motion2.position;
+	float dist = length(dp);
+	float radius_sum = (abs(motion1.scale.x) + abs(motion2.scale.x)) / 2.f;
+	return dist <= radius_sum;
 }
 
 
@@ -576,29 +581,36 @@ void PhysicsSystem::step_world(float elapsed_ms)
 
 
 
-		// Bounce of side walls
+		//// Bounce of side walls
 
-		if (motion.position.x < 0) {
-			vec2 curr_v = motion.velocity;
-			motion.position.x = 20;
-			motion.velocity = vec2(-curr_v.x, curr_v.y);
-		}
-		if (motion.position.y < 0) {
-			vec2 curr_v = motion.velocity;
-			motion.position.y = 20;
-			motion.velocity = vec2(curr_v.x, -curr_v.y);
-		}
-		if (motion.position.x > window_width_px) {
-			vec2 curr_v = motion.velocity;
-			motion.position.x = window_width_px - 20;
-			motion.velocity = vec2(-curr_v.x, curr_v.y);
-		}
-		if (motion.position.y > window_height_px) {
-			vec2 curr_v = motion.velocity;
-			motion.position.y = window_height_px - 20;
-			motion.velocity = vec2(curr_v.x, -curr_v.y);
-		}
+		//if (motion.position.x < 0) {
+		//	vec2 curr_v = motion.velocity;
+		//	motion.position.x = 20;
+		//	motion.velocity = vec2(-curr_v.x, curr_v.y);
+		//}
+		//if (motion.position.y < 0) {
+		//	vec2 curr_v = motion.velocity;
+		//	motion.position.y = 20;
+		//	motion.velocity = vec2(curr_v.x, -curr_v.y);
+		//}
+		//if (motion.position.x > window_width_px) {
+		//	vec2 curr_v = motion.velocity;
+		//	motion.position.x = window_width_px - 20;
+		//	motion.velocity = vec2(-curr_v.x, curr_v.y);
+		//}
+		//if (motion.position.y > window_height_px) {
+		//	vec2 curr_v = motion.velocity;
+		//	motion.position.y = window_height_px - 20;
+		//	motion.velocity = vec2(curr_v.x, -curr_v.y);
+		//}
+
+		//// Gravity
+		//if (registry.balls.has(motion_container.entities[i])) {
+		//	motion.velocity.y += step_seconds * 200;
+		//}
 	}
+
+
 
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// TODO A2: HANDLE PEBBLE UPDATES HERE
@@ -617,12 +629,42 @@ void PhysicsSystem::step_world(float elapsed_ms)
 			{
 				Motion& motion_j = motion_container.components[j];
 				if (collides(motion_i, motion_j))
-				{
+				{	
 					Entity entity_j = motion_container.entities[j];
-					// Create a collisions event
-					// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
-					registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-					registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+
+					//// ball vs player collision
+					//if (registry.balls.has(entity_i) && registry.players.has(entity_j) ||
+					//	registry.balls.has(entity_j) && registry.players.has(entity_i)) {
+
+					//	// Split them apart first
+					//	vec2 dp = motion_i.position - motion_j.position;
+					//	float dist = length(dp);
+					//	float radius_sum = (abs(motion_i.scale.x) + abs(motion_j.scale.x)) / 2.f;
+					//	float displacement = (radius_sum - dist) / 2.f + 0.00001;
+					//	motion_i.position += displacement * normalize(dp);
+					//	motion_j.position -= displacement * normalize(dp);
+
+					//	// Velocity Calculation
+					//	if (registry.balls.has(entity_i)) {
+					//		motion_i.velocity -= (2) * dot(
+					//			(motion_i.velocity - motion_j.velocity), (motion_i.position - motion_j.position)
+					//		) / length(motion_i.position - motion_j.position) / length(motion_i.position - motion_j.position)
+					//			* (motion_i.position - motion_j.position);
+					//	}
+					//	else {
+					//		motion_j.velocity -= (2) * dot(
+					//			(motion_j.velocity - motion_i.velocity), (motion_j.position - motion_i.position)
+					//		) / length(motion_j.position - motion_i.position) / length(motion_j.position - motion_i.position)
+					//			* (motion_j.position - motion_i.position);
+					//	}
+					//}
+
+					//else {
+						// Create a collisions event
+						// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
+						registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+						registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+					//}
 				}
 			}
 		}

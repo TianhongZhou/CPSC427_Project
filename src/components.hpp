@@ -5,6 +5,21 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
+struct Ball
+{
+
+};
+
+struct PlayerBullet
+{
+
+};
+
+struct EnemyBullet
+{
+
+};
+
 // Player component
 struct Player
 {
@@ -31,6 +46,7 @@ struct Enemy
 	float haltTimer = 0.3f;
 	vec2 roomPositon;
 	float roomScale;
+	vec2 curr_position = { 0,0 };
 };
 
 // A timer that will highlight a room enemy

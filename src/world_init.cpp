@@ -357,6 +357,9 @@ Entity createPebble(vec2 pos, vec2 size)
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.rooms.emplace(entity);
+
+	registry.balls.emplace(entity);
+
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
