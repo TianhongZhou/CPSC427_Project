@@ -286,6 +286,8 @@ bool detectAndResloveCollision(physObj* a, physObj* b) {
 
 	collisionResponse(event, a->moveable, a->knockbackCoef);
 
+	// detect enemy collision here?
+
 
 	return true;
 

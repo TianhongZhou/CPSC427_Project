@@ -252,19 +252,38 @@ void WorldSystem::init_combat()
 	Entity player_ball = createBall(renderer, {400, 400});
 	// createNewRectangleTiedToEntity(player_ball, 12.f, 12.f, registry.motions.get(player_ball).position);
 
-	Entity rectangle2 = createPolygonByVertex(renderer, {{220, 450}, {220, 320}, {300, 320}, {300, 450}}, GEOMETRY_BUFFER_ID::OCT);
+	//wall
+	Entity leftwall = createPolygonByVertex(renderer, {{220, 699}, {220, 1}, {240, 1}, {240, 699}}, GEOMETRY_BUFFER_ID::OCT);
+	createNewRectangleTiedToEntity(leftwall, 20.f, 698.f, registry.motions.get(leftwall).position, false, 1.0);
 
-	createNewRectangleTiedToEntity(rectangle2, 80.f, 130.f, registry.motions.get(rectangle2).position, false, 1.0);
+	Entity rightwall = createPolygonByVertex(renderer, { {820, 699}, {820, 1}, {840, 1}, {840, 699} }, GEOMETRY_BUFFER_ID::OCT);
+	createNewRectangleTiedToEntity(rightwall, 20.f, 698.f, registry.motions.get(rightwall).position, false, 1.0);
 
 
+	//ball
+	Entity squareball = createPolygonByVertex(renderer, { {500, 270}, {500, 220}, {550, 220}, {550, 270} }, GEOMETRY_BUFFER_ID::OCT);
+	createNewRectangleTiedToEntity(squareball, 50.f, 50.f, registry.motions.get(squareball).position, true, 1.0);
 
-	Entity rectangle3 = createPolygonByVertex(renderer, { {220, 250}, {220, 120}, {300, 120}, {300, 250} }, GEOMETRY_BUFFER_ID::OCT);
 
-	createNewRectangleTiedToEntity(rectangle3, 80.f, 130.f, registry.motions.get(rectangle3).position, true, 1.0);
+	//slide
+	Entity leftslide = createPolygonByVertex(renderer, { {220, 700}, {220, 680}, {400, 680}, {400, 700} }, GEOMETRY_BUFFER_ID::RECT);
+	createNewRectangleTiedToEntity(leftslide, 180.f, 20.f, registry.motions.get(leftslide).position, false, 1.0);
 
-	Entity flipper = createPolygonByVertex(renderer, {{300, 600}, {300, 580}, {400, 580}, {400, 600}}, GEOMETRY_BUFFER_ID::RECT);
+	Entity rightslide = createPolygonByVertex(renderer, { {660, 700}, {660, 680}, {840, 680}, {840, 700} }, GEOMETRY_BUFFER_ID::RECT);
+	createNewRectangleTiedToEntity(rightslide, 180.f, 20.f, registry.motions.get(rightslide).position, false, 1.0);
 
-	createNewRectangleTiedToEntity(flipper, 100.f, 20.f, registry.motions.get(flipper).position, true,0.2);
+
+	//flipper
+	Entity flipper = createPolygonByVertex(renderer, {{480, 600}, {480, 580}, {580, 580}, {580, 600}}, GEOMETRY_BUFFER_ID::RECT);
+	createNewRectangleTiedToEntity(flipper, 100.f, 20.f, registry.motions.get(flipper).position, true, 0.0);
+
+
+	//enemy
+	Entity enemyobj = createPolygonByVertex(renderer, { {500, 170}, {500, 120}, {580, 120}, {580, 170} }, GEOMETRY_BUFFER_ID::OCT);
+	createNewRectangleTiedToEntity(enemyobj, 80.f, 50.f, registry.motions.get(enemyobj).position, false, 1.0);
+	registry.pinballEnemies.emplace(enemyobj);
+
+
 
 	playerFlipper pf;
 	registry.playerFlippers.insert(flipper, pf);

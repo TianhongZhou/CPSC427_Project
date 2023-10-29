@@ -12,6 +12,8 @@ class ECSRegistry
 public:
 	// Manually created list of all components this game has
 	// TODO: A1 add a LightUp component
+	ComponentContainer<PinballEnemy> pinballEnemies;
+
     ComponentContainer<EnterCombatTimer> enterCombatTimer;
     ComponentContainer<Combat> combat;
 	ComponentContainer<DeathTimer> deathTimers;
@@ -36,6 +38,8 @@ public:
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
 	{
+		registry_list.push_back(&pinballEnemies);
+
         registry_list.push_back(&combat);
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);

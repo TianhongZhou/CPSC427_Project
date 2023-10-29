@@ -33,6 +33,12 @@ struct Enemy
 	float roomScale;
 };
 
+// Pinball enemy
+struct PinballEnemy
+{
+
+};
+
 // A timer that will highlight a room enemy
 struct HighLightEnemy
 {
