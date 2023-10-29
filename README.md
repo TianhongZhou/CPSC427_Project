@@ -9,7 +9,9 @@
 - ### Working basic 2D transformations:
     - drawTexturedMesh in render_system.cpp
 - ### Key-frame/state interpolation (smooth movement from point A to point B in Cartesian or angle space)
-    - step and step_world in physics_system.cpp
+    - struct PositionKeyFrame in components.hpp
+    - positionKeyFrames in tiny_ecs_registry.hpp
+    - step_world in ai_system.cpp
 - ### Keyboard/mouse control of at least one character sprite. This can include changes in the set of rendered objects, object geometry, position, orientation, textures, colors, and other attributes
     - on_key and on_mouse_click in world_system.cpp
 - ### Randomized or hard-coded action of one or more characters/assets
