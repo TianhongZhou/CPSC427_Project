@@ -35,7 +35,9 @@ void AISystem::step_world(float elapsed_ms)
 			if (enemy.seePlayer)
 			{
 				// Enemy chasing player
-				enemyMotion.angle = angleToPlayer;
+				// enemyMotion.angle = angleToPlayer;
+				enemyMotion.velocity.x = 100.f* cos(angleToPlayer);
+				enemyMotion.velocity.y = 100.f* sin(angleToPlayer);
 			}
 			else
 			{
@@ -74,27 +76,27 @@ void AISystem::step_world(float elapsed_ms)
 					// Turn to another direction if near the boundary
 					float xDiff = enemy.roomPositon.x - enemyMotion.position.x;
 					float yDiff = enemy.roomPositon.y - enemyMotion.position.y;
-					if (xDiff > enemy.roomScale * 0.4) {
-						enemyMotion.angle = 0;
+					if (xDiff > enemy.roomScale * 0.4 ) {
+						enemyMotion.velocity.x = abs(enemyMotion.velocity.x);
 					}
 					else if (-xDiff > enemy.roomScale * 0.4) {
-						enemyMotion.angle = M_PI;
+						enemyMotion.velocity.x = -abs(enemyMotion.velocity.x);
 					}
 					if (yDiff > enemy.roomScale * 0.4) {
-						enemyMotion.angle = M_PI / 2;
+						enemyMotion.velocity.y = abs(enemyMotion.velocity.y);
 					}
 					else if (-yDiff > enemy.roomScale * 0.4) {
-						enemyMotion.angle = -M_PI / 2;
+						enemyMotion.velocity.y = -abs(enemyMotion.velocity.y);
 					}
 					// Randomly move in room
 					if (enemy.randomMoveTimer <= 0.0f)
 					{
 						if (enemy.haltTimer <= 0.0f)
 						{
-							enemyMotion.velocity.x = 50.f;
 							float ran = (float)(rand() % 4 - 1);
 							float randomAngle = ran * M_PI / 2;
-							enemyMotion.angle = randomAngle;
+							enemyMotion.velocity.x = 50.f*cos(randomAngle);
+							enemyMotion.velocity.y = 50.f*sin(randomAngle);
 							enemy.randomMoveTimer = 3.f + rand() % 3;
 							enemy.haltTimer = 0.3f;
 						}

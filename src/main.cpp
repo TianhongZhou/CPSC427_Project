@@ -54,10 +54,10 @@ int main()
 		t = now;
 
         if (GameSceneState == 0 && !tutorial_open) {
-			world_system.step_world(elapsed_ms);
-			ai_system.step_world(elapsed_ms);
-			physics_system.step_world(elapsed_ms);
 			world_system.handle_collisions_world();
+			physics_system.step_world(elapsed_ms);
+			ai_system.step_world(elapsed_ms);
+			world_system.step_world(elapsed_ms);
 		}
 		else if (GameSceneState == 1) {
 
