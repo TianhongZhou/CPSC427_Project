@@ -177,17 +177,17 @@ void RenderSystem::drawShadow(Entity entity, const mat3 &projection, const float
 
     vec2 texture_size = vec2((int) width, (int) height);
 
-	Transform transform;
-	transform.translate(motion.position);
-	transform.translate(vec2(-10, height / 2.0f + 20));
-	transform.rotate(angleRadians);
-	texture_size = vec2(1.0f, 3.0f) * texture_size;
-	//texture_size = scale * texture_size;
-	//transform.translate(vec2(20, -texture_size.y+20));
-	transform.scale(motion.scale);
-	transform.scale(vec2(1.0f, 3.0f));
-	transform.scale(scale);
-	transform.translate(render_request.textureOffset);
+    Transform transform;
+    transform.translate(motion.position);
+    transform.translate(vec2(-10, height / 2.0f + 20));
+    transform.rotate(angleRadians);
+    texture_size = vec2(1.0f, 3.0f) * texture_size;
+    //texture_size = scale * texture_size;
+    //transform.translate(vec2(20, -texture_size.y+20));
+    transform.scale(motion.scale);
+    transform.scale(vec2(1.0f, 3.0f));
+    transform.scale(scale);
+    transform.translate(render_request.textureOffset);
 
     const GLuint used_effect_enum = (GLuint) render_request.used_effect;
     assert(used_effect_enum != (GLuint) EFFECT_ASSET_ID::EFFECT_COUNT);
@@ -385,14 +385,6 @@ mat3 RenderSystem::createProjectionMatrix() {
             {tx,  ty,  1.f}};
 }
 
-void drawCombatMesh() {
-
-}
-
-void drawWorldMesh() {
-
-}
-
 // Render our game world
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
 void RenderSystem::draw_world(bool &tutorial_open) {
@@ -417,7 +409,8 @@ void RenderSystem::draw_world(bool &tutorial_open) {
 
     // Getting size of window
     int w, h;
-    glfwGetFramebufferSize(window, &w,&h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
+    glfwGetFramebufferSize(window, &w,
+                           &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
 
     // First render to the custom framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
@@ -437,39 +430,88 @@ void RenderSystem::draw_world(bool &tutorial_open) {
 
     std::vector<Light> lights = {};
 
-    for (Entity entity: registry.lights.entities) {
-        if (!registry.lights.has(entity)) {
-            continue;
-        }
+    if (GameSceneState == 0) {
 
-        RenderRequest &renderRequest = registry.renderRequests.get(entity);
-        Motion &motion = registry.motions.get(entity);
-        Light &light = registry.lights.get(entity);
-        if ((renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYER) ||
-            (renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET) ||
-            (renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET)) {
-            light.screenPosition = vec2(motion.position.x / w, (h - motion.position.y) / h);
-            light.haloRadius = 0.2f;
-            light.lightColor = vec3(1.0f, 1.0f, 1.0f);
-            light.haloSoftness = 0.05f;
-            light.priority = 2;
+        for (Entity entity: registry.lights.entities) {
+            if (!registry.lights.has(entity)) {
+                continue;
+            }
+
+            RenderRequest &renderRequest = registry.renderRequests.get(entity);
+            Motion &motion = registry.motions.get(entity);
+            Light &light = registry.lights.get(entity);
+            if ((renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYER) ||
+                (renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET) ||
+                (renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET)) {
+                light.screenPosition = vec2(motion.position.x / w, (h - motion.position.y) / h);
+                light.haloRadius = 0.2f;
+                light.lightColor = vec3(1.0f, 1.0f, 1.0f);
+                light.haloSoftness = 0.05f;
+                light.priority = 2;
+            }
+            lights.push_back(light);
         }
-        lights.push_back(light);
     }
 
     mat3 projection_2D = createProjectionMatrix();
 
-	// Draw all textured meshes that have a position and size component
-	for (Entity entity : registry.renderRequests.entities)
-	{
-		RenderRequest& renderRequest = registry.renderRequests.get(entity);
-		if (renderRequest.used_texture != TEXTURE_ASSET_ID::GROUND)
-		{
-			continue;
-		}
+    // Draw all textured meshes that have a position and size component
+    for (Entity entity: registry.renderRequests.entities) {
+        RenderRequest &renderRequest = registry.renderRequests.get(entity);
+        if (renderRequest.used_texture != TEXTURE_ASSET_ID::GROUND) {
+            continue;
+        }
+        drawTexturedMesh(entity, projection_2D);
+    }
 
-		drawTexturedMesh(entity, projection_2D);
-	}
+
+    // Draw all textured meshes that have a position and size component
+    for (Entity entity: registry.renderRequests.entities) {
+        if (!registry.motions.has(entity))
+            continue;
+
+        if (registry.combat.has(entity)) {
+            continue;
+        }
+
+        RenderRequest &renderRequest = registry.renderRequests.get(entity);
+        if (renderRequest.used_texture == TEXTURE_ASSET_ID::SHADOW) {
+            continue;
+        }
+        if (renderRequest.used_texture == TEXTURE_ASSET_ID::GROUND) {
+            continue;
+        }
+
+        Motion &motion = registry.motions.get(entity);
+
+        for (Light light: lights) {
+            glm::vec2 lightPosition = light.screenPosition;
+            glm::vec2 entityPosition = vec2(motion.position.x / w, (h - motion.position.y) / h);
+
+            if (entityPosition == lightPosition) {
+                continue;
+            }
+            if (glm::length(entityPosition - lightPosition) >= (light.haloRadius + light.haloSoftness)) {
+                continue;
+            }
+
+            float dy = entityPosition.y - lightPosition.y;
+            float dx = entityPosition.x - lightPosition.x;
+            float angle = atan2(dy, dx);
+
+            vec2 scale = vec2(1.0f,
+                              glm::length(entityPosition - lightPosition) /
+                              (light.haloRadius + light.haloSoftness));
+
+            //if (scale.y < 0.31)
+            //{
+            //	scale.y = 0.31;
+            //}
+            drawShadow(entity, projection_2D, M_PI / 2 - angle, scale);
+        }
+
+//        drawTexturedMesh(entity, projection_2D);
+    }
 
     // Draw all textured meshes that have a position and size component
     for (Entity entity: registry.renderRequests.entities) {
@@ -484,47 +526,9 @@ void RenderSystem::draw_world(bool &tutorial_open) {
             continue;
         }
 
-
-        if (GameSceneState == 0) {
-
-            RenderRequest &renderRequest = registry.renderRequests.get(entity);
-            if (renderRequest.used_texture == TEXTURE_ASSET_ID::SHADOW) {
-                continue;
-            }
-		RenderRequest& renderRequest = registry.renderRequests.get(entity);
-		if (renderRequest.used_texture == TEXTURE_ASSET_ID::GROUND)
-		{
-			continue;
-		}
-
-            Motion &motion = registry.motions.get(entity);
-
-		for (Light light : lights)
-		{
-			glm::vec2 lightPosition = light.screenPosition;
-			glm::vec2 entityPosition = vec2(motion.position.x / w, (h - motion.position.y) / h);
-
-                if (entityPosition == lightPosition) {
-                    continue;
-                }
-                if (glm::length(entityPosition - lightPosition) >= (light.haloRadius + light.haloSoftness)) {
-                    continue;
-                }
-
-                float dy = entityPosition.y - lightPosition.y;
-                float dx = entityPosition.x - lightPosition.x;
-                float angle = atan2(dy, dx);
-
-                vec2 scale = vec2(1.0f,
-                                  glm::length(entityPosition - lightPosition) /
-                                  (light.haloRadius + light.haloSoftness));
-
-                //if (scale.y < 0.31)
-                //{
-                //	scale.y = 0.31;
-                //}
-                drawShadow(entity, projection_2D, M_PI / 2 - angle, scale);
-            }
+        RenderRequest &renderRequest = registry.renderRequests.get(entity);
+        if (renderRequest.used_texture == TEXTURE_ASSET_ID::GROUND) {
+            continue;
         }
 
         drawTexturedMesh(entity, projection_2D);
