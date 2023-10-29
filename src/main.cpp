@@ -59,7 +59,7 @@ int main()
 			physics_system.step_world(elapsed_ms);
 			world_system.handle_collisions_world();
 		}
-		else if (GameSceneState == 1 && !tutorial_open) {
+		else if (GameSceneState == 1) {
 
 			if (InitCombat) {
 				world_system.init_combat();
@@ -69,9 +69,13 @@ int main()
 			world_system.step(elapsed_ms);
 			physics_system.step(elapsed_ms);
 			world_system.handle_collisions();
+            render_system.draw_combat_scene();
 		}
 
-        render_system.draw_world(tutorial_open);
+        if (GameSceneState == 0) {
+            render_system.draw_world(tutorial_open);
+        }
+
     }
 
 //    ImGui_ImplOpenGL3_Shutdown();

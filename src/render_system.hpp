@@ -89,6 +89,7 @@ public:
 
 	// Draw all entities
 	void draw_world(bool &tutorial_open);
+    void draw_combat_scene();
 
     mat3 createProjectionMatrix();
 
@@ -110,6 +111,7 @@ private:
 	Entity screen_state_entity;
 
     void init_ImGui(GLFWwindow *window_arg) const;
+
 };
 
 bool loadEffectFromFile(
