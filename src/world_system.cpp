@@ -279,8 +279,8 @@ void WorldSystem::init_combat()
 
 
 	//enemy
-	Entity enemyobj = createPolygonByVertex(renderer, { {500, 170}, {500, 120}, {580, 120}, {580, 170} }, GEOMETRY_BUFFER_ID::OCT);
-	createNewRectangleTiedToEntity(enemyobj, 80.f, 50.f, registry.motions.get(enemyobj).position, false, 1.0);
+	Entity enemyobj = createPolygonByVertex(renderer, { {460, 170}, {460, 120}, {580, 120}, {580, 170} }, GEOMETRY_BUFFER_ID::OCT);
+	createNewRectangleTiedToEntity(enemyobj, 120.f, 50.f, registry.motions.get(enemyobj).position, false, 1.0);
 	registry.pinballEnemies.emplace(enemyobj);
 
 
