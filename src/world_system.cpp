@@ -356,15 +356,15 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		motion.velocity.x = 0.f;
 	}
 
-	if (action == GLFW_RELEASE && GameSceneState == 0)
+	if (action == GLFW_RELEASE)
 	{
 		if ((key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) && !conflictUpAndDown)
 		{
-			if (pressedKeys.count(GLFW_KEY_UP))
+			if (pressedKeys.count(GLFW_KEY_UP) && GameSceneState == 0)
 			{
 				motion.velocity.y = -200.f;
 			}
-			else if (pressedKeys.count(GLFW_KEY_DOWN))
+			else if (pressedKeys.count(GLFW_KEY_DOWN) && GameSceneState == 0)
 			{
 				motion.velocity.y = 200.f;
 			}
@@ -376,11 +376,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 		if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) && !conflictLeftAndRight)
 		{
-			if (pressedKeys.count(GLFW_KEY_LEFT))
+			if (pressedKeys.count(GLFW_KEY_LEFT) && GameSceneState == 0)
 			{
 				motion.velocity.x = -200.f;
 			}
-			else if (pressedKeys.count(GLFW_KEY_RIGHT))
+			else if (pressedKeys.count(GLFW_KEY_RIGHT) && GameSceneState == 0)
 			{
 				motion.velocity.x = 200.f;
 			}
