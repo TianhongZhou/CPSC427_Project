@@ -385,6 +385,14 @@ mat3 RenderSystem::createProjectionMatrix() {
             {tx,  ty,  1.f}};
 }
 
+void drawCombatMesh() {
+
+}
+
+void drawWorldMesh() {
+
+}
+
 // Render our game world
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
 void RenderSystem::draw_world(bool &tutorial_open) {
@@ -409,8 +417,7 @@ void RenderSystem::draw_world(bool &tutorial_open) {
 
     // Getting size of window
     int w, h;
-    glfwGetFramebufferSize(window, &w,
-                           &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
+    glfwGetFramebufferSize(window, &w,&h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
 
     // First render to the custom framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
