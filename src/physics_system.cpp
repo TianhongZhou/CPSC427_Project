@@ -532,22 +532,22 @@ void PhysicsSystem::step(float elapsed_ms)
 
 	updateWithSubstep(elapsed_ms, 4.0f);
 
-	auto& motion_container = registry.motions;
-	for (uint i = 0; i < motion_container.size(); i++)
-	{
-		Motion& motion = motion_container.components[i];
-		Entity entity = motion_container.entities[i];
-		float step_seconds = elapsed_ms / 1000.f;
-		Transform transform;
-		transform.rotate(motion.angle);
-		vec3 velocity = { motion.velocity.x, motion.velocity.y, 1.f };
-		vec3 result = transform.mat * velocity;
-		float x_velocity = result.x;
-		float y_velocity = result.y;
-		float x_position = motion.position.x + (x_velocity * step_seconds);
-		float y_position = motion.position.y + (y_velocity * step_seconds);
-		motion.position = { x_position, y_position };
-	}
+	//auto& motion_container = registry.motions;
+	//for (uint i = 0; i < motion_container.size(); i++)
+	//{
+	//	Motion& motion = motion_container.components[i];
+	//	Entity entity = motion_container.entities[i];
+	//	float step_seconds = elapsed_ms / 1000.f;
+	//	Transform transform;
+	//	transform.rotate(motion.angle);
+	//	vec3 velocity = { motion.velocity.x, motion.velocity.y, 1.f };
+	//	vec3 result = transform.mat * velocity;
+	//	float x_velocity = result.x;
+	//	float y_velocity = result.y;
+	//	float x_position = motion.position.x + (x_velocity * step_seconds);
+	//	float y_position = motion.position.y + (y_velocity * step_seconds);
+	//	motion.position = { x_position, y_position };
+	//}
 
 }
 

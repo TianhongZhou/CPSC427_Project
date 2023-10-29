@@ -28,7 +28,7 @@ Entity createRoad(RenderSystem* renderer, vec2 pos);
 // the player
 Entity createPlayer(RenderSystem* renderer, vec2 pos);
 // the room enemy
-Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPosition, float roomScale);
+Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPosition, float roomScale, bool keyFrame);
 // the player
 Entity createSalmon(RenderSystem* renderer, vec2 pos);
 // the prey

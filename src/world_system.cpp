@@ -256,12 +256,6 @@ void WorldSystem::init_combat()
 
 	createNewRectangleTiedToEntity(rectangle2, 80.f, 130.f, registry.motions.get(rectangle2).position, false, 1.0);
 
-
-
-	Entity rectangle3 = createPolygonByVertex(renderer, { {220, 250}, {220, 120}, {300, 120}, {300, 250} }, GEOMETRY_BUFFER_ID::OCT);
-
-	createNewRectangleTiedToEntity(rectangle3, 80.f, 130.f, registry.motions.get(rectangle3).position, true, 1.0);
-
 	Entity flipper = createPolygonByVertex(renderer, {{300, 600}, {300, 580}, {400, 580}, {400, 600}}, GEOMETRY_BUFFER_ID::RECT);
 
 	createNewRectangleTiedToEntity(flipper, 100.f, 20.f, registry.motions.get(flipper).position, true,0.2);
@@ -344,12 +338,12 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	}
 
 	Motion &motion = registry.motions.get(player);
-	bool inCombat = registry.enterCombatTimer.has(player);
+	bool inCombat = GameSceneState || registry.enterCombatTimer.has(player);;
 
 	bool conflictUpAndDown = pressedKeys.count(GLFW_KEY_UP) && pressedKeys.count(GLFW_KEY_DOWN);
 	bool conflictLeftAndRight = pressedKeys.count(GLFW_KEY_LEFT) && pressedKeys.count(GLFW_KEY_RIGHT);
 
-	if (!conflictUpAndDown && (key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) && (action == GLFW_PRESS || action == GLFW_REPEAT) && !inCombat)
+	if (!conflictUpAndDown && (key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) && (action == GLFW_PRESS || action == GLFW_REPEAT) && GameSceneState == 0)
 	{
 		motion.velocity.y = (key == GLFW_KEY_UP) ? -200.f : 200.f;
 	}
@@ -358,7 +352,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		motion.velocity.y = 0.f;
 	}
 
-	if (!conflictLeftAndRight && (key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) && (action == GLFW_PRESS || action == GLFW_REPEAT) && !inCombat)
+	if (!conflictLeftAndRight && (key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) && (action == GLFW_PRESS || action == GLFW_REPEAT) && GameSceneState == 0)
 	{
 		motion.velocity.x = (key == GLFW_KEY_LEFT) ? -200.f : 200.f;
 	}
@@ -367,7 +361,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		motion.velocity.x = 0.f;
 	}
 
-	if (action == GLFW_RELEASE)
+	if (action == GLFW_RELEASE && GameSceneState == 0)
 	{
 		if ((key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) && !conflictUpAndDown)
 		{
@@ -532,6 +526,8 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 
 	if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT && GameSceneState == 0)
 	{
+		Mix_PlayChannel(-1, player_attack_sound, 0);
+
 		bool temp = false;
 		if (registry.spriteSheets.has(player))
 		{
@@ -544,7 +540,7 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 		}
 		SpriteSheet &spriteSheet = registry.spriteSheets.emplace_with_duplicates(player);
 		spriteSheet.next_sprite = TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET;
-		spriteSheet.frameIncrement = 0.06f;
+		spriteSheet.frameIncrement = 0.08f;
 		spriteSheet.frameAccumulator = 0.0f;
 		spriteSheet.spriteSheetHeight = 1;
 		spriteSheet.spriteSheetWidth = 6;
@@ -554,7 +550,6 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 		RenderRequest &renderRequest = registry.renderRequests.get(player);
 		renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET;
 
-		Mix_PlayChannel(-1, player_attack_sound, 0);
 	}
 }
 

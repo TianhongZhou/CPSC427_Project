@@ -31,6 +31,7 @@ struct Enemy
 	float haltTimer = 0.3f;
 	vec2 roomPositon;
 	float roomScale;
+	bool keyFrame;
 };
 
 // A timer that will highlight a room enemy
@@ -174,6 +175,11 @@ struct Light {
 	int priority;
 };
 
+struct PositionKeyFrame {
+	std::vector<vec3> keyFrames;
+	float timeIncrement;
+	float timeAccumulator;
+};
 
 
 
@@ -249,6 +255,7 @@ struct RenderRequest {
 	TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
+	vec2 textureOffset = vec2(0.0, 0.0);
 };
 
 struct SpriteSheet {
