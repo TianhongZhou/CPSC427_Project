@@ -30,6 +30,19 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ext/project_path.hpp.in" "${CMAKE_CU
 # You can switch to use the file GLOB for simplicity but at your own risk
 file(GLOB SOURCE_FILES src/*.cpp src/*.hpp)
 
+set(IMGUI_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/imgui)
+set(IMGUI_BACKENDS_DIR ${IMGUI_SOURCE_DIR}/backends)
+
+set(IMGUI_SOURCES
+        ${IMGUI_SOURCE_DIR}/imgui_demo.cpp
+        ${IMGUI_SOURCE_DIR}/imgui_draw.cpp
+        ${IMGUI_SOURCE_DIR}/imgui_tables.cpp
+        ${IMGUI_SOURCE_DIR}/imgui.cpp
+        ${IMGUI_SOURCE_DIR}/imgui_widgets.cpp
+        ${IMGUI_BACKENDS_DIR}/imgui_impl_opengl3.cpp
+        ${IMGUI_BACKENDS_DIR}/imgui_impl_glfw.cpp
+)
+
 #set(SOURCE_FILES
 #	src/main.cpp
 #	src/common.cpp
@@ -58,7 +71,8 @@ if (IS_OS_MAC)
   link_directories(/usr/local/lib)
 endif()
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${IMGUI_SOURCES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${IMGUI_SOURCE_DIR} ${IMGUI_BACKENDS_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 
 # Added this so policy CMP0065 doesn't scream

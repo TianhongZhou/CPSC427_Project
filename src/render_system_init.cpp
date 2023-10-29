@@ -13,6 +13,11 @@
 #include <iostream>
 #include <sstream>
 
+// imgui
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 // World initialization
 bool RenderSystem::init(GLFWwindow* window_arg)
 {
@@ -20,8 +25,9 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1); // vsync
+    init_ImGui(window_arg);
 
-	// Load OpenGL function pointers
+    // Load OpenGL function pointers
 	const int is_fine = gl3w_init();
 	assert(is_fine == 0);
 
@@ -61,6 +67,20 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 	initializeGlGeometryBuffers();
 
 	return true;
+}
+
+void RenderSystem::init_ImGui(GLFWwindow *window_arg) const {// Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    (void)io;
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsLight();
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(window_arg, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
+    ImGui_ImplOpenGL3_Init();
 }
 
 void RenderSystem::initializeGlTextures()

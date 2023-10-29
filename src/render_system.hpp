@@ -88,10 +88,10 @@ public:
 	~RenderSystem();
 
 	// Draw all entities
-	void draw_combat_scene();
-	void draw_world();
+	void draw_world(bool &tutorial_open);
+    void draw_combat_scene();
 
-	mat3 createProjectionMatrix();
+    mat3 createProjectionMatrix();
 
 private:
 	// Internal drawing functions for each entity type
@@ -109,6 +109,9 @@ private:
 	GLuint off_screen_render_buffer_depth;
 
 	Entity screen_state_entity;
+
+    void init_ImGui(GLFWwindow *window_arg) const;
+
 };
 
 bool loadEffectFromFile(

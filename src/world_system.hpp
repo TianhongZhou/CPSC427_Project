@@ -51,8 +51,9 @@ public:
     // exit combat
     void exit_combat();
 
-	//set main world stuff out of sight
-	void main_world_out();
+    // removes world objects from the rendering list
+    void hide_world();
+
 
 private:
 	// Input callback functions
