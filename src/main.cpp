@@ -26,7 +26,7 @@ int main()
 	PhysicsSystem physics_system;
 	AISystem ai_system;
 
-	// Initializing window
+    // Initializing window
 	GLFWwindow* window = world_system.create_window();
 	if (!window) {
 		// Time to read the error message
@@ -37,7 +37,9 @@ int main()
 
 	// initialize the main systems
 	render_system.init(window);
-	world_system.init(&render_system);
+    world_system.init(&render_system);
+
+    bool tutorial_open = true;
 
 	// variable timestep loop
 	auto t = Clock::now();
@@ -51,12 +53,11 @@ int main()
 			(float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000;
 		t = now;
 
-		if (GameSceneState == 0) {
-			world_system.handle_collisions_world();
+        if (GameSceneState == 0 && !tutorial_open) {
 			world_system.step_world(elapsed_ms);
 			ai_system.step_world(elapsed_ms);
 			physics_system.step_world(elapsed_ms);
-			render_system.draw_world();
+			world_system.handle_collisions_world();
 		}
 		else if (GameSceneState == 1) {
 
@@ -70,7 +71,16 @@ int main()
 			world_system.handle_collisions();
             render_system.draw_combat_scene();
 		}
-	}
+
+        if (GameSceneState == 0) {
+            render_system.draw_world(tutorial_open);
+        }
+
+    }
+
+//    ImGui_ImplOpenGL3_Shutdown();
+//    ImGui_ImplGlfw_Shutdown();
+//    ImGui::DestroyContext();
 
 	return EXIT_SUCCESS;
 }

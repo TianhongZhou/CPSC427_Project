@@ -28,7 +28,7 @@ Entity createRoad(RenderSystem* renderer, vec2 pos);
 // the player
 Entity createPlayer(RenderSystem* renderer, vec2 pos);
 // the room enemy
-Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPosition, float roomScale);
+Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPosition, float roomScale, bool keyFrame);
 // the player
 Entity createSalmon(RenderSystem* renderer, vec2 pos);
 // the prey
@@ -40,6 +40,6 @@ Entity createLine(vec2 position, vec2 size);
 // a pebble
 Entity createPebble(vec2 pos, vec2 size);
 
-void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos);
+void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos, bool moveable, float knockbackCoef);
 
 
