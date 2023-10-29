@@ -580,43 +580,6 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 		}
 	}
 
-	//// Spawning new turtles
-	// next_turtle_spawn -= elapsed_ms_since_last_update * current_speed;
-	// if (registry.rooms.components.size() <= MAX_TURTLES && next_turtle_spawn < 0.f) {
-	//	// Reset timer
-	//	next_turtle_spawn = (TURTLE_DELAY_MS / 2) + uniform_dist(rng) * (TURTLE_DELAY_MS / 2);
-	//	// Create turtle
-	//	Entity entity = createTurtle(renderer, {0,0});
-	//	// Setting random initial position and constant velocity
-	//	Motion& motion = registry.motions.get(entity);
-	//	motion.position =
-	//		vec2(window_width_px + 100.f, // 2c: spawn outside of screen
-	//			 50.f + uniform_dist(rng) * (window_height_px - 100.f));
-	//	motion.velocity = vec2(-100.f, 0.f);
-	// }
-
-	// Spawning new fish
-	// next_fish_spawn -= elapsed_ms_since_last_update * current_speed;
-	// if (registry.mainWorldEnemies.components.size() <= MAX_FISH && next_fish_spawn < 0.f) {
-	// 	// !!!  TODO A1: Create new fish with createFish({0,0}), as for the Turtles above
-
-	// 	//2c
-	// 	// Reset timer
-	// 	next_fish_spawn = (FISH_DELAY_MS / 2) + uniform_dist(rng) * (FISH_DELAY_MS / 2);
-	// 	// Create fish
-	// 	Entity entity = createFish(renderer, { 0,0 });
-	// 	// Setting random initial position and constant velocity
-	// 	Motion& motion = registry.motions.get(entity);
-	// 	motion.position =
-	// 		vec2(window_width_px + 100.f, // 2c: spawn outside of screen
-	// 			50.f + uniform_dist(rng) * (window_height_px - 100.f));
-	// 	motion.velocity = vec2(-200.f, 0.f);
-	// }
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: HANDLE PEBBLE SPAWN HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 	// handling entering combat state
 	float min_timer_ms = 3000.f;
 	for (Entity entity : registry.enterCombatTimer.entities)
