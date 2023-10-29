@@ -18,6 +18,10 @@ struct Combat
 };
 
 // Main world room
+// Entity is part of main world
+struct MainWorld{};
+
+// Turtles have a hard shell
 struct Room
 {
 	std::array<Entity,3> enemies;

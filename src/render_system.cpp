@@ -5,65 +5,69 @@
 #include "tiny_ecs_registry.hpp"
 #include "world_init.hpp"
 #include <glm/gtc/type_ptr.hpp>
+#include "world_system.hpp"
+
+// imgui
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 void RenderSystem::drawTexturedMesh(Entity entity,
-									const mat3 &projection)
-{
-	Motion &motion = registry.motions.get(entity);
-	// Transformation code, see Rendering and Transformation in the template
-	// specification for more info Incrementally updates transformation matrix,
-	// thus ORDER IS IMPORTANT
-	Transform transform;
-	transform.translate(motion.position);
-	transform.rotate(motion.angle);
-	transform.scale(motion.scale);
+                                    const mat3 &projection) {
+    Motion &motion = registry.motions.get(entity);
+    // Transformation code, see Rendering and Transformation in the template
+    // specification for more info Incrementally updates transformation matrix,
+    // thus ORDER IS IMPORTANT
+    Transform transform;
+    transform.translate(motion.position);
+    transform.rotate(motion.angle);
+    transform.scale(motion.scale);
 
-	assert(registry.renderRequests.has(entity));
-	const RenderRequest &render_request = registry.renderRequests.get(entity);
+    assert(registry.renderRequests.has(entity));
+    const RenderRequest &render_request = registry.renderRequests.get(entity);
 
-	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
-	assert(used_effect_enum != (GLuint)EFFECT_ASSET_ID::EFFECT_COUNT);
-	const GLuint program = (GLuint)effects[used_effect_enum];
+    const GLuint used_effect_enum = (GLuint) render_request.used_effect;
+    assert(used_effect_enum != (GLuint) EFFECT_ASSET_ID::EFFECT_COUNT);
+    const GLuint program = (GLuint) effects[used_effect_enum];
 
-	// Setting shaders
-	glUseProgram(program);
-	gl_has_errors();
+    // Setting shaders
+    glUseProgram(program);
+    gl_has_errors();
 
-	assert(render_request.used_geometry != GEOMETRY_BUFFER_ID::GEOMETRY_COUNT);
-	const GLuint vbo = vertex_buffers[(GLuint)render_request.used_geometry];
-	const GLuint ibo = index_buffers[(GLuint)render_request.used_geometry];
+    assert(render_request.used_geometry != GEOMETRY_BUFFER_ID::GEOMETRY_COUNT);
+    const GLuint vbo = vertex_buffers[(GLuint) render_request.used_geometry];
+    const GLuint ibo = index_buffers[(GLuint) render_request.used_geometry];
 
-	// Setting vertex and index buffers
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	gl_has_errors();
+    // Setting vertex and index buffers
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    gl_has_errors();
 
-	// Input data location as in the vertex buffer
-	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED)
-	{
-		GLint in_position_loc = glGetAttribLocation(program, "in_position");
-		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
-		gl_has_errors();
-		assert(in_texcoord_loc >= 0);
+    // Input data location as in the vertex buffer
+    if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED) {
+        GLint in_position_loc = glGetAttribLocation(program, "in_position");
+        GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
+        gl_has_errors();
+        assert(in_texcoord_loc >= 0);
 
-		glEnableVertexAttribArray(in_position_loc);
-		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(TexturedVertex), (void *)0);
-		gl_has_errors();
+        glEnableVertexAttribArray(in_position_loc);
+        glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+                              sizeof(TexturedVertex), (void *) 0);
+        gl_has_errors();
 
-		glEnableVertexAttribArray(in_texcoord_loc);
-		glVertexAttribPointer(
-			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
-			(void *)sizeof(
-				vec3)); // note the stride to skip the preceeding vertex position
+        glEnableVertexAttribArray(in_texcoord_loc);
+        glVertexAttribPointer(
+                in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+                (void *) sizeof(
+                        vec3)); // note the stride to skip the preceeding vertex position
 
-		// Enabling and binding texture to slot 0
-		glActiveTexture(GL_TEXTURE0);
-		gl_has_errors();
+        // Enabling and binding texture to slot 0
+        glActiveTexture(GL_TEXTURE0);
+        gl_has_errors();
 
-		assert(registry.renderRequests.has(entity));
-		GLuint texture_id =
-			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+        assert(registry.renderRequests.has(entity));
+        GLuint texture_id =
+                texture_gl_handles[(GLuint) registry.renderRequests.get(entity).used_texture];
 
 
         // enter combat?
@@ -371,48 +375,6 @@ void RenderSystem::drawToScreen()
 	gl_has_errors();
 }
 
-// Render combat world
-// http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
-void RenderSystem::draw_combat_scene()
-{
-	// Getting size of window
-	int w, h;
-	glfwGetFramebufferSize(window, &w, &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
-
-	// First render to the custom framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
-	gl_has_errors();
-	// Clearing backbuffer
-	glViewport(0, 0, w, h);
-	glDepthRange(0.00001, 10);
-	glClearColor(0.5, 0.5, 0.5, 1.0);
-	glClearDepth(10.f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_DEPTH_TEST); // native OpenGL does not work with a depth buffer
-							  // and alpha blending, one would have to sort
-							  // sprites back to front
-	gl_has_errors();
-	mat3 projection_2D = createProjectionMatrix();
-
-	// Draw all textured meshes that have a position and size component
-	for (Entity entity : registry.renderRequests.entities)
-	{
-		if (!registry.motions.has(entity) || !registry.combat.has(entity))
-			continue;
-		// Note, its not very efficient to access elements indirectly via the entity
-		// albeit iterating through all Sprites in sequence. A good point to optimize
-		drawTexturedMesh(entity, projection_2D);
-	}
-
-	// Truely render to the screen
-	drawToScreen();
-
-	// flicker-free display with a double buffer
-	glfwSwapBuffers(window);
-	gl_has_errors();
-}
 
 mat3 RenderSystem::createProjectionMatrix()
 {
@@ -431,21 +393,31 @@ mat3 RenderSystem::createProjectionMatrix()
 	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
 }
 
-
-
-
-
-// ================================= WORLD ==========================
-
-
-
 // Render our game world
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
-void RenderSystem::draw_world()
-{
-	// Getting size of window
-	int w, h;
-	glfwGetFramebufferSize(window, &w, &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
+void RenderSystem::draw_world(bool &tutorial_open) {
+
+    // Start the Dear ImGui frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    static bool p_open = tutorial_open;
+
+    if (p_open) {
+        ImGui::Begin("Tutorial", &p_open);
+        ImGui::TextWrapped("Put Tutorial instructions here!");
+        ImGui::End();
+    }
+
+    if (!p_open) {
+        tutorial_open = p_open;
+    }
+
+    // Getting size of window
+    int w, h;
+    glfwGetFramebufferSize(window, &w,
+                           &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
 
 	// First render to the custom framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
@@ -493,8 +465,16 @@ void RenderSystem::draw_world()
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
-		if (!registry.motions.has(entity) || registry.combat.has(entity))
+		if (!registry.motions.has(entity))
 			continue;
+
+        if (GameSceneState == 0 && registry.combat.has(entity)) {
+            continue;
+        }
+
+        if (GameSceneState == 1 && !registry.combat.has(entity)) {
+            continue;
+        }
 
 		RenderRequest& renderRequest = registry.renderRequests.get(entity);
 		if (renderRequest.used_texture == TEXTURE_ASSET_ID::SHADOW)
@@ -537,6 +517,7 @@ void RenderSystem::draw_world()
 	// Truely render to the screen
 	drawToScreen();
 
+
 	// Make the screen black
 	float quadVertices[] = {
 	   -1.0f,  1.0f,  0.0f, 1.0f,
@@ -572,9 +553,14 @@ void RenderSystem::draw_world()
 	glBindVertexArray(quadVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	// flicker-free display with a double buffer
-	glfwSwapBuffers(window);
-	gl_has_errors();
+    // Render ImGui
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    // flicker-free display with a double buffer
+    glfwSwapBuffers(window);
+    gl_has_errors();
+
 }
 
 

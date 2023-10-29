@@ -11,9 +11,9 @@ class ECSRegistry
 
 public:
 	// Manually created list of all components this game has
-	// TODO: A1 add a LightUp component
     ComponentContainer<EnterCombatTimer> enterCombatTimer;
     ComponentContainer<Combat> combat;
+    ComponentContainer<MainWorld> mainWorld;
 	ComponentContainer<DeathTimer> deathTimers;
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Collision> collisions;
@@ -37,7 +37,8 @@ public:
 	ECSRegistry()
 	{
         registry_list.push_back(&combat);
-		registry_list.push_back(&deathTimers);
+        registry_list.push_back(&mainWorld);
+        registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);
 		registry_list.push_back(&collisions);
 		registry_list.push_back(&players);

@@ -185,11 +185,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	//	motion.velocity = vec2(-100.f, 0.f);
 	//}
 
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: HANDLE PEBBLE SPAWN HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 	// Processing the salmon state
 	assert(registry.screenStates.components.size() <= 1);
 	ScreenState &screen = registry.screenStates.components[0];
@@ -506,16 +501,9 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	current_speed = fmax(0.f, current_speed);
 }
 
-void WorldSystem::on_mouse_move(vec2 mouse_position)
-{
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE SALMON ROTATION HERE
-	// xpos and ypos are relative to the top-left of the window, the salmon's
-	// default facing direction is (1, 0)
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+void WorldSystem::on_mouse_move(vec2 mouse_position) {
 
-	if (registry.mousePosArray.size() == 0)
-	{
+	if (registry.mousePosArray.size() == 0) {
 		Entity e;
 		mousePos mp;
 		mp.pos = mouse_position;
@@ -558,11 +546,11 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 	}
 }
 
-void WorldSystem::exit_combat()
-{
-	while (registry.physObjs.entities.size() > 0)
-		registry.remove_all_components_of(registry.physObjs.entities.back());
-	GameSceneState = 0;
+void WorldSystem::exit_combat() {
+	while (registry.combat.entities.size() > 0)
+		registry.remove_all_components_of(registry.combat.entities.back());
+
+    GameSceneState = 0;
 }
 
 // ================================================== WORLD ===============================================================================
@@ -746,9 +734,3 @@ void WorldSystem::handle_collisions_world()
 	// Remove all collisions from this simulation step
 	registry.collisions.clear();
 }
-
-////set main world stuff out of sight
-// void WorldSystem::main_world_out() {
-//	//set enemies, player, room, road invisible
-//
-// }
