@@ -38,6 +38,12 @@ struct Enemy
 	bool keyFrame;
 };
 
+// Pinball enemy
+struct PinballEnemy
+{
+
+};
+
 // A timer that will highlight a room enemy
 struct HighLightEnemy
 {

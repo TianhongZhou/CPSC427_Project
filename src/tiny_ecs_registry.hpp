@@ -11,6 +11,7 @@ class ECSRegistry
 
 public:
 	// Manually created list of all components this game has
+	ComponentContainer<PinballEnemy> pinballEnemies;
     ComponentContainer<EnterCombatTimer> enterCombatTimer;
     ComponentContainer<Combat> combat;
     ComponentContainer<MainWorld> mainWorld;
@@ -37,6 +38,8 @@ public:
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
 	{
+		registry_list.push_back(&pinballEnemies);
+
         registry_list.push_back(&combat);
         registry_list.push_back(&mainWorld);
         registry_list.push_back(&deathTimers);
