@@ -52,7 +52,7 @@ Entity createPolygonByVertex(RenderSystem* renderer, const std::vector<vec2>& ve
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size;
 
-	registry.players.emplace(entity);
+	// registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
@@ -143,7 +143,7 @@ Entity createRoad(RenderSystem* renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * 10.f;
 
-	registry.players.emplace(entity);
+	// registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
@@ -181,9 +181,19 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
     std::uniform_real_distribution<float> distribution2(0.0f, 1.0f);
 	Room& room = registry.rooms.get(entity);
 	for (int i=0; i<3; i++) {
-		room.enemies[i] = createRoomEnemy(renderer, { pos[0]+distribution1(gen), pos[1]+distribution1(gen), }, pos, 700.f, false);
+		room.enemies[i] = createRoomEnemy(renderer, { pos[0]+distribution1(gen), pos[1]+distribution1(gen), }, pos, 700.f, i == 0);
 		registry.colors.insert(room.enemies[i], { distribution2(gen), distribution2(gen), distribution2(gen) });
 	}
+	PositionKeyFrame& positionKeyFrame = registry.positionKeyFrames.emplace(room.enemies[0]);
+	positionKeyFrame.timeIncrement = 0.0f;
+	positionKeyFrame.timeAccumulator = 0.1f;
+	std::vector<vec3> keyFrames = {};
+	keyFrames.push_back({ 0.0f, 600, 400 });
+	keyFrames.push_back({ 10.0f, 600, 600 });
+	keyFrames.push_back({ 20.0f, 400, 600 });
+	keyFrames.push_back({ 30.0f, 400, 400 });
+	keyFrames.push_back({ 40.0f, 600, 400 });
+	positionKeyFrame.keyFrames = keyFrames;
 
 	return entity;
 }
@@ -202,7 +212,7 @@ Entity createEnemyWave(RenderSystem* renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * 50.f;
 
-	registry.players.emplace(entity);
+	// registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
@@ -227,7 +237,7 @@ Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * 50.f;
 
-	registry.players.emplace(entity);
+	// registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
@@ -252,7 +262,7 @@ Entity createBall(RenderSystem* renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * 10.f;
 
-	registry.players.emplace(entity);
+	// registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
@@ -392,7 +402,7 @@ Entity createPebble(vec2 pos, vec2 size)
 
 
 
-void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) {
+void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos, bool moveable, float knockbackCoef) {
 
 
 
@@ -405,11 +415,14 @@ void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) 
 
 
 
-//	0-----1
-//	|	  |
-//	3-----2
+	//	0-----1
+	//	|	  |
+	//	3-----2
 
 	physObj& newObj = registry.physObjs.get(e);
+
+	newObj.moveable = moveable;
+	newObj.knockbackCoef = knockbackCoef;
 
 	newV.pos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
 	newV.oldPos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
@@ -440,7 +453,7 @@ void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) 
 	physObj test1 = registry.physObjs.components[0];
 
 	Edge newEdge{};
-	
+
 
 
 	newObj.Edges[0].v1 = 0;
@@ -452,7 +465,7 @@ void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) 
 	newObj.Edges[1].v2 = 2;
 	newObj.Edges[1].len = h;
 
-	
+
 
 	newObj.Edges[2].v1 = 2;
 	newObj.Edges[2].v2 = 3;
@@ -465,13 +478,13 @@ void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos) 
 	newObj.Edges[3].v2 = 0;
 	newObj.Edges[3].len = h;
 
-	
+
 
 	newObj.Edges[4].v1 = 0;
 	newObj.Edges[4].v2 = 2;
 	newObj.Edges[4].len = sqrt(h * h + w * w);
 
-	
+
 
 
 

@@ -175,6 +175,11 @@ struct Light {
 	int priority;
 };
 
+struct PositionKeyFrame {
+	std::vector<vec3> keyFrames;
+	float timeIncrement;
+	float timeAccumulator;
+};
 
 
 
