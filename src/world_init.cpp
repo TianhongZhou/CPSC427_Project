@@ -156,7 +156,7 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
     std::uniform_real_distribution<float> distribution1(-450.0f, 450.0f);
     std::uniform_real_distribution<float> distribution2(0.0f, 1.0f);
 	Room& room = registry.rooms.get(entity);
-	for (int i=0; i<1; i++) {
+	for (int i=0; i<3; i++) {
 		room.enemies[i] = createRoomEnemy(renderer, { pos[0]+distribution1(gen), pos[1]+distribution1(gen), }, pos, 700.f);
 		registry.colors.insert(room.enemies[i], { distribution2(gen), distribution2(gen), distribution2(gen) });
 	}
@@ -356,18 +356,68 @@ Entity createPebble(vec2 pos, vec2 size)
 	motion.scale = size;
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
-	registry.rooms.emplace(entity);
+	registry.rooms.emplace(entity); //?
 
 	registry.balls.emplace(entity);
 
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
-			EFFECT_ASSET_ID::PEBBLE,
-			GEOMETRY_BUFFER_ID::PEBBLE });
+		{ TEXTURE_ASSET_ID::FISH, // TEXTURE_COUNT indicates that no txture is needed
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }
+
+
+Entity createPlayerBullet(vec2 pos, vec2 size)
+{
+	auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = size;
+
+	registry.playerBullets.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::FISH, // TEXTURE_COUNT indicates that no txture is needed
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity createEnemyBullet(vec2 pos, vec2 size)
+{
+	auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = size;
+
+	registry.enemyBullets.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::TURTLE, // TEXTURE_COUNT indicates that no txture is needed
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+
+
+
+
 
 
 

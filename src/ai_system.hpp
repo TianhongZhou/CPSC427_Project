@@ -15,4 +15,8 @@ public:
 	void step_world(float elapsed_ms);
 
 	void step(float elapsed_ms);
+
+private:
+
+	float bullet_spawn_timer;
 };

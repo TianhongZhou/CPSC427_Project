@@ -82,6 +82,8 @@ private:
 	Entity player;
 	std::array<Entity,MAX_ROOM_NUM> rooms;
 
+	float last_angle = 0.f;
+
 	// music references
 	Mix_Music* background_music;
 	Mix_Chunk* salmon_dead_sound;

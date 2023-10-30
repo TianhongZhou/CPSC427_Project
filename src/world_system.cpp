@@ -512,6 +512,12 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		printf("Current speed = %f\n", current_speed);
 	}
 	current_speed = fmax(0.f, current_speed);
+
+	// player attack
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && GameSceneState == 0) {
+		on_mouse_click(GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0);
+	}
+
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position)
@@ -563,23 +569,39 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 		renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET;
 
 
-		// Create PEBBLE
-		Entity entity = createPebble({ 0,0 }, { 0,0 }); //intialized below
-		// A2 2b: Setting random initial direction, velocity, size
+		// Create player bullet
+		Entity entity = createPlayerBullet({ 0,0 }, { 0,0 }); //intialized below
+
 		Motion& motion = registry.motions.get(entity);
 		motion.position = registry.motions.get(player).position;
 
 		float radius = 30; //* (uniform_dist(rng) + 0.3f);
 		motion.scale = { radius, radius };
-		motion.angle = 0; // Do we have to set angle? Just use velocity?
+
+		vec2 player_v = registry.motions.get(player).velocity;
+		float angle = atan(player_v.y / player_v.x);
+
+		// Set bullet angle and save last angle
+		if (player_v.x == 0.f && player_v.y == 0.f) {
+			angle = last_angle;
+		}
+		else {
+			// CHECK: This is to fix flipping of the axis 
+			if (player_v.x < 0) {
+				angle += atan(1) * 4;
+			}
+			last_angle = angle;
+		}
+		motion.angle = angle; 
+		
 
 		//motion.velocity = vec2(200.f + uniform_dist(rng)*200, 100.f - uniform_dist(rng)*200);
-		float angle = registry.motions.get(player).angle;
-		vec2 velocity = vec2(200.f + uniform_dist(rng) * 200, 100.f - uniform_dist(rng) * 200);
-		motion.velocity.x = velocity.x * cos(angle) + velocity.y * sin(angle);
-		motion.velocity.y = velocity.x * sin(angle) + velocity.y * cos(angle);
+		//float angle = registry.motions.get(player).angle;
+		motion.velocity = vec2(500.f, 0.f);
+		//motion.velocity.x = velocity.x * cos(angle) + velocity.y * sin(angle);
+		//motion.velocity.y = velocity.x * sin(angle) + velocity.y * cos(angle);
 
-		registry.colors.insert(entity, { 0, 1, 0 });
+		registry.colors.insert(entity, { 1, 1, 1 });
 	}
 }
 
@@ -621,36 +643,12 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 				registry.remove_all_components_of(motion_container.entities[i]);
 		}
 	}
-	
-	// enemy shoot
-	next_turtle_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.enemyBullets.components.size() <= MAX_TURTLES && next_turtle_spawn < 0.f) {
-		// Reset timer
-		next_turtle_spawn = (TURTLE_DELAY_MS / 2) + uniform_dist(rng) * (TURTLE_DELAY_MS / 2);
-
-		auto& enemy_container = registry.mainWorldEnemies;
-
-		for (int i = (int)enemy_container.components.size() - 1; i >= 0; --i)
-		{	
-			Enemy& enemy_motion = enemy_container.components[i];
-
-			// Create PEBBLE
-			Entity entity = createPebble({ 0,0 }, { 0,0 }); //intialized below
-			// A2 2b: Setting random initial direction, velocity, size
-			Motion& motion = registry.motions.get(entity);
-			motion.position = enemy_motion.roomPositon;
-
-			float radius = 30; //* (uniform_dist(rng) + 0.3f);
-			motion.scale = { radius, radius };
-			motion.angle = 0; // Do we have to set angle? Just use velocity?
-
-			//motion.velocity = vec2(200.f + uniform_dist(rng)*200, 100.f - uniform_dist(rng)*200);
-			float angle = 0; // registry.motions.get(room.enemies[i]).angle;
-			vec2 velocity = vec2(200.f + uniform_dist(rng) * 200, 100.f - uniform_dist(rng) * 200);
-			motion.velocity.x = velocity.x * cos(angle) + velocity.y * sin(angle);
-			motion.velocity.y = velocity.x * sin(angle) + velocity.y * cos(angle);
-
-			registry.colors.insert(entity, { 1, 0, 0 });
+	// save player orientation for attack
+	Motion& motion = registry.motions.get(player);
+	if (motion.velocity.y != 0.f || motion.velocity.x != 0.f) {
+		last_angle = atan(motion.velocity.y / motion.velocity.x);
+		if (motion.velocity.x < 0) {
+			last_angle += atan(1) * 4;
 		}
 	}
 
@@ -751,6 +749,22 @@ void WorldSystem::handle_collisions_world()
 		//		}
 		//	}
 		//}
+
+		// enemy bullet vs player bullet collision
+		if (registry.enemyBullets.has(entity) && registry.playerBullets.has(entity_other) ||
+			registry.enemyBullets.has(entity_other) && registry.playerBullets.has(entity)) {
+			// remove enemy upon collision
+			registry.remove_all_components_of(entity);
+			registry.remove_all_components_of(entity_other);
+		}
+
+		// player bullet vs enemy collision
+		if (registry.mainWorldEnemies.has(entity) && registry.playerBullets.has(entity_other) ||
+			registry.mainWorldEnemies.has(entity_other) && registry.playerBullets.has(entity)) {
+			// remove enemy upon collision
+			registry.remove_all_components_of(entity);
+			registry.remove_all_components_of(entity_other);
+		}
 	}
 
 	// Remove all collisions from this simulation step
