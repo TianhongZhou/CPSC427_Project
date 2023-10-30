@@ -18,7 +18,7 @@ Entity createShadow(RenderSystem* renderer, vec2 pos);
 // the polygon
 Entity createPolygonByVertex(RenderSystem* renderer, const std::vector<vec2>& vertices, GEOMETRY_BUFFER_ID id);
 // the pin ball enemy
-Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos);
+Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos, vec2 boundary);
 // the enemy wave
 Entity createEnemyWave(RenderSystem* renderer, vec2 pos);
 // the room
