@@ -49,8 +49,11 @@
     - drawShadow in render_system.cpp
     - createShadow in world_init.cpp
 - ### Playability
-    - createPinBallEnemyBlood in world_init.cpp
-    - init_combat in world_system.cpp
+    - ####
+    - #### Blood
+	    - createPinBallEnemyBlood in world_init.cpp
+	    - init_combat in world_system.cpp
+	    - detectAndSolveAllCollisions in physics_system.cpp
 
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:
