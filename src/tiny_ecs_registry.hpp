@@ -33,6 +33,7 @@ public:
 	ComponentContainer<HighLightEnemy> highLightEnemies;
 	ComponentContainer<Light> lights;
 	ComponentContainer<PositionKeyFrame> positionKeyFrames;
+	ComponentContainer<Blood> bloods;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -60,6 +61,7 @@ public:
 		registry_list.push_back(&highLightEnemies);
 		registry_list.push_back(&lights);
 		registry_list.push_back(&positionKeyFrames);
+		registry_list.push_back(&bloods);
 	}
 
 	void clear_all_components() {

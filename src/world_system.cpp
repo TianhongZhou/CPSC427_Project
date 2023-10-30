@@ -277,15 +277,19 @@ void WorldSystem::init_combat()
 	//enemy
 	Entity enemyobj = createPolygonByVertex(renderer, { {460, 170}, {460, 120}, {580, 120}, {580, 170} }, GEOMETRY_BUFFER_ID::OCT);
 	createNewRectangleTiedToEntity(enemyobj, 120.f, 50.f, registry.motions.get(enemyobj).position, false, 1.0);
-	registry.pinballEnemies.emplace(enemyobj);
+	PinballEnemy & pinballEnemy = registry.pinballEnemies.emplace(enemyobj);
+	pinballEnemy.maxBlood = 100.0f;
+	pinballEnemy.currentBlood = 100.0f;
 
 	playerFlipper pf;
 	registry.playerFlippers.insert(flipper, pf);
 
-	//Entity pinballenemy = createPinBallEnemy(renderer, { 100, 700 });
-	//registry.colors.insert(pinballenemy, { 1, 0, 0 });
-	//Entity enemyWave = createEnemyWave(renderer, { 400, 600 });
-	//registry.colors.insert(enemyWave, { 0, 0, 1 });
+	Entity pinballenemyBloodBg = createPinBallEnemyBlood(renderer, { 520, 50 });
+	registry.colors.insert(pinballenemyBloodBg, { 0.2, 0.2, 0.2 });
+
+	Entity pinballenemyBlood = createPinBallEnemyBlood(renderer, { 520, 50 });
+	registry.colors.insert(pinballenemyBlood, { 1, 0, 0 });
+	registry.bloods.emplace(pinballenemyBlood);
 }
 
 // Compute collisions between entities
