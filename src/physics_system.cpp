@@ -318,11 +318,11 @@ void detectAndSolveAllCollisions()
 						enemy = entity_b;
 					}
 					PinBallEnemy& pinballEnemy = registry.pinballEnemies.get(enemy);
-					pinballEnemy.currentBlood -= 0.5;
-					Entity blood = registry.bloods.entities[0];
+					pinballEnemy.currentHealth -= 0.5;
+					Entity blood = registry.healthBar.entities[0];
 					Motion& motion = registry.motions.get(blood);
 					float scaleBefore = motion.scale.x;
-					motion.scale.x *= (float) pinballEnemy.currentBlood / pinballEnemy.maxBlood;
+					motion.scale.x *= (float) pinballEnemy.currentHealth / pinballEnemy.maxHealth;
 					motion.position.x -= (scaleBefore - motion.scale.x) / 2.0f;
 				}
 			}

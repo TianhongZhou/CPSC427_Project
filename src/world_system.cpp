@@ -213,7 +213,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
 
 
-	Entity blood = registry.bloods.entities[0];
+	Entity blood = registry.healthBar.entities[0];
 	Motion& motion = registry.motions.get(blood);
 	if (motion.scale.x <= 0.5f)
 	{
@@ -298,19 +298,17 @@ void WorldSystem::init_combat(int initCombat)
 	Entity enemyobj = createPolygonByVertex(renderer, { {360, 380}, {360, 320}, {520, 320}, {520, 380} }, GEOMETRY_BUFFER_ID::OCT);
 	createNewRectangleTiedToEntity(enemyobj, 120.f, 50.f, registry.motions.get(enemyobj).position, false, 1.0);
 	PinBallEnemy &pinballEnemy = registry.pinballEnemies.emplace(enemyobj);
-	pinballEnemy.maxBlood = 100.0f;
-	pinballEnemy.currentBlood = 100.0f;
 	registry.colors.insert(enemyobj, { 0.6, 0, 0 });
 
 	playerFlipper pf;
 	registry.playerFlippers.insert(flipper, pf);
 
-	Entity pinballenemyBloodBg = createPinBallEnemyBlood(renderer, { 520, 50 });
-	registry.colors.insert(pinballenemyBloodBg, { 0.2, 0.2, 0.2 });
+	Entity pinballenemyHealthBg = createPinBallEnemyHealth(renderer, { 520, 50 });
+	registry.colors.insert(pinballenemyHealthBg, { 0.2, 0.2, 0.2 });
 
-	Entity pinballenemyBlood = createPinBallEnemyBlood(renderer, { 520, 50 });
-	registry.colors.insert(pinballenemyBlood, { 1, 0, 0 });
-	registry.bloods.emplace(pinballenemyBlood);
+	Entity pinballenemyHealth = createPinBallEnemyHealth(renderer, { 520, 50 });
+	registry.colors.insert(pinballenemyHealth, { 1, 0, 0 });
+	registry.healthBar.emplace(pinballenemyHealth);
 }
 
 // Compute collisions between entities
