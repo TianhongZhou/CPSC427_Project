@@ -38,6 +38,14 @@ struct Enemy
 	bool keyFrame;
 };
 
+// PinBall enemy
+struct PinBallEnemy
+{
+	float randomMoveTimer = 0.1f;
+	vec2 boundary;
+	bool keyFrame;
+};
+
 // A timer that will highlight a room enemy
 struct HighLightEnemy
 {

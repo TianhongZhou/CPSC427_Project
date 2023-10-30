@@ -22,6 +22,7 @@ public:
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<ScreenState> screenStates;
 	ComponentContainer<Enemy> mainWorldEnemies;
+	ComponentContainer<PinBallEnemy> pinballEnemies;
 	ComponentContainer<Room> rooms;
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<vec3> colors;
@@ -47,6 +48,7 @@ public:
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&screenStates);
 		registry_list.push_back(&mainWorldEnemies);
+		registry_list.push_back(&pinballEnemies);
 		registry_list.push_back(&rooms);
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&colors);
