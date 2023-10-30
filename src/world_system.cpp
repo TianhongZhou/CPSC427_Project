@@ -241,8 +241,20 @@ void WorldSystem::restart_game()
 	registry.lights.emplace(player);
 }
 
-void WorldSystem::init_combat()
+void WorldSystem::init_combat(int initCombat)
 {
+	int w, h;
+	glfwGetWindowSize(window, &w, &h);
+	vec2 boundary = {50.f, w-50.f};
+	std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> distribution1(boundary.x, boundary.y);
+    std::uniform_real_distribution<float> distribution2(0.f, 1.f);
+
+	for (int i=0; i<initCombat; i++) {
+		Entity pinballenemy = createPinBallEnemy(renderer, {distribution1(gen),80*(i+1)}, boundary);
+		registry.colors.insert(pinballenemy, { distribution2(gen), distribution2(gen), distribution2(gen) });
+	}
 
 	Entity player_ball = createBall(renderer, {400, 400});
 	// createNewRectangleTiedToEntity(player_ball, 12.f, 12.f, registry.motions.get(player_ball).position);
@@ -257,9 +269,6 @@ void WorldSystem::init_combat()
 
 	playerFlipper pf;
 	registry.playerFlippers.insert(flipper, pf);
-
-	Entity pinballenemy = createPinBallEnemy(renderer, { 100, 700 });
-	registry.colors.insert(pinballenemy, { 1, 0, 0 });
 	Entity enemyWave = createEnemyWave(renderer, { 400, 600 });
 	registry.colors.insert(enemyWave, { 0, 0, 1 });
 }
@@ -592,13 +601,14 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 		}
 		if (timer.timer_ms < 0)
 		{
-			if (registry.mainWorldEnemies.has(entity))
-			{
-				registry.remove_all_components_of(entity);
-			}
+			for (Entity ene: registry.enterCombatTimer.get(entity).engagedEnemeis) {
+            	registry.remove_all_components_of(ene);
+            }
+         	for (Enemy& remain: registry.mainWorldEnemies.components) {
+          		remain.seePlayer = false;
+         	}
 			GameSceneState = 1;
-			InitCombat = 1;
-			printf("\n%d\n", registry.enterCombatTimer.get(entity).engagedEnemeis.size());
+			InitCombat = registry.enterCombatTimer.get(entity).engagedEnemeis.size();
 			registry.enterCombatTimer.remove(entity);
 		}
 	}
