@@ -212,6 +212,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	// reduce window brightness if any of the present salmons is dying
 	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
 
+
+	Entity blood = registry.bloods.entities[0];
+	Motion& motion = registry.motions.get(blood);
+	if (motion.scale.x <= 0.5f)
+	{
+		GameSceneState = 0;
+	}
+
 	return true;
 }
 
@@ -243,6 +251,18 @@ void WorldSystem::restart_game()
 
 void WorldSystem::init_combat(int initCombat)
 {
+	int w, h;
+	glfwGetWindowSize(window, &w, &h);
+	vec2 boundary = { 260, 800 };
+	std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> distribution1(boundary.x, boundary.y);
+    std::uniform_real_distribution<float> distribution2(0.f, 1.f);
+
+	for (int i=0; i<initCombat; i++) {
+		Entity pinballenemy = createPinBallEnemy(renderer, {distribution1(gen),80*(i+1)}, boundary);
+		registry.colors.insert(pinballenemy, { distribution2(gen), distribution2(gen), distribution2(gen) });
+	}
 
 	//Entity player_ball = createBall(renderer, {400, 400});
 	//createNewRectangleTiedToEntity(player_ball, 12.f, 12.f, registry.motions.get(player_ball).position);
@@ -257,7 +277,7 @@ void WorldSystem::init_combat(int initCombat)
 	//Entity flipper = createPolygonByVertex(renderer, {{300, 600}, {300, 580}, {400, 580}, {400, 600}}, GEOMETRY_BUFFER_ID::RECT);
 
 	//ball
-	Entity squareball = createPolygonByVertex(renderer, { {500, 270}, {500, 220}, {550, 220}, {550, 270} }, GEOMETRY_BUFFER_ID::OCT);
+	Entity squareball = createPolygonByVertex(renderer, { {500, 570}, {500, 520}, {550, 520}, {550, 570} }, GEOMETRY_BUFFER_ID::OCT);
 	createNewRectangleTiedToEntity(squareball, 50.f, 50.f, registry.motions.get(squareball).position, true, 1.0);
 
 
@@ -275,11 +295,12 @@ void WorldSystem::init_combat(int initCombat)
 
 
 	//enemy
-	Entity enemyobj = createPolygonByVertex(renderer, { {460, 170}, {460, 120}, {580, 120}, {580, 170} }, GEOMETRY_BUFFER_ID::OCT);
+	Entity enemyobj = createPolygonByVertex(renderer, { {360, 380}, {360, 320}, {520, 320}, {520, 380} }, GEOMETRY_BUFFER_ID::OCT);
 	createNewRectangleTiedToEntity(enemyobj, 120.f, 50.f, registry.motions.get(enemyobj).position, false, 1.0);
 	PinBallEnemy &pinballEnemy = registry.pinballEnemies.emplace(enemyobj);
 	pinballEnemy.maxBlood = 100.0f;
 	pinballEnemy.currentBlood = 100.0f;
+	registry.colors.insert(enemyobj, { 0.6, 0, 0 });
 
 	playerFlipper pf;
 	registry.playerFlippers.insert(flipper, pf);
@@ -620,13 +641,14 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 		}
 		if (timer.timer_ms < 0)
 		{
-			if (registry.mainWorldEnemies.has(entity))
-			{
-				registry.remove_all_components_of(entity);
-			}
+			for (Entity ene: registry.enterCombatTimer.get(entity).engagedEnemeis) {
+            	registry.remove_all_components_of(ene);
+            }
+         	for (Enemy& remain: registry.mainWorldEnemies.components) {
+          		remain.seePlayer = false;
+         	}
 			GameSceneState = 1;
-			InitCombat = 1;
-			printf("\n%d\n", registry.enterCombatTimer.get(entity).engagedEnemeis.size());
+			InitCombat = registry.enterCombatTimer.get(entity).engagedEnemeis.size();
 			registry.enterCombatTimer.remove(entity);
 		}
 	}

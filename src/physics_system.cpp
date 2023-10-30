@@ -285,7 +285,6 @@ void updateAllEdges()
 
 void detectAndSolveAllCollisions()
 {
-
 	for (uint i = 0; i < registry.physObjs.size(); i++)
 	{
 		physObj *a = &registry.physObjs.components[i];
@@ -325,11 +324,6 @@ void detectAndSolveAllCollisions()
 					float scaleBefore = motion.scale.x;
 					motion.scale.x *= (float) pinballEnemy.currentBlood / pinballEnemy.maxBlood;
 					motion.position.x -= (scaleBefore - motion.scale.x) / 2.0f;
-					if (motion.scale.x <= 0.0f)
-					{
-						printf("%.2f\n", pinballEnemy.currentBlood);
-						GameSceneState = 0;
-					}
 				}
 			}
 		}

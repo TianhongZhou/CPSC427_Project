@@ -248,7 +248,7 @@ Entity createPinBallEnemyBlood(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
-Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos, vec2 boundary)
+ Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos, vec2 boundary)
 {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PINBALLENEMY);
