@@ -224,7 +224,7 @@ Entity createEnemyWave(RenderSystem* renderer, vec2 pos)
 }
 
 
-Entity createPinBallEnemyBlood(RenderSystem* renderer, vec2 pos)
+Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PINBALLENEMYBLOOD);
@@ -265,6 +265,8 @@ Entity createPinBallEnemyBlood(RenderSystem* renderer, vec2 pos)
 
 	PinBallEnemy& enemy = registry.pinballEnemies.emplace(entity);
 	enemy.boundary = boundary;
+	enemy.maxHealth = 100.f;
+	enemy.currentHealth = 100.f;
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,

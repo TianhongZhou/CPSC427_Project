@@ -44,8 +44,8 @@ struct PinBallEnemy
 	float randomMoveTimer = 0.1f;
 	vec2 boundary;
 	bool keyFrame;
-	float maxBlood;
-	float currentBlood;
+	float maxHealth = 100.f;
+	float currentHealth = 100.f;
 };
 
 // A timer that will highlight a room enemy
@@ -175,8 +175,9 @@ struct playerFlipper {
 
 };
 
-struct Blood {
-
+struct HealthBar {
+	vec2 initScale;
+	vec2 initPos;
 };
 
 
