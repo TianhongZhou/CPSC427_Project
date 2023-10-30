@@ -11,7 +11,6 @@ class ECSRegistry
 
 public:
 	// Manually created list of all components this game has
-	ComponentContainer<PinballEnemy> pinballEnemies;
     ComponentContainer<EnterCombatTimer> enterCombatTimer;
     ComponentContainer<Combat> combat;
     ComponentContainer<MainWorld> mainWorld;
@@ -23,6 +22,7 @@ public:
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<ScreenState> screenStates;
 	ComponentContainer<Enemy> mainWorldEnemies;
+	ComponentContainer<PinBallEnemy> pinballEnemies;
 	ComponentContainer<Room> rooms;
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<vec3> colors;
@@ -39,8 +39,6 @@ public:
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
 	{
-		registry_list.push_back(&pinballEnemies);
-
         registry_list.push_back(&combat);
         registry_list.push_back(&mainWorld);
         registry_list.push_back(&deathTimers);
@@ -51,6 +49,7 @@ public:
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&screenStates);
 		registry_list.push_back(&mainWorldEnemies);
+		registry_list.push_back(&pinballEnemies);
 		registry_list.push_back(&rooms);
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&colors);

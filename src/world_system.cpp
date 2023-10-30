@@ -241,7 +241,7 @@ void WorldSystem::restart_game()
 	registry.lights.emplace(player);
 }
 
-void WorldSystem::init_combat()
+void WorldSystem::init_combat(int initCombat)
 {
 
 	//Entity player_ball = createBall(renderer, {400, 400});
@@ -277,7 +277,7 @@ void WorldSystem::init_combat()
 	//enemy
 	Entity enemyobj = createPolygonByVertex(renderer, { {460, 170}, {460, 120}, {580, 120}, {580, 170} }, GEOMETRY_BUFFER_ID::OCT);
 	createNewRectangleTiedToEntity(enemyobj, 120.f, 50.f, registry.motions.get(enemyobj).position, false, 1.0);
-	PinballEnemy & pinballEnemy = registry.pinballEnemies.emplace(enemyobj);
+	PinBallEnemy &pinballEnemy = registry.pinballEnemies.emplace(enemyobj);
 	pinballEnemy.maxBlood = 100.0f;
 	pinballEnemy.currentBlood = 100.0f;
 

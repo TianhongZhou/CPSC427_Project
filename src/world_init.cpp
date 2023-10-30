@@ -223,10 +223,35 @@ Entity createEnemyWave(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
+
 Entity createPinBallEnemyBlood(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PINBALLENEMYBLOOD);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	registry.combat.emplace(entity);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = mesh.original_size * 20.f;
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::SALMON,
+			GEOMETRY_BUFFER_ID::PINBALLENEMYBLOOD });
+
+	return entity;
+}
+
+Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos, vec2 boundary)
+{
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PINBALLENEMY);
 	registry.meshPtrs.emplace(entity, &mesh);
 
     registry.combat.emplace(entity);
@@ -235,15 +260,16 @@ Entity createPinBallEnemyBlood(RenderSystem* renderer, vec2 pos)
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = pos;
 	motion.angle = 0.f;
-	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 20.f;
+	motion.velocity = { 80.f, 0.f };
+	motion.scale = mesh.original_size * 50.f;
 
-	// registry.players.emplace(entity);
+	PinBallEnemy& enemy = registry.pinballEnemies.emplace(entity);
+	enemy.boundary = boundary;
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			EFFECT_ASSET_ID::SALMON,
-			GEOMETRY_BUFFER_ID::PINBALLENEMYBLOOD });
+			GEOMETRY_BUFFER_ID::PINBALLENEMY });
 
 	return entity;
 }

@@ -38,9 +38,12 @@ struct Enemy
 	bool keyFrame;
 };
 
-// Pinball enemy
-struct PinballEnemy
+// PinBall enemy
+struct PinBallEnemy
 {
+	float randomMoveTimer = 0.1f;
+	vec2 boundary;
+	bool keyFrame;
 	float maxBlood;
 	float currentBlood;
 };
@@ -254,7 +257,8 @@ enum class GEOMETRY_BUFFER_ID {
 	PEBBLE = SPRITE + 1,
 	BALL = PEBBLE + 1,
 	PINBALLENEMYBLOOD = BALL + 1,
-	ENEMYWAVE = PINBALLENEMYBLOOD + 1,
+	PINBALLENEMY = PINBALLENEMYBLOOD + 1,
+	ENEMYWAVE = PINBALLENEMY + 1,
 	ROOM = ENEMYWAVE + 1,
 	ROAD = ROOM + 1,
 	PLAYER = ROAD + 1,

@@ -62,12 +62,13 @@ int main()
 		else if (GameSceneState == 1) {
 
 			if (InitCombat) {
-				world_system.init_combat();
+				world_system.init_combat(InitCombat);
 				InitCombat = 0;
 			}
 
 			world_system.step(elapsed_ms);
 			physics_system.step(elapsed_ms);
+			ai_system.step(elapsed_ms);
 			world_system.handle_collisions();
             render_system.draw_combat_scene();
 		}

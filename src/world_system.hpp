@@ -46,7 +46,7 @@ public:
 	bool is_over()const;
 
 	// initialize combat
-	void init_combat();
+	void init_combat(int initCombat);
 
     // exit combat
     void exit_combat();
