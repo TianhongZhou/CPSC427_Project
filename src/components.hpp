@@ -44,6 +44,8 @@ struct PinBallEnemy
 	float randomMoveTimer = 0.1f;
 	vec2 boundary;
 	bool keyFrame;
+	float maxBlood;
+	float currentBlood;
 };
 
 // A timer that will highlight a room enemy
@@ -173,6 +175,10 @@ struct playerFlipper {
 
 };
 
+struct Blood {
+
+};
+
 
 struct mousePos {
 	vec2 pos;
@@ -250,7 +256,8 @@ enum class GEOMETRY_BUFFER_ID {
 	SPRITE = SALMON + 1,
 	PEBBLE = SPRITE + 1,
 	BALL = PEBBLE + 1,
-	PINBALLENEMY = BALL + 1,
+	PINBALLENEMYBLOOD = BALL + 1,
+	PINBALLENEMY = PINBALLENEMYBLOOD + 1,
 	ENEMYWAVE = PINBALLENEMY + 1,
 	ROOM = ENEMYWAVE + 1,
 	ROAD = ROOM + 1,

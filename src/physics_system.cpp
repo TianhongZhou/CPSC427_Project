@@ -1,6 +1,7 @@
 // internal
 #include "physics_system.hpp"
 #include "world_init.hpp"
+#include <world_system.hpp>
 
 // Returns the local bounding coordinates scaled by the current size of the entity
 vec2 get_bounding_box(const Motion &motion)
@@ -284,7 +285,6 @@ void updateAllEdges()
 
 void detectAndSolveAllCollisions()
 {
-
 	for (uint i = 0; i < registry.physObjs.size(); i++)
 	{
 		physObj *a = &registry.physObjs.components[i];
@@ -292,10 +292,39 @@ void detectAndSolveAllCollisions()
 		for (uint i2 = 0; i2 < registry.physObjs.size(); i2++)
 		{
 			physObj *b = &registry.physObjs.components[i2];
+			bool collide = false;
 
-			if (a != b)
-			{
-				detectAndResloveCollision(a, b);
+			if (a != b) {
+				collide = detectAndResloveCollision(a, b);
+
+			}
+
+			// Handle Collision
+
+			// If collided with an enemy
+			Entity entity_a = registry.physObjs.entities[i];
+			Entity entity_b = registry.physObjs.entities[i2];
+			if (collide) {
+				if (registry.pinballEnemies.has(entity_a) && !registry.pinballEnemies.has(entity_b) ||
+					registry.pinballEnemies.has(entity_b) && !registry.pinballEnemies.has(entity_a)) {
+					Entity enemy = entity_a;
+					// remove enemy upon collision
+					if (registry.pinballEnemies.has(entity_a)) {
+						//registry.remove_all_components_of(entity_a);
+						enemy = entity_a;
+					}
+					else {
+						//registry.remove_all_components_of(entity_b);
+						enemy = entity_b;
+					}
+					PinBallEnemy& pinballEnemy = registry.pinballEnemies.get(enemy);
+					pinballEnemy.currentBlood -= 0.5;
+					Entity blood = registry.bloods.entities[0];
+					Motion& motion = registry.motions.get(blood);
+					float scaleBefore = motion.scale.x;
+					motion.scale.x *= (float) pinballEnemy.currentBlood / pinballEnemy.maxBlood;
+					motion.position.x -= (scaleBefore - motion.scale.x) / 2.0f;
+				}
 			}
 		}
 	}

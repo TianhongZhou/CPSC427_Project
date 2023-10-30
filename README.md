@@ -26,8 +26,9 @@
     - createNewRectangleTiedToEntity in world_init.cpp
     - physObj component and various sub-components in components.hpp
 - ### Simple rendering effects
-    -  	EnterCombatTimer in components.hpp
-    -  	textured.fs.glsl
+    - post.fs.glsl
+    - post.vs.glsl
+    - draw_world in render_system.cpp
 - ### Animation: Implement sprite sheet animation or an equivalent animation system
     - struct SpriteSheet in components.hpp
     - spriteSheets in tiny_ecs_registry.hpp
@@ -41,14 +42,18 @@
 - ### Assets: Introduce new sprite and background assets (background music & attacking sound)
     - create_window in world_system.cpp
 - ### 2D Dynamic Shadow
-    - post.fs.glsl
-    - post.vs.glsl
     - draw_world in render_system.cpp
     - struct Light in components.hpp
     - lights in tiny_ecs_registry.hpp
     - shadow.png in textures
     - drawShadow in render_system.cpp
     - createShadow in world_init.cpp
+- ### Playability
+    - ####
+    - #### Blood
+	    - createPinBallEnemyBlood in world_init.cpp
+	    - init_combat in world_system.cpp
+	    - detectAndSolveAllCollisions in physics_system.cpp
 
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:
