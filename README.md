@@ -42,6 +42,7 @@
 - ### Assets: Introduce new sprite and background assets (background music & attacking sound)
     - create_window in world_system.cpp
     - on_mouse_click in world_system.cpp
+    - on_key in world_system.cpp and step_world in ai_system.cpp (projectiles shot by player/enemy)
 - ### 2D Dynamic Shadow
     - draw_world in render_system.cpp
     - struct Light in components.hpp
