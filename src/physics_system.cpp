@@ -36,13 +36,13 @@ float MAX_Y_COORD = 750.0f;
 
 float MIN_Y_COORD = 0.0f;
 
-float MIN_X_COORD = 0.0f;
+float MIN_X_COORD = 220.0f;
 
-float FLIPPERHEIGHT = 700.f;
+float FLIPPERHEIGHT = 720.f;
 
 float FLIPPERDELTA = 30.f;
 
-float MAX_X_COORD = 900.0f;
+float MAX_X_COORD = 840.0f;
 
 vec2 GRAV = {0.f, 0.0003f};
 // struct Vertex_Phys {
