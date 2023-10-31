@@ -47,7 +47,9 @@ class RenderSystem {
 			sprite_sheet_path("main_character_walk.png"),
 			sprite_sheet_path("enemy_attack.png"),
 			sprite_sheet_path("enemy_walk.png"),
-			textures_path("shadow.png") 
+			textures_path("shadow.png"),
+			textures_path("playerbullet.png"),
+			textures_path("enemybullet.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;

@@ -193,6 +193,20 @@ void WorldSystem::restart_game()
 	rooms[0] = createRoom(renderer, { 600, 400 });
 	player = createPlayer(renderer, { 350, 200 });
 	registry.lights.emplace(player);
+
+
+	//int w, h;
+	//glfwGetWindowSize(window, &w, &h);
+	//// Add a ball
+	//Entity entity = createPebble({ 0,0 }, { 0,0 }); //intialized below
+	//Motion& motion = registry.motions.get(entity);
+	//motion.position = {400, 400};
+	//motion.scale = {30, 30};
+	//motion.angle = 0; 
+	//motion.velocity = { 200, 200 };
+
+
+	//registry.colors.insert(entity, { 1, 1, 1 });
 }
 
 void WorldSystem::init_combat(int initCombat)
@@ -318,7 +332,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		pressedKeys.erase(key);
 	}
 
-	Motion &motion = registry.motions.get(player);
+	Motion& motion = registry.motions.get(player);
 	bool inCombat = GameSceneState || registry.enterCombatTimer.has(player);;
 
 	bool conflictUpAndDown = pressedKeys.count(GLFW_KEY_UP) && pressedKeys.count(GLFW_KEY_DOWN);
@@ -381,8 +395,8 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	{
 		if (registry.spriteSheets.has(player))
 		{
-			SpriteSheet &spriteSheet = registry.spriteSheets.get(player);
-			RenderRequest &renderRequest = registry.renderRequests.get(player);
+			SpriteSheet& spriteSheet = registry.spriteSheets.get(player);
+			RenderRequest& renderRequest = registry.renderRequests.get(player);
 			renderRequest.used_texture = spriteSheet.origin;
 			registry.spriteSheets.remove(player);
 		}
@@ -391,7 +405,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	{
 		if (!registry.spriteSheets.has(player))
 		{
-			SpriteSheet &spriteSheet = registry.spriteSheets.emplace_with_duplicates(player);
+			SpriteSheet& spriteSheet = registry.spriteSheets.emplace_with_duplicates(player);
 			spriteSheet.next_sprite = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;
 			spriteSheet.frameIncrement = 0.06f;
 			spriteSheet.frameAccumulator = 0.0f;
@@ -404,7 +418,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			{
 				spriteSheet.xFlip = true;
 			}
-			RenderRequest &renderRequest = registry.renderRequests.get(player);
+			RenderRequest& renderRequest = registry.renderRequests.get(player);
 			renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;
 		}
 	}
@@ -433,27 +447,27 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_P)
 	{
-		Entity &flipper = registry.playerFlippers.entities[0];
+		Entity& flipper = registry.playerFlippers.entities[0];
 
-		physObj &flipperPhys = registry.physObjs.get(flipper);
+		physObj& flipperPhys = registry.physObjs.get(flipper);
 
 		flipperPhys.Vertices[3].accel += vec2(0.f, -0.8f);
 	}
 
 	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
 	{
-		Entity &flipper = registry.playerFlippers.entities[0];
+		Entity& flipper = registry.playerFlippers.entities[0];
 
-		physObj &flipperPhys = registry.physObjs.get(flipper);
+		physObj& flipperPhys = registry.physObjs.get(flipper);
 
 		flipperPhys.Vertices[1].accel += vec2(0.1f, 0.f);
 	}
 
 	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_LEFT)
 	{
-		Entity &flipper = registry.playerFlippers.entities[0];
+		Entity& flipper = registry.playerFlippers.entities[0];
 
-		physObj &flipperPhys = registry.physObjs.get(flipper);
+		physObj& flipperPhys = registry.physObjs.get(flipper);
 
 		flipperPhys.Vertices[1].accel += vec2(-0.1f, 0.f);
 	}
@@ -479,6 +493,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		printf("Current speed = %f\n", current_speed);
 	}
 	current_speed = fmax(0.f, current_speed);
+
+	// player attack
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && GameSceneState == 0) {
+		on_mouse_click(GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0);
+	}
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
@@ -524,6 +543,40 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 		RenderRequest &renderRequest = registry.renderRequests.get(player);
 		renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET;
 
+
+		// Create player bullet
+		Entity entity = createPlayerBullet({ 0,0 }, { 0,0 }); //intialized below
+
+		Motion& motion = registry.motions.get(entity);
+		motion.position = registry.motions.get(player).position;
+
+		float radius = 30; //* (uniform_dist(rng) + 0.3f);
+		motion.scale = { radius, radius };
+
+		vec2 player_v = registry.motions.get(player).velocity;
+		float angle = atan(player_v.y / player_v.x);
+
+		// Set bullet angle and save last angle
+		if (player_v.x == 0.f && player_v.y == 0.f) {
+			angle = last_angle;
+		}
+		else {
+			// CHECK: This is to fix flipping of the axis 
+			if (player_v.x < 0) {
+				angle += atan(1) * 4;
+			}
+			last_angle = angle;
+		}
+		motion.angle = angle; 
+		
+
+		//motion.velocity = vec2(200.f + uniform_dist(rng)*200, 100.f - uniform_dist(rng)*200);
+		//float angle = registry.motions.get(player).angle;
+		motion.velocity = vec2(500.f, 0.f);
+		//motion.velocity.x = velocity.x * cos(angle) + velocity.y * sin(angle);
+		//motion.velocity.y = velocity.x * sin(angle) + velocity.y * cos(angle);
+
+		registry.colors.insert(entity, { 1, 1, 1 });
 	}
 }
 
@@ -563,6 +616,14 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 		{
 			if (!registry.players.has(motion_container.entities[i])) // don't remove the player
 				registry.remove_all_components_of(motion_container.entities[i]);
+		}
+	}
+	// save player orientation for attack
+	Motion& motion = registry.motions.get(player);
+	if (motion.velocity.y != 0.f || motion.velocity.x != 0.f) {
+		last_angle = atan(motion.velocity.y / motion.velocity.x);
+		if (motion.velocity.x < 0) {
+			last_angle += atan(1) * 4;
 		}
 	}
 
@@ -648,31 +709,46 @@ void WorldSystem::handle_collisions_world()
 	for (uint i = 0; i < collisionsRegistry.components.size(); i++)
 	{
 		// The entity and its collider
-		Entity playerC = collisionsRegistry.entities[i];
-		Entity enemy = collisionsRegistry.components[i].other_entity;
-		if (registry.players.has(playerC))
+		Entity entity = collisionsRegistry.entities[i];
+		Entity entity_other = collisionsRegistry.components[i].other_entity;
+		if (registry.players.has(entity))
 		{
 			// Checking Player - Enemy collisions
-			if (registry.mainWorldEnemies.has(enemy))
+			if (registry.mainWorldEnemies.has(entity_other))
 			{
-				if (!registry.enterCombatTimer.has(playerC))
+				if (!registry.enterCombatTimer.has(entity))
 				{
-					registry.enterCombatTimer.emplace(playerC);
-					registry.enterCombatTimer.get(playerC).engagedEnemeis.push_back(enemy);
+					registry.enterCombatTimer.emplace(entity);
+					registry.enterCombatTimer.get(entity).engagedEnemeis.push_back(entity_other);
 				} else {
-					std::vector<Entity> vec = registry.enterCombatTimer.get(playerC).engagedEnemeis;
+					std::vector<Entity> vec = registry.enterCombatTimer.get(entity).engagedEnemeis;
 					int find = 0;
 					for (unsigned int j = 0; j < vec.size(); j++) {
-    					if (vec[j]==enemy) {
+    					if (vec[j]== entity_other) {
 							find = 1;
 							break;
 						}
   					}
 					if (!find) {
-        				registry.enterCombatTimer.get(playerC).engagedEnemeis.push_back(enemy);
+        				registry.enterCombatTimer.get(entity).engagedEnemeis.push_back(entity_other);
     				}
 				}
 			}
+		}
+		// enemy bullet vs player bullet collision
+		if (registry.enemyBullets.has(entity) && registry.playerBullets.has(entity_other) ||
+			registry.enemyBullets.has(entity_other) && registry.playerBullets.has(entity)) {
+			// remove enemy upon collision
+			registry.remove_all_components_of(entity);
+			registry.remove_all_components_of(entity_other);
+		}
+
+		// player bullet vs enemy collision
+		if (registry.mainWorldEnemies.has(entity) && registry.playerBullets.has(entity_other) ||
+			registry.mainWorldEnemies.has(entity_other) && registry.playerBullets.has(entity)) {
+			// remove enemy upon collision
+			registry.remove_all_components_of(entity);
+			registry.remove_all_components_of(entity_other);
 		}
 	}
 

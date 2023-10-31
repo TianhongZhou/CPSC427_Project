@@ -1,6 +1,8 @@
 // internal
 #include "ai_system.hpp"
 #include "world_init.hpp"
+#include "world_system.hpp"
+
 #define M_PI 3.14159265358979323846 /* pi */
 #define ENEMY_VERSION_WIDTH M_PI / 9
 #define ENEMY_VERSION_LENGTH 400.f
@@ -76,6 +78,10 @@ void AISystem::step_world(float elapsed_ms)
 			playerMotion = motion_container.components[i];
 		}
 	}
+	
+
+	// Enemy fire rate
+	bullet_spawn_timer -= elapsed_ms;
 
 	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i)
 	{
@@ -84,6 +90,24 @@ void AISystem::step_world(float elapsed_ms)
 			Motion &enemyMotion = motion_container.components[i];
 			Enemy &enemy = registry.mainWorldEnemies.get(motion_container.entities[i]);
 			float angleToPlayer = atan2(playerMotion.position.y - enemyMotion.position.y, playerMotion.position.x - enemyMotion.position.x);
+
+			//shoot player
+
+			if (bullet_spawn_timer < 0) {
+
+				// Create enemy bullet
+				Entity entity = createEnemyBullet({ 0,0 }, { 0,0 }); //intialized below
+
+				Motion& motion = registry.motions.get(entity);
+				motion.position = enemyMotion.position;
+
+				float radius = 30; //* (uniform_dist(rng) + 0.3f);
+				motion.scale = { radius, radius };
+				motion.angle = angleToPlayer; 
+				motion.velocity = vec2(200.f, 0.f);
+				registry.colors.insert(entity, { 1, 1, 1 });
+			}
+
 			float distanceToPlayer = glm::length(playerMotion.position - enemyMotion.position);
 			if (enemy.seePlayer)
 			{
@@ -216,5 +240,8 @@ void AISystem::step_world(float elapsed_ms)
 			RenderRequest &renderRequest = registry.renderRequests.get(entity);
 			renderRequest.used_texture = TEXTURE_ASSET_ID::ENEMYATTACKSPRITESHEET;
 		}
+	}
+	if (bullet_spawn_timer < 0) {
+		bullet_spawn_timer = 3000.f;
 	}
 }

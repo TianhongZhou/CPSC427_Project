@@ -432,15 +432,68 @@ Entity createPebble(vec2 pos, vec2 size)
 	motion.scale = size;
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
-	registry.rooms.emplace(entity);
+	registry.rooms.emplace(entity); //?
+
+	registry.balls.emplace(entity);
+
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
-			EFFECT_ASSET_ID::PEBBLE,
-			GEOMETRY_BUFFER_ID::PEBBLE });
+		{ TEXTURE_ASSET_ID::FISH, // TEXTURE_COUNT indicates that no txture is needed
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }
+
+
+Entity createPlayerBullet(vec2 pos, vec2 size)
+{
+	auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = size;
+
+	registry.playerBullets.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::PLAYERBULLET, // TEXTURE_COUNT indicates that no txture is needed
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity createEnemyBullet(vec2 pos, vec2 size)
+{
+	auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = size;
+
+	registry.enemyBullets.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::ENEMYBULLET, // TEXTURE_COUNT indicates that no txture is needed
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+
+
+
+
 
 
 

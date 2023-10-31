@@ -5,6 +5,21 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
+struct Ball
+{
+
+};
+
+struct PlayerBullet
+{
+
+};
+
+struct EnemyBullet
+{
+
+};
+
 // Player component
 struct Player
 {
@@ -238,7 +253,9 @@ enum class TEXTURE_ASSET_ID {
 	ENEMYATTACKSPRITESHEET = PLAYERWALKSPRITESHEET + 1,
 	ENEMYWALKSPRITESHEET = ENEMYATTACKSPRITESHEET + 1,
 	SHADOW = ENEMYWALKSPRITESHEET + 1,
-	TEXTURE_COUNT = SHADOW + 1
+	PLAYERBULLET = SHADOW + 1,
+	ENEMYBULLET = PLAYERBULLET + 1,
+	TEXTURE_COUNT = ENEMYBULLET + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
