@@ -33,6 +33,10 @@ struct Combat
 };
 
 // Main world room
+// Entity is part of main world
+struct MainWorld{};
+
+// Turtles have a hard shell
 struct Room
 {
 	std::array<Entity,3> enemies;
@@ -46,7 +50,17 @@ struct Enemy
 	float haltTimer = 0.3f;
 	vec2 roomPositon;
 	float roomScale;
-	vec2 curr_position = { 0,0 };
+	bool keyFrame;
+};
+
+// PinBall enemy
+struct PinBallEnemy
+{
+	float randomMoveTimer = 0.1f;
+	vec2 boundary;
+	bool keyFrame;
+	float maxHealth = 100.f;
+	float currentHealth = 100.f;
 };
 
 // A timer that will highlight a room enemy
@@ -100,6 +114,7 @@ struct DeathTimer
 struct EnterCombatTimer
 {
     float timer_ms = 1000.f;
+	std::vector<Entity> engagedEnemeis;
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & salmon.vs.glsl)
@@ -163,7 +178,9 @@ struct physObj {
 	int VertexCount;
 	int EdgesCount;
 
+	bool moveable;
 
+	float knockbackCoef;
 };
 
 
@@ -171,6 +188,11 @@ struct playerFlipper {
 
 
 
+};
+
+struct HealthBar {
+	vec2 initScale;
+	vec2 initPos;
 };
 
 
@@ -187,6 +209,11 @@ struct Light {
 	int priority;
 };
 
+struct PositionKeyFrame {
+	std::vector<vec3> keyFrames;
+	float timeIncrement;
+	float timeAccumulator;
+};
 
 
 
@@ -224,7 +251,10 @@ enum class TEXTURE_ASSET_ID {
 	PLAYERWALKSPRITESHEET = PLAYERATTACKSPRITESHEET + 1,
 	ENEMYATTACKSPRITESHEET = PLAYERWALKSPRITESHEET + 1,
 	ENEMYWALKSPRITESHEET = ENEMYATTACKSPRITESHEET + 1,
-	TEXTURE_COUNT = ENEMYWALKSPRITESHEET + 1
+	SHADOW = ENEMYWALKSPRITESHEET + 1,
+	PLAYERBULLET = SHADOW + 1,
+	ENEMYBULLET = PLAYERBULLET + 1,
+	TEXTURE_COUNT = ENEMYBULLET + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -235,8 +265,7 @@ enum class EFFECT_ASSET_ID {
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
 	POST = WATER + 1,
-	SHADOW = POST + 1,
-	EFFECT_COUNT = SHADOW + 1,
+	EFFECT_COUNT = POST + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
@@ -245,7 +274,8 @@ enum class GEOMETRY_BUFFER_ID {
 	SPRITE = SALMON + 1,
 	PEBBLE = SPRITE + 1,
 	BALL = PEBBLE + 1,
-	PINBALLENEMY = BALL + 1,
+	PINBALLENEMYBLOOD = BALL + 1,
+	PINBALLENEMY = PINBALLENEMYBLOOD + 1,
 	ENEMYWAVE = PINBALLENEMY + 1,
 	ROOM = ENEMYWAVE + 1,
 	ROAD = ROOM + 1,
@@ -262,6 +292,7 @@ struct RenderRequest {
 	TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
+	vec2 textureOffset = vec2(0.0, 0.0);
 };
 
 struct SpriteSheet {

@@ -46,13 +46,14 @@ public:
 	bool is_over()const;
 
 	// initialize combat
-	void init_combat();
+	void init_combat(int initCombat);
 
     // exit combat
     void exit_combat();
 
-	//set main world stuff out of sight
-	void main_world_out();
+    // removes world objects from the rendering list
+    void hide_world();
+
 
 private:
 	// Input callback functions
@@ -87,7 +88,7 @@ private:
 	// music references
 	Mix_Music* background_music;
 	Mix_Chunk* salmon_dead_sound;
-	Mix_Chunk* salmon_eat_sound;
+	Mix_Chunk* player_attack_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;

@@ -9,7 +9,9 @@
 - ### Working basic 2D transformations:
     - drawTexturedMesh in render_system.cpp
 - ### Key-frame/state interpolation (smooth movement from point A to point B in Cartesian or angle space)
-    - step and step_world in physics_system.cpp
+    - struct PositionKeyFrame in components.hpp
+    - positionKeyFrames in tiny_ecs_registry.hpp
+    - step_world in ai_system.cpp
 - ### Keyboard/mouse control of at least one character sprite. This can include changes in the set of rendered objects, object geometry, position, orientation, textures, colors, and other attributes
     - on_key and on_mouse_click in world_system.cpp
 - ### Randomized or hard-coded action of one or more characters/assets
@@ -24,8 +26,9 @@
     - createNewRectangleTiedToEntity in world_init.cpp
     - physObj component and various sub-components in components.hpp
 - ### Simple rendering effects
-    -  	EnterCombatTimer in components.hpp
-    -  	textured.fs.glsl
+    - post.fs.glsl
+    - post.vs.glsl
+    - draw_world in render_system.cpp
 - ### Animation: Implement sprite sheet animation or an equivalent animation system
     - struct SpriteSheet in components.hpp
     - spriteSheets in tiny_ecs_registry.hpp
@@ -36,12 +39,21 @@
     - drawTexturedMesh in render_system.cpp
     - textured.vs.glsl
     - textured.fs.glsl
+- ### Assets: Introduce new sprite and background assets (background music & attacking sound)
+    - create_window in world_system.cpp
 - ### 2D Dynamic Shadow
-    - post.fs.glsl
-    - post.vs.glsl
     - draw_world in render_system.cpp
     - struct Light in components.hpp
     - lights in tiny_ecs_registry.hpp
+    - shadow.png in textures
+    - drawShadow in render_system.cpp
+    - createShadow in world_init.cpp
+- ### Playability
+    - ####
+    - #### Blood
+	    - createPinBallEnemyBlood in world_init.cpp
+	    - init_combat in world_system.cpp
+	    - detectAndSolveAllCollisions in physics_system.cpp
 
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:

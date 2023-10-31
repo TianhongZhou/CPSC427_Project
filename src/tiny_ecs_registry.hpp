@@ -12,12 +12,9 @@ class ECSRegistry
 public:
 	// Manually created list of all components this game has
 	
-	ComponentContainer<Ball> balls;
-	ComponentContainer<PlayerBullet> playerBullets;
-	ComponentContainer<EnemyBullet> enemyBullets;
-
     ComponentContainer<EnterCombatTimer> enterCombatTimer;
     ComponentContainer<Combat> combat;
+    ComponentContainer<MainWorld> mainWorld;
 	ComponentContainer<DeathTimer> deathTimers;
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Collision> collisions;
@@ -26,6 +23,7 @@ public:
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<ScreenState> screenStates;
 	ComponentContainer<Enemy> mainWorldEnemies;
+	ComponentContainer<PinBallEnemy> pinballEnemies;
 	ComponentContainer<Room> rooms;
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<vec3> colors;
@@ -35,16 +33,19 @@ public:
 	ComponentContainer<SpriteSheet> spriteSheets;
 	ComponentContainer<HighLightEnemy> highLightEnemies;
 	ComponentContainer<Light> lights;
+	ComponentContainer<PositionKeyFrame> positionKeyFrames;
+	ComponentContainer<HealthBar> healthBar;
+	
+	ComponentContainer<PlayerBullet> playerBullets;
+	ComponentContainer<EnemyBullet> enemyBullets;
+	ComponentContainer<Ball> balls;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
 	{
-		registry_list.push_back(&playerBullets);
-		registry_list.push_back(&enemyBullets);
-		registry_list.push_back(&balls);
-
-		registry_list.push_back(&combat);
+        registry_list.push_back(&combat);
+		registry_list.push_back(&mainWorld);
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);
 		registry_list.push_back(&collisions);
@@ -53,6 +54,7 @@ public:
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&screenStates);
 		registry_list.push_back(&mainWorldEnemies);
+		registry_list.push_back(&pinballEnemies);
 		registry_list.push_back(&rooms);
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&colors);
@@ -62,6 +64,12 @@ public:
 		registry_list.push_back(&spriteSheets);
 		registry_list.push_back(&highLightEnemies);
 		registry_list.push_back(&lights);
+		registry_list.push_back(&positionKeyFrames);
+		registry_list.push_back(&healthBar);
+
+		registry_list.push_back(&playerBullets);
+		registry_list.push_back(&enemyBullets);
+		registry_list.push_back(&balls);
 	}
 
 	void clear_all_components() {

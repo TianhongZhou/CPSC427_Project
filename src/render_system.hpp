@@ -28,6 +28,7 @@ class RenderSystem {
 		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SALMON, mesh_path("salmon.obj")),
 		  // specify meshes of other assets here
 		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::BALL, mesh_path("ball.obj")),
+		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::PINBALLENEMYBLOOD, mesh_path("enemy_blood.obj")),
 		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::PINBALLENEMY, mesh_path("enemy.obj")),
 		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::ENEMYWAVE, mesh_path("enemyWave.obj")),
 		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::ROOM, mesh_path("room.obj")),
@@ -45,7 +46,10 @@ class RenderSystem {
 			sprite_sheet_path("main_character_attack.png"),
 			sprite_sheet_path("main_character_walk.png"),
 			sprite_sheet_path("enemy_attack.png"),
-			sprite_sheet_path("enemy_walk.png")
+			sprite_sheet_path("enemy_walk.png"),
+			textures_path("shadow.png"),
+			textures_path("playerbullet.png"),
+			textures_path("enemybullet.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -56,8 +60,7 @@ class RenderSystem {
 		shader_path("salmon"),
 		shader_path("textured"),
 		shader_path("water"),
-		shader_path("post"),
-		shader_path("shadow")
+		shader_path("post")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
@@ -88,17 +91,17 @@ public:
 	~RenderSystem();
 
 	// Draw all entities
-	void draw_combat_scene();
-	void draw_world();
+	void draw_world(bool &tutorial_open);
+    void draw_combat_scene();
 
-	mat3 createProjectionMatrix();
+    mat3 createProjectionMatrix();
 
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
 	void draw_lights(GLuint post_program, std::vector<Light> lights, float aspectRatio);
-	void drawShadow(Entity entity, const mat3& projection, const vec2& shadowOffset);
+	void drawShadow(Entity entity, const mat3& projection, const float angleRadians, const vec2 scale);
 
 	// Window handle
 	GLFWwindow* window;
@@ -109,6 +112,9 @@ private:
 	GLuint off_screen_render_buffer_depth;
 
 	Entity screen_state_entity;
+
+    void init_ImGui(GLFWwindow *window_arg) const;
+
 };
 
 bool loadEffectFromFile(

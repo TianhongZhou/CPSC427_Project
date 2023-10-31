@@ -1,18 +1,19 @@
 // internal
 #include "physics_system.hpp"
 #include "world_init.hpp"
+#include <world_system.hpp>
 
 // Returns the local bounding coordinates scaled by the current size of the entity
-vec2 get_bounding_box(const Motion& motion)
+vec2 get_bounding_box(const Motion &motion)
 {
 	// abs is to avoid negative scale due to the facing direction.
-	return { abs(motion.scale.x), abs(motion.scale.y) };
+	return {abs(motion.scale.x), abs(motion.scale.y)};
 }
 
 // This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
 // if the center point of either object is inside the other's bounding-box-circle. You can
 // surely implement a more accurate detection
-bool collides(const Motion& motion1, const Motion& motion2)
+bool collides(const Motion &motion1, const Motion &motion2)
 {
 	/*vec2 dp = motion1.position - motion2.position;
 	float dist_squared = dot(dp, dp);
@@ -31,33 +32,29 @@ bool collides(const Motion& motion1, const Motion& motion2)
 	return dist <= radius_sum;
 }
 
-
-
 float MAX_Y_COORD = 750.0f;
 
 float MIN_Y_COORD = 0.0f;
 
 float MIN_X_COORD = 0.0f;
 
-
 float FLIPPERHEIGHT = 700.f;
 
 float FLIPPERDELTA = 30.f;
 
-
 float MAX_X_COORD = 900.0f;
 
-vec2 GRAV = { 0.f, 0.0003f };
-//struct Vertex_Phys {
+vec2 GRAV = {0.f, 0.0003f};
+// struct Vertex_Phys {
 //	vec2 pos;
 //	vec2 oldPos;
 //
 //	vec2 accel;
 //
-//};
+// };
 //
 //
-//struct Edge {
+// struct Edge {
 //	Vertex_Phys* v1;
 //	Vertex_Phys* v2;
 //
@@ -65,10 +62,10 @@ vec2 GRAV = { 0.f, 0.0003f };
 //
 //	float len;
 //
-//};
+// };
 //
 //
-//struct physObj {
+// struct physObj {
 //
 //	Vertex_Phys Vertices[8];
 //	Edge Edges[13];
@@ -80,36 +77,33 @@ vec2 GRAV = { 0.f, 0.0003f };
 //	int EdgesCount;
 //
 //
-//};
+// };
 
-
-struct CollisionEvent {
+struct CollisionEvent
+{
 	vec2 Normal;
 	float Depth;
-	Edge* Edge;
-	Vertex_Phys* Vertex;
+	Edge *Edge;
+	Vertex_Phys *Vertex;
 
-	physObj* EdgeParent;
+	physObj *EdgeParent;
 };
 
-
-
-
-
-
-
-void updatePos(float dt, Vertex_Phys& v) {
+void updatePos(float dt, Vertex_Phys &v)
+{
 	vec2 velocity = v.pos - v.oldPos;
 	v.oldPos = v.pos;
 	v.pos = v.pos + velocity + v.accel * dt * dt;
 	v.accel = {};
 }
 
-void updateEdges(physObj& obj) {
+void updateEdges(physObj &obj)
+{
 
-	for (int i = 0; i < obj.EdgesCount; i++) {
+	for (int i = 0; i < obj.EdgesCount; i++)
+	{
 
-		Edge& e = obj.Edges[i];
+		Edge &e = obj.Edges[i];
 
 		vec2 v1v2 = obj.Vertices[e.v2].pos - obj.Vertices[e.v1].pos;
 
@@ -121,56 +115,41 @@ void updateEdges(physObj& obj) {
 
 		obj.Vertices[e.v1].pos += direction * diff * 0.5f;
 		obj.Vertices[e.v2].pos -= direction * diff * 0.5f;
-
-
 	}
-
-
 }
 
-
-
-
-
-
-
-
-void projectObjToAxis(physObj& Obj, vec2 Axis, float& Max, float& Min) {
+void projectObjToAxis(physObj &Obj, vec2 Axis, float &Max, float &Min)
+{
 
 	float dp = dot(Axis, Obj.Vertices[0].pos);
 
 	Max = Min = dp;
 
-	for (int i = 1; i < Obj.VertexCount; i++) {
+	for (int i = 1; i < Obj.VertexCount; i++)
+	{
 		dp = dot(Axis, Obj.Vertices[i].pos);
 
 		Min = min(dp, Min);
 		Max = max(dp, Max);
-
 	}
-
-
-
 }
 
-vec2 findCenter(const physObj& a) {
+vec2 findCenter(const physObj &a)
+{
 
 	float cx = 0.f;
 	float cy = 0.f;
-	for (int i = 0; i < a.VertexCount; i++) {
+	for (int i = 0; i < a.VertexCount; i++)
+	{
 		cx += a.Vertices[i].pos.x;
 		cy += a.Vertices[i].pos.y;
-
 	}
 
-
 	return vec2(cx / a.VertexCount, cy / a.VertexCount);
-
-
-
 }
 
-void collisionResponse(CollisionEvent& e) {
+void collisionResponse(CollisionEvent &e, bool otherObjMoveable, float otherObjCoef)
+{
 	vec2 CollisionVector = e.Normal * e.Depth;
 
 	int E1 = e.Edge->v1;
@@ -184,37 +163,46 @@ void collisionResponse(CollisionEvent& e) {
 
 	float Lambda = 1.0f / (fac * fac + (1 - fac) * (1 - fac));
 
-	e.EdgeParent->Vertices[E1].pos -= CollisionVector * (1 - fac) * 0.5f * Lambda;
-	e.EdgeParent->Vertices[E2].pos -= CollisionVector * fac * 0.5f * Lambda;
+	if (e.EdgeParent->moveable)
+	{
 
-	e.Vertex->pos += CollisionVector * 0.5f;
+		e.EdgeParent->Vertices[E1].pos -= CollisionVector * (1 - fac) * 0.5f * Lambda * e.EdgeParent->knockbackCoef;
+		e.EdgeParent->Vertices[E2].pos -= CollisionVector * fac * 0.5f * Lambda * e.EdgeParent->knockbackCoef;
+	}
+
+	if (otherObjMoveable)
+	{
+		e.Vertex->pos += CollisionVector * 0.5f * otherObjCoef;
+	}
 }
 
-
-bool detectAndResloveCollision(physObj* a, physObj* b) {
+bool detectAndResloveCollision(physObj *a, physObj *b)
+{
 
 	float minDist = 15000.0f;
 	CollisionEvent event{};
 
-	physObj* parent;
+	physObj *parent;
 
-	for (int i = 0; i < a->EdgesCount + b->EdgesCount; i++) {
-		Edge* currEdge;
-		if (i < a->EdgesCount) {
+	for (int i = 0; i < a->EdgesCount + b->EdgesCount; i++)
+	{
+		Edge *currEdge;
+		if (i < a->EdgesCount)
+		{
 			currEdge = &a->Edges[i];
 
 			parent = a;
 		}
-		else {
+		else
+		{
 			currEdge = &b->Edges[i - a->EdgesCount];
 
 			parent = b;
 		}
 
 		vec2 Axis = vec2((*parent).Vertices[currEdge->v1].pos.y - (*parent).Vertices[currEdge->v2].pos.y,
-			(*parent).Vertices[currEdge->v2].pos.x - (*parent).Vertices[currEdge->v1].pos.x);
+						 (*parent).Vertices[currEdge->v2].pos.x - (*parent).Vertices[currEdge->v1].pos.x);
 		Axis = normalize(Axis);
-
 
 		float MinA, MinB, MaxA, MaxB;
 
@@ -222,39 +210,37 @@ bool detectAndResloveCollision(physObj* a, physObj* b) {
 		projectObjToAxis(*b, Axis, MaxB, MinB);
 		float dist;
 
-		if (MinA < MinB) {
+		if (MinA < MinB)
+		{
 			dist = MinB - MaxA;
 		}
-		else {
+		else
+		{
 			dist = MinA - MaxB;
 		}
 
-		if (dist > 0.0f) {
+		if (dist > 0.0f)
+		{
 			return false;
-
 		}
-		else if (abs(dist) < minDist) {
+		else if (abs(dist) < minDist)
+		{
 			minDist = abs(dist);
-
 
 			event.Normal = Axis;
 			event.Edge = currEdge;
 
 			event.EdgeParent = parent;
 
-
-			//emplace this new event
-
+			// emplace this new event
 		}
-
-
 	}
 
 	event.Depth = minDist;
 
-
-	if ((event.EdgeParent) != b) {
-		physObj* temp = b;
+	if ((event.EdgeParent) != b)
+	{
+		physObj *temp = b;
 		b = a;
 		a = temp;
 	}
@@ -263,168 +249,173 @@ bool detectAndResloveCollision(physObj* a, physObj* b) {
 
 	int sign = (0.f < check) - (check < 0.f);
 
-	if (sign != 1) {
+	if (sign != 1)
+	{
 		event.Normal = -event.Normal;
 	}
 
 	float smallestDist = 20000.0f;
 
+	for (int i = 0; i < a->VertexCount; i++)
+	{
 
-	for (int i = 0; i < a->VertexCount; i++) {
+		float distance = dot(event.Normal, (a->Vertices[i].pos - b->center)); // questionable
 
-		float distance = dot(event.Normal, (a->Vertices[i].pos - b->center)); //questionable
-
-
-		if (distance < smallestDist) {
+		if (distance < smallestDist)
+		{
 			smallestDist = distance;
 			event.Vertex = &a->Vertices[i];
 		}
 	}
 
-
-	collisionResponse(event);
-
+	collisionResponse(event, a->moveable, a->knockbackCoef);
 
 	return true;
-
-
 }
 
-
-
-
-void accelerate(vec2 acc, Vertex_Phys& obj) {
+void accelerate(vec2 acc, Vertex_Phys &obj)
+{
 	obj.accel += acc;
-
 }
 
-
-
-void updateAllEdges() {
-	for (uint i = 0; i < registry.physObjs.size(); i++) {
-		physObj& obj = registry.physObjs.components[i];
+void updateAllEdges()
+{
+	for (uint i = 0; i < registry.physObjs.size(); i++)
+	{
+		physObj &obj = registry.physObjs.components[i];
 
 		updateEdges(obj);
-
 	}
 }
 
+void detectAndSolveAllCollisions()
+{
+	for (uint i = 0; i < registry.physObjs.size(); i++)
+	{
+		physObj *a = &registry.physObjs.components[i];
 
-
-void detectAndSolveAllCollisions() {
-
-	for (uint i = 0; i < registry.physObjs.size(); i++) {
-		physObj* a = &registry.physObjs.components[i];
-
-
-		for (uint i2 = 0; i2 < registry.physObjs.size(); i2++) {
-			physObj* b = &registry.physObjs.components[i2];
+		for (uint i2 = 0; i2 < registry.physObjs.size(); i2++)
+		{
+			physObj *b = &registry.physObjs.components[i2];
+			bool collide = false;
 
 			if (a != b) {
-				detectAndResloveCollision(a, b);
-
+				collide = detectAndResloveCollision(a, b);
 
 			}
 
+			// Handle Collision
 
-
+			// If collided with an enemy
+			Entity entity_a = registry.physObjs.entities[i];
+			Entity entity_b = registry.physObjs.entities[i2];
+			if (collide) {
+				if (registry.pinballEnemies.has(entity_a) && !registry.pinballEnemies.has(entity_b) ||
+					registry.pinballEnemies.has(entity_b) && !registry.pinballEnemies.has(entity_a)) {
+					Entity enemy = entity_a;
+					// remove enemy upon collision
+					if (registry.pinballEnemies.has(entity_a)) {
+						//registry.remove_all_components_of(entity_a);
+						enemy = entity_a;
+					}
+					else {
+						//registry.remove_all_components_of(entity_b);
+						enemy = entity_b;
+					}
+					PinBallEnemy& pinballEnemy = registry.pinballEnemies.get(enemy);
+					pinballEnemy.currentHealth -= 0.5;
+					Entity blood = registry.healthBar.entities[0];
+					Motion& motion = registry.motions.get(blood);
+					float scaleBefore = motion.scale.x;
+					motion.scale.x *= (float) pinballEnemy.currentHealth / pinballEnemy.maxHealth;
+					motion.position.x -= (scaleBefore - motion.scale.x) / 2.0f;
+				}
+			}
 		}
-
-
-
 	}
-
-
 }
 
+void updateAllObjPos(float dt)
+{
 
+	for (uint i = 0; i < registry.physObjs.size(); i++)
+	{
+		physObj &obj = registry.physObjs.components[i];
 
-
-
-
-void updateAllObjPos(float dt) {
-
-
-	for (uint i = 0; i < registry.physObjs.size(); i++) {
-		physObj& obj = registry.physObjs.components[i];
-
-		for (int i2 = 0; i2 < obj.VertexCount; i2++) {
+		for (int i2 = 0; i2 < obj.VertexCount; i2++)
+		{
 			updatePos(dt, (obj.Vertices[i2]));
 			//			printf("x=%f, y=%f\n", obj.Vertices[i2].pos.x, obj.Vertices[i2].pos.y);
 		}
-
 	}
-
 }
 
+void applyObjGrav()
+{
+	for (uint i = 0; i < registry.physObjs.size(); i++)
+	{
+		physObj &obj = registry.physObjs.components[i];
 
-void applyObjGrav() {
-	for (uint i = 0; i < registry.physObjs.size(); i++) {
-		physObj& obj = registry.physObjs.components[i];
+		if (obj.moveable)
+		{
 
-		for (int i2 = 0; i2 < obj.VertexCount; i2++) {
-			accelerate(GRAV, (obj.Vertices[i2]));
+			for (int i2 = 0; i2 < obj.VertexCount; i2++)
+			{
+				accelerate(GRAV, (obj.Vertices[i2]));
+			}
 		}
-
 	}
 }
 
+void updateAllCenters()
+{
 
-void updateAllCenters() {
-
-	for (uint i = 0; i < registry.physObjs.size(); i++) {
-		physObj& obj = registry.physObjs.components[i];
+	for (uint i = 0; i < registry.physObjs.size(); i++)
+	{
+		physObj &obj = registry.physObjs.components[i];
 
 		obj.center = findCenter(obj);
-
 	}
-
-
 }
 
+void applyGlobalConstraints()
+{
 
+	for (uint i = 0; i < registry.physObjs.size(); i++)
+	{
+		physObj &obj = registry.physObjs.components[i];
 
-void applyGlobalConstraints() {
-
-	for (uint i = 0; i < registry.physObjs.size(); i++) {
-		physObj& obj = registry.physObjs.components[i];
-
-		for (int i2 = 0; i2 < obj.VertexCount; i2++) {
-			if (obj.Vertices[i2].pos.y > MAX_Y_COORD) {
+		for (int i2 = 0; i2 < obj.VertexCount; i2++)
+		{
+			if (obj.Vertices[i2].pos.y > MAX_Y_COORD)
+			{
 				obj.Vertices[i2].pos.y = MAX_Y_COORD;
 			}
 
-
-			if (obj.Vertices[i2].pos.y < MIN_Y_COORD) {
+			if (obj.Vertices[i2].pos.y < MIN_Y_COORD)
+			{
 				obj.Vertices[i2].pos.y = MIN_Y_COORD;
 			}
 
-			if (obj.Vertices[i2].pos.x < MIN_X_COORD) {
+			if (obj.Vertices[i2].pos.x < MIN_X_COORD)
+			{
 				obj.Vertices[i2].pos.x = MIN_X_COORD;
 			}
 
-
-			if (obj.Vertices[i2].pos.x > MAX_X_COORD) {
+			if (obj.Vertices[i2].pos.x > MAX_X_COORD)
+			{
 				obj.Vertices[i2].pos.x = MAX_X_COORD;
 			}
-
 		}
-
 	}
-
-
 }
 
+void updateAllMotionInfo()
+{
 
-
-
-
-
-void updateAllMotionInfo() {
-
-
-	for (uint i = 0; i < registry.physObjs.size(); i++) {
-		Entity& obj = registry.physObjs.entities[i];
+	for (uint i = 0; i < registry.physObjs.size(); i++)
+	{
+		Entity &obj = registry.physObjs.entities[i];
 
 		float x = registry.physObjs.get(obj).Vertices[1].pos.x - registry.physObjs.get(obj).Vertices[0].pos.x;
 		float y = registry.physObjs.get(obj).Vertices[1].pos.y - registry.physObjs.get(obj).Vertices[0].pos.y;
@@ -435,32 +426,34 @@ void updateAllMotionInfo() {
 		registry.motions.get(obj).angle = atan2(y, x);
 		//		printf("angle = %f \n", atan2(y, x));
 	}
-
 }
 
+void flipperConstraints()
+{
 
-void flipperConstraints() {
+	for (uint i = 0; i < registry.playerFlippers.size(); i++)
+	{
+		Entity &flipper = registry.playerFlippers.entities[i];
 
-	for (uint i = 0; i < registry.playerFlippers.size(); i++) {
-		Entity& flipper = registry.playerFlippers.entities[i];
+		physObj &flipperPhys = registry.physObjs.get(flipper);
 
-		physObj& flipperPhys = registry.physObjs.get(flipper);
-
-		if (flipperPhys.Vertices[1].pos.y != FLIPPERHEIGHT) {
+		if (flipperPhys.Vertices[1].pos.y != FLIPPERHEIGHT)
+		{
 			flipperPhys.Vertices[1].pos.y = FLIPPERHEIGHT;
 		}
 
-		if (flipperPhys.Vertices[3].pos.y > FLIPPERHEIGHT + FLIPPERDELTA) {
+		if (flipperPhys.Vertices[3].pos.y > FLIPPERHEIGHT + FLIPPERDELTA)
+		{
 			flipperPhys.Vertices[3].pos.y = FLIPPERHEIGHT + FLIPPERDELTA;
 		}
 
-		if (flipperPhys.Vertices[3].pos.y < FLIPPERHEIGHT - FLIPPERDELTA) {
+		if (flipperPhys.Vertices[3].pos.y < FLIPPERHEIGHT - FLIPPERDELTA)
+		{
 			flipperPhys.Vertices[3].pos.y = FLIPPERHEIGHT - FLIPPERDELTA;
 		}
-
 	}
 
-	//if (registry.mousePosArray.size() != 0) {
+	// if (registry.mousePosArray.size() != 0) {
 
 	//	vec2 mouse_position = registry.mousePosArray.components[0].pos;
 
@@ -480,18 +473,17 @@ void flipperConstraints() {
 	//}
 
 	//}
-
 }
 
+void update(float dt)
+{
 
-void update(float dt) {
-	
 	applyObjGrav();
 	updateAllObjPos(dt);
-	Entity& flipper = registry.playerFlippers.entities[0];
+	Entity &flipper = registry.playerFlippers.entities[0];
 
 	flipperConstraints();
-	physObj& flipperPhys = registry.physObjs.get(flipper);
+	physObj &flipperPhys = registry.physObjs.get(flipper);
 	applyGlobalConstraints();
 	updateAllEdges();
 	flipperPhys = registry.physObjs.get(flipper);
@@ -501,81 +493,83 @@ void update(float dt) {
 	flipperPhys = registry.physObjs.get(flipper);
 
 	updateAllMotionInfo();
-	
-	flipperPhys = registry.physObjs.get(flipper);
 
+	flipperPhys = registry.physObjs.get(flipper);
 }
 
-void updateWithSubstep(float dt, float steps) {
+void updateWithSubstep(float dt, float steps)
+{
 
-	for (int i = 0; i < steps; i++) {
+	for (int i = 0; i < steps; i++)
+	{
 		update(dt / steps);
 	}
-
-
 }
-
-
-
-
 
 void PhysicsSystem::step(float elapsed_ms)
 {
 
 	updateWithSubstep(elapsed_ms, 4.0f);
 
-	auto& motion_container = registry.motions;
+	auto &motion_container = registry.motions;
 	for (uint i = 0; i < motion_container.size(); i++)
 	{
-		Motion& motion = motion_container.components[i];
-		Entity entity = motion_container.entities[i];
-		float step_seconds = elapsed_ms / 1000.f;
-		Transform transform;
-		transform.rotate(motion.angle);
-		vec3 velocity = { motion.velocity.x, motion.velocity.y, 1.f };
-		vec3 result = transform.mat * velocity;
-		float x_velocity = result.x;
-		float y_velocity = result.y;
-		float x_position = motion.position.x + (x_velocity * step_seconds);
-		float y_position = motion.position.y + (y_velocity * step_seconds);
-		motion.position = { x_position, y_position };
+		if (registry.pinballEnemies.has(motion_container.entities[i]))
+		{
+			Motion &motion = motion_container.components[i];
+			Entity entity = motion_container.entities[i];
+			float step_seconds = elapsed_ms / 1000.f;
+			Transform transform;
+			transform.rotate(motion.angle);
+			vec3 velocity = {motion.velocity.x, motion.velocity.y, 1.f};
+			vec3 result = transform.mat * velocity;
+			float x_velocity = result.x;
+			float y_velocity = result.y;
+			float x_position = motion.position.x + (x_velocity * step_seconds);
+			float y_position = motion.position.y + (y_velocity * step_seconds);
+			motion.position = {x_position, y_position};
+		}
 	}
-
 }
-
 
 void PhysicsSystem::step_world(float elapsed_ms)
 {
 	// Move fish based on how much time has passed, this is to (partially) avoid
 	// having entities move at different speed based on the machine.
-	auto& motion_container = registry.motions;
+	auto &motion_container = registry.motions;
 	for (uint i = 0; i < motion_container.size(); i++)
 	{
 		// !!! TODO A1: update motion.position based on step_seconds and motion.velocity
-		Motion& motion = motion_container.components[i];
+		Motion &motion = motion_container.components[i];
 		// Entity entity = motion_container.entities[i];
 		float step_seconds = elapsed_ms / 1000.f;
 
-		//2a, 2d: separate velocity components and calculate based on angle
+		// 2a, 2d: separate velocity components and calculate based on angle
 		float v_x = motion.velocity.x * cos(motion.angle) + motion.velocity.y * sin(motion.angle);
 		float v_y = motion.velocity.x * sin(motion.angle) + motion.velocity.y * cos(motion.angle);
-		vec2 velocity = { v_x, v_y };
+		vec2 velocity = {v_x, v_y};
 
 		motion.position += velocity * step_seconds;
+
+
 
 		// Boundary check
 		// Now we restrict everything, but we can choose what we want to restrict
 
-		/*if (motion.position.x < 0) {
+		/*if (motion.position.x < 0)
+		{
 			motion.position.x = 0;
 		}
-		if (motion.position.y < 0) {
+		if (motion.position.y < 0)
+		{
 			motion.position.y = 0;
 		}
-		if (motion.position.x > window_width_px) {
+		if (motion.position.x > window_width_px)
+		{
 			motion.position.x = window_width_px;
 		}
-		if (motion.position.y > window_height_px) {
+		if (motion.position.y > window_height_px)
+		{
 			motion.position.y = window_height_px;
 		}*/
 
@@ -620,14 +614,15 @@ void PhysicsSystem::step_world(float elapsed_ms)
 	// Check for collisions between all moving entities
 	for (uint i = 0; i < motion_container.components.size(); i++)
 	{
-		Motion& motion_i = motion_container.components[i];
+		Motion &motion_i = motion_container.components[i];
 		Entity entity_i = motion_container.entities[i];
 
-		if (!registry.rooms.has(entity_i)) {
+		if (!registry.rooms.has(entity_i))
+		{
 			// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
 			for (uint j = i + 1; j < motion_container.components.size(); j++)
 			{
-				Motion& motion_j = motion_container.components[j];
+				Motion &motion_j = motion_container.components[j];
 				if (collides(motion_i, motion_j))
 				{	
 					Entity entity_j = motion_container.entities[j];

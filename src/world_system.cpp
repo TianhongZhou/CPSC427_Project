@@ -5,6 +5,7 @@
 // stlib
 #include <cassert>
 #include <sstream>
+#include <algorithm>
 
 #include "physics_system.hpp"
 
@@ -32,9 +33,9 @@ WorldSystem::~WorldSystem()
 	if (background_music != nullptr)
 		Mix_FreeMusic(background_music);
 	if (salmon_dead_sound != nullptr)
-		Mix_FreeChunk(salmon_dead_sound);
-	if (salmon_eat_sound != nullptr)
-		Mix_FreeChunk(salmon_eat_sound);
+		// Mix_FreeChunk(salmon_dead_sound);
+	if (player_attack_sound != nullptr)
+		Mix_FreeChunk(player_attack_sound);
 	Mix_CloseAudio();
 
 	// Destroy all created components
@@ -114,16 +115,16 @@ GLFWwindow *WorldSystem::create_window()
 		return nullptr;
 	}
 
-	background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
+	background_music = Mix_LoadMUS(audio_path("Pinball Music.wav").c_str());
 	salmon_dead_sound = Mix_LoadWAV(audio_path("salmon_dead.wav").c_str());
-	salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav").c_str());
+	player_attack_sound = Mix_LoadWAV(audio_path("Attack Sound.wav").c_str());
 
-	if (background_music == nullptr || salmon_dead_sound == nullptr || salmon_eat_sound == nullptr)
+	if (background_music == nullptr || salmon_dead_sound == nullptr || player_attack_sound == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-				audio_path("music.wav").c_str(),
+				audio_path("Pinball Music.mp3").c_str(),
 				audio_path("salmon_dead.wav").c_str(),
-				audio_path("salmon_eat.wav").c_str());
+				audio_path("Attack Sound.wav").c_str());
 		return nullptr;
 	}
 
@@ -184,11 +185,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	//	motion.velocity = vec2(-100.f, 0.f);
 	//}
 
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: HANDLE PEBBLE SPAWN HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 	// Processing the salmon state
 	assert(registry.screenStates.components.size() <= 1);
 	ScreenState &screen = registry.screenStates.components[0];
@@ -215,6 +211,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	}
 	// reduce window brightness if any of the present salmons is dying
 	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
+
+
+	Entity blood = registry.healthBar.entities[0];
+	Motion& motion = registry.motions.get(blood);
+	if (motion.scale.x <= 0.5f)
+	{
+		GameSceneState = 0;
+	}
 
 	return true;
 }
@@ -259,27 +263,66 @@ void WorldSystem::restart_game()
 	//registry.colors.insert(entity, { 1, 1, 1 });
 }
 
-void WorldSystem::init_combat()
+void WorldSystem::init_combat(int initCombat)
 {
+	int w, h;
+	glfwGetWindowSize(window, &w, &h);
+	vec2 boundary = { 260, 800 };
+	std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> distribution1(boundary.x, boundary.y);
+    std::uniform_real_distribution<float> distribution2(0.f, 1.f);
 
-	Entity player_ball = createBall(renderer, {400, 400});
-	// createNewRectangleTiedToEntity(player_ball, 12.f, 12.f, registry.motions.get(player_ball).position);
+	for (int i=0; i<initCombat; i++) {
+		Entity pinballenemy = createPinBallEnemy(renderer, {distribution1(gen),80*(i+1)}, boundary);
+		registry.colors.insert(pinballenemy, { distribution2(gen), distribution2(gen), distribution2(gen) });
+	}
 
-	Entity rectangle2 = createPolygonByVertex(renderer, {{220, 350}, {220, 220}, {300, 220}, {300, 350}}, GEOMETRY_BUFFER_ID::OCT);
+	//Entity player_ball = createBall(renderer, {400, 400});
+	//createNewRectangleTiedToEntity(player_ball, 12.f, 12.f, registry.motions.get(player_ball).position);
 
-	createNewRectangleTiedToEntity(rectangle2, 80.f, 130.f, registry.motions.get(rectangle2).position);
+	//wall
+	Entity leftwall = createPolygonByVertex(renderer, {{220, 749}, {220, 1}, {240, 1}, {240, 749}}, GEOMETRY_BUFFER_ID::OCT);
+	createNewRectangleTiedToEntity(leftwall, 20.f, 698.f, registry.motions.get(leftwall).position, false, 1.0);
 
-	Entity flipper = createPolygonByVertex(renderer, {{300, 600}, {300, 580}, {400, 580}, {400, 600}}, GEOMETRY_BUFFER_ID::RECT);
+	Entity rightwall = createPolygonByVertex(renderer, { {820, 749}, {820, 1}, {840, 1}, {840, 749} }, GEOMETRY_BUFFER_ID::OCT);
+	createNewRectangleTiedToEntity(rightwall, 20.f, 698.f, registry.motions.get(rightwall).position, false, 1.0);
 
-	createNewRectangleTiedToEntity(flipper, 100.f, 20.f, registry.motions.get(flipper).position);
+	//Entity flipper = createPolygonByVertex(renderer, {{300, 600}, {300, 580}, {400, 580}, {400, 600}}, GEOMETRY_BUFFER_ID::RECT);
+
+	//ball
+	Entity squareball = createPolygonByVertex(renderer, { {500, 570}, {500, 520}, {550, 520}, {550, 570} }, GEOMETRY_BUFFER_ID::OCT);
+	createNewRectangleTiedToEntity(squareball, 50.f, 50.f, registry.motions.get(squareball).position, true, 1.0);
+
+
+	//slide
+	Entity leftslide = createPolygonByVertex(renderer, { {220, 750}, {220, 730}, {400, 730}, {400, 750} }, GEOMETRY_BUFFER_ID::RECT);
+	createNewRectangleTiedToEntity(leftslide, 180.f, 20.f, registry.motions.get(leftslide).position, false, 1.0);
+
+	Entity rightslide = createPolygonByVertex(renderer, { {660, 750}, {660, 730}, {840, 730}, {840, 750} }, GEOMETRY_BUFFER_ID::RECT);
+	createNewRectangleTiedToEntity(rightslide, 180.f, 20.f, registry.motions.get(rightslide).position, false, 1.0);
+
+
+	//flipper
+	Entity flipper = createPolygonByVertex(renderer, {{480, 600}, {480, 580}, {580, 580}, {580, 600}}, GEOMETRY_BUFFER_ID::RECT);
+	createNewRectangleTiedToEntity(flipper, 100.f, 20.f, registry.motions.get(flipper).position, true, 0.0);
+
+
+	//enemy
+	Entity enemyobj = createPolygonByVertex(renderer, { {360, 380}, {360, 320}, {520, 320}, {520, 380} }, GEOMETRY_BUFFER_ID::OCT);
+	createNewRectangleTiedToEntity(enemyobj, 120.f, 50.f, registry.motions.get(enemyobj).position, false, 1.0);
+	PinBallEnemy &pinballEnemy = registry.pinballEnemies.emplace(enemyobj);
+	registry.colors.insert(enemyobj, { 0.6, 0, 0 });
 
 	playerFlipper pf;
 	registry.playerFlippers.insert(flipper, pf);
 
-	Entity pinballenemy = createPinBallEnemy(renderer, { 100, 700 });
-	registry.colors.insert(pinballenemy, { 1, 0, 0 });
-	Entity enemyWave = createEnemyWave(renderer, { 400, 600 });
-	registry.colors.insert(enemyWave, { 0, 0, 1 });
+	Entity pinballenemyHealthBg = createPinBallEnemyHealth(renderer, { 520, 50 });
+	registry.colors.insert(pinballenemyHealthBg, { 0.2, 0.2, 0.2 });
+
+	Entity pinballenemyHealth = createPinBallEnemyHealth(renderer, { 520, 50 });
+	registry.colors.insert(pinballenemyHealth, { 1, 0, 0 });
+	registry.healthBar.emplace(pinballenemyHealth);
 }
 
 // Compute collisions between entities
@@ -318,10 +361,9 @@ void WorldSystem::handle_collisions()
 				{
 					// chew, count points, and set the LightUp timer
 					registry.remove_all_components_of(entity_other);
-					Mix_PlayChannel(-1, salmon_eat_sound, 0);
+					// Mix_PlayChannel(-1, player_attack_sound, 0);
 					++points;
 
-					// !!! TODO A1: create a new struct called LightUp in components.hpp and add an instance to the salmon entity by modifying the ECS registry
 				}
 			}
 		}
@@ -351,13 +393,13 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		pressedKeys.erase(key);
 	}
 
-	Motion &motion = registry.motions.get(player);
-	bool inCombat = registry.enterCombatTimer.has(player);
+	Motion& motion = registry.motions.get(player);
+	bool inCombat = GameSceneState || registry.enterCombatTimer.has(player);;
 
 	bool conflictUpAndDown = pressedKeys.count(GLFW_KEY_UP) && pressedKeys.count(GLFW_KEY_DOWN);
 	bool conflictLeftAndRight = pressedKeys.count(GLFW_KEY_LEFT) && pressedKeys.count(GLFW_KEY_RIGHT);
 
-	if (!conflictUpAndDown && (key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) && (action == GLFW_PRESS || action == GLFW_REPEAT) && !inCombat)
+	if (!conflictUpAndDown && (key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) && (action == GLFW_PRESS || action == GLFW_REPEAT) && GameSceneState == 0)
 	{
 		motion.velocity.y = (key == GLFW_KEY_UP) ? -200.f : 200.f;
 	}
@@ -366,7 +408,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		motion.velocity.y = 0.f;
 	}
 
-	if (!conflictLeftAndRight && (key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) && (action == GLFW_PRESS || action == GLFW_REPEAT) && !inCombat)
+	if (!conflictLeftAndRight && (key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) && (action == GLFW_PRESS || action == GLFW_REPEAT) && GameSceneState == 0)
 	{
 		motion.velocity.x = (key == GLFW_KEY_LEFT) ? -200.f : 200.f;
 	}
@@ -379,11 +421,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	{
 		if ((key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) && !conflictUpAndDown)
 		{
-			if (pressedKeys.count(GLFW_KEY_UP))
+			if (pressedKeys.count(GLFW_KEY_UP) && GameSceneState == 0)
 			{
 				motion.velocity.y = -200.f;
 			}
-			else if (pressedKeys.count(GLFW_KEY_DOWN))
+			else if (pressedKeys.count(GLFW_KEY_DOWN) && GameSceneState == 0)
 			{
 				motion.velocity.y = 200.f;
 			}
@@ -395,11 +437,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 		if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) && !conflictLeftAndRight)
 		{
-			if (pressedKeys.count(GLFW_KEY_LEFT))
+			if (pressedKeys.count(GLFW_KEY_LEFT) && GameSceneState == 0)
 			{
 				motion.velocity.x = -200.f;
 			}
-			else if (pressedKeys.count(GLFW_KEY_RIGHT))
+			else if (pressedKeys.count(GLFW_KEY_RIGHT) && GameSceneState == 0)
 			{
 				motion.velocity.x = 200.f;
 			}
@@ -414,8 +456,8 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	{
 		if (registry.spriteSheets.has(player))
 		{
-			SpriteSheet &spriteSheet = registry.spriteSheets.get(player);
-			RenderRequest &renderRequest = registry.renderRequests.get(player);
+			SpriteSheet& spriteSheet = registry.spriteSheets.get(player);
+			RenderRequest& renderRequest = registry.renderRequests.get(player);
 			renderRequest.used_texture = spriteSheet.origin;
 			registry.spriteSheets.remove(player);
 		}
@@ -424,7 +466,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	{
 		if (!registry.spriteSheets.has(player))
 		{
-			SpriteSheet &spriteSheet = registry.spriteSheets.emplace_with_duplicates(player);
+			SpriteSheet& spriteSheet = registry.spriteSheets.emplace_with_duplicates(player);
 			spriteSheet.next_sprite = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;
 			spriteSheet.frameIncrement = 0.06f;
 			spriteSheet.frameAccumulator = 0.0f;
@@ -437,7 +479,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			{
 				spriteSheet.xFlip = true;
 			}
-			RenderRequest &renderRequest = registry.renderRequests.get(player);
+			RenderRequest& renderRequest = registry.renderRequests.get(player);
 			renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;
 		}
 	}
@@ -466,27 +508,27 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_P)
 	{
-		Entity &flipper = registry.playerFlippers.entities[0];
+		Entity& flipper = registry.playerFlippers.entities[0];
 
-		physObj &flipperPhys = registry.physObjs.get(flipper);
+		physObj& flipperPhys = registry.physObjs.get(flipper);
 
 		flipperPhys.Vertices[3].accel += vec2(0.f, -0.8f);
 	}
 
 	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
 	{
-		Entity &flipper = registry.playerFlippers.entities[0];
+		Entity& flipper = registry.playerFlippers.entities[0];
 
-		physObj &flipperPhys = registry.physObjs.get(flipper);
+		physObj& flipperPhys = registry.physObjs.get(flipper);
 
 		flipperPhys.Vertices[1].accel += vec2(0.1f, 0.f);
 	}
 
 	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_LEFT)
 	{
-		Entity &flipper = registry.playerFlippers.entities[0];
+		Entity& flipper = registry.playerFlippers.entities[0];
 
-		physObj &flipperPhys = registry.physObjs.get(flipper);
+		physObj& flipperPhys = registry.physObjs.get(flipper);
 
 		flipperPhys.Vertices[1].accel += vec2(-0.1f, 0.f);
 	}
@@ -517,19 +559,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && GameSceneState == 0) {
 		on_mouse_click(GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0);
 	}
-
 }
 
-void WorldSystem::on_mouse_move(vec2 mouse_position)
-{
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE SALMON ROTATION HERE
-	// xpos and ypos are relative to the top-left of the window, the salmon's
-	// default facing direction is (1, 0)
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+void WorldSystem::on_mouse_move(vec2 mouse_position) {
 
-	if (registry.mousePosArray.size() == 0)
-	{
+	if (registry.mousePosArray.size() == 0) {
 		Entity e;
 		mousePos mp;
 		mp.pos = mouse_position;
@@ -546,6 +580,8 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 
 	if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT && GameSceneState == 0)
 	{
+		Mix_PlayChannel(-1, player_attack_sound, 0);
+
 		bool temp = false;
 		if (registry.spriteSheets.has(player))
 		{
@@ -558,7 +594,7 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 		}
 		SpriteSheet &spriteSheet = registry.spriteSheets.emplace_with_duplicates(player);
 		spriteSheet.next_sprite = TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET;
-		spriteSheet.frameIncrement = 0.06f;
+		spriteSheet.frameIncrement = 0.08f;
 		spriteSheet.frameAccumulator = 0.0f;
 		spriteSheet.spriteSheetHeight = 1;
 		spriteSheet.spriteSheetWidth = 6;
@@ -605,11 +641,11 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 	}
 }
 
-void WorldSystem::exit_combat()
-{
-	while (registry.physObjs.entities.size() > 0)
-		registry.remove_all_components_of(registry.physObjs.entities.back());
-	GameSceneState = 0;
+void WorldSystem::exit_combat() {
+	while (registry.combat.entities.size() > 0)
+		registry.remove_all_components_of(registry.combat.entities.back());
+
+    GameSceneState = 0;
 }
 
 // ================================================== WORLD ===============================================================================
@@ -664,13 +700,15 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 		}
 		if (timer.timer_ms < 0)
 		{
-			if (registry.mainWorldEnemies.has(entity))
-			{
-				registry.remove_all_components_of(entity);
-			}
-			registry.enterCombatTimer.remove(entity);
+			for (Entity ene: registry.enterCombatTimer.get(entity).engagedEnemeis) {
+            	registry.remove_all_components_of(ene);
+            }
+         	for (Enemy& remain: registry.mainWorldEnemies.components) {
+          		remain.seePlayer = false;
+         	}
 			GameSceneState = 1;
-			InitCombat = 1;
+			InitCombat = registry.enterCombatTimer.get(entity).engagedEnemeis.size();
+			registry.enterCombatTimer.remove(entity);
 		}
 	}
 
@@ -734,22 +772,30 @@ void WorldSystem::handle_collisions_world()
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other_entity;
-		//if (registry.players.has(entity))
-		//{
-		//	// Checking Player - Enemy collisions
-		//	if (registry.mainWorldEnemies.has(entity_other))
-		//	{
-		//		if (!registry.enterCombatTimer.has(entity))
-		//		{
-		//			registry.enterCombatTimer.emplace(entity);
-		//		}
-		//		if (!registry.enterCombatTimer.has(entity_other))
-		//		{
-		//			registry.enterCombatTimer.emplace(entity_other);
-		//		}
-		//	}
-		//}
-
+		if (registry.players.has(entity))
+		{
+			// Checking Player - Enemy collisions
+			if (registry.mainWorldEnemies.has(entity_other))
+			{
+				if (!registry.enterCombatTimer.has(entity))
+				{
+					registry.enterCombatTimer.emplace(entity);
+					registry.enterCombatTimer.get(entity).engagedEnemeis.push_back(entity_other);
+				} else {
+					std::vector<Entity> vec = registry.enterCombatTimer.get(entity).engagedEnemeis;
+					int find = 0;
+					for (unsigned int j = 0; j < vec.size(); j++) {
+    					if (vec[j]== entity_other) {
+							find = 1;
+							break;
+						}
+  					}
+					if (!find) {
+        				registry.enterCombatTimer.get(entity).engagedEnemeis.push_back(entity_other);
+    				}
+				}
+			}
+		}
 		// enemy bullet vs player bullet collision
 		if (registry.enemyBullets.has(entity) && registry.playerBullets.has(entity_other) ||
 			registry.enemyBullets.has(entity_other) && registry.playerBullets.has(entity)) {
@@ -770,9 +816,3 @@ void WorldSystem::handle_collisions_world()
 	// Remove all collisions from this simulation step
 	registry.collisions.clear();
 }
-
-////set main world stuff out of sight
-// void WorldSystem::main_world_out() {
-//	//set enemies, player, room, road invisible
-//
-// }
