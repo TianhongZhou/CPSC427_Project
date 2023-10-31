@@ -109,7 +109,7 @@ void AISystem::step_world(float elapsed_ms)
 			}
 
 			float distanceToPlayer = glm::length(playerMotion.position - enemyMotion.position);
-			if (enemy.seePlayer)
+			if (enemy.seePlayer && !registry.positionKeyFrames.has(motion_container.entities[i]))
 			{
 				// Enemy chasing player
 				// enemyMotion.angle = angleToPlayer;

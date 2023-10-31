@@ -550,7 +550,7 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 		Motion& motion = registry.motions.get(entity);
 		motion.position = registry.motions.get(player).position;
 
-		float radius = 30; //* (uniform_dist(rng) + 0.3f);
+		float radius = 20; //* (uniform_dist(rng) + 0.3f);
 		motion.scale = { radius, radius };
 
 		vec2 player_v = registry.motions.get(player).velocity;
@@ -706,7 +706,7 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 
 	generate_enemy_timer += elapsed_ms_since_last_update / 1000.0f; // Convert elapsed time to seconds
 
-    if (generate_enemy_timer >= 2.f) {
+    if (generate_enemy_timer >= 3.f) {
 		vec2 pos = registry.motions.get(registry.rooms.entities[0]).position;
 		Entity ene = createRoomEnemy(renderer, { pos[0]+distribution1(gen), pos[1]+distribution1(gen) }, pos, 700.f, false);
 		registry.colors.insert(ene, { distribution2(gen), distribution2(gen), distribution2(gen) });
@@ -730,7 +730,7 @@ void WorldSystem::handle_collisions_world()
 		if (registry.players.has(entity))
 		{
 			// Checking Player - Enemy collisions
-			if (registry.mainWorldEnemies.has(entity_other))
+			if (registry.mainWorldEnemies.has(entity_other) && registry.positionKeyFrames.has(entity_other) && registry.mainWorldEnemies.size() == 1)
 			{
 				if (!registry.enterCombatTimer.has(entity))
 				{
@@ -763,8 +763,22 @@ void WorldSystem::handle_collisions_world()
 		if (registry.mainWorldEnemies.has(entity) && registry.playerBullets.has(entity_other) ||
 			registry.mainWorldEnemies.has(entity_other) && registry.playerBullets.has(entity)) {
 			// remove enemy upon collision
-			registry.remove_all_components_of(entity);
-			registry.remove_all_components_of(entity_other);
+			if (!registry.positionKeyFrames.has(entity) && !registry.positionKeyFrames.has(entity_other)) {
+				registry.remove_all_components_of(entity);
+				registry.remove_all_components_of(entity_other);
+			}
+		}
+
+		// enemyy bullet vs player collision
+		if (registry.enemyBullets.has(entity) && registry.players.has(entity_other) ||
+			registry.enemyBullets.has(entity_other) && registry.players.has(entity)) {
+			// handle damage interaction (nothing for now)
+			if (registry.enemyBullets.has(entity)) {
+				registry.remove_all_components_of(entity);
+			}
+			else {
+				registry.remove_all_components_of(entity_other);
+			}
 		}
 	}
 
