@@ -44,6 +44,7 @@ struct PinBallEnemy
 	float randomMoveTimer = 0.1f;
 	vec2 boundary;
 	bool keyFrame;
+	std::array<Entity,3> healthBar;
 	float maxHealth = 100.f;
 	float currentHealth = 100.f;
 };

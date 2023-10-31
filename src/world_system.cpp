@@ -145,79 +145,25 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
-	// Updating window title with points
-	std::stringstream title_ss;
-	title_ss << "Points: " << points;
-	glfwSetWindowTitle(window, title_ss.str().c_str());
-
-	// Remove debug info from the last step
-	while (registry.debugComponents.entities.size() > 0)
-		registry.remove_all_components_of(registry.debugComponents.entities.back());
-
-	// Removing out of screen entities
-	auto &motion_container = registry.motions;
-
-	// Remove entities that leave the screen on the left side
-	// Iterate backwards to be able to remove without unterfering with the next object to visit
-	// (the containers exchange the last element with the current)
-	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i)
-	{
-		Motion &motion = motion_container.components[i];
-		if (motion.position.x + abs(motion.scale.x) < 0.f)
-		{
-			if (!registry.players.has(motion_container.entities[i])) // don't remove the player
-				registry.remove_all_components_of(motion_container.entities[i]);
+	// Entity blood = registry.healthBar.entities[0];
+	// Motion& motion = registry.motions.get(blood);
+	// if (motion.scale.x <= 0.5f)
+	// {
+	// 	GameSceneState = 0;
+	// }
+	if (registry.pinballEnemies.entities.size()==0) {
+		// exit_combat();
+		// GameSceneState = 0;
+	} else {
+		for (Entity entity: registry.pinballEnemies.entities) {
+		PinBallEnemy& enemy = registry.pinballEnemies.get(entity);
+		if (enemy.currentHealth<=0) {
+			for (int j=0; j<enemy.healthBar.size(); j++) {
+				registry.remove_all_components_of(enemy.healthBar[j]);
+			}
+			registry.remove_all_components_of(entity);
 		}
 	}
-
-	// Spawning new turtles
-	// next_turtle_spawn -= elapsed_ms_since_last_update * current_speed;
-	// if (registry.rooms.components.size() <= MAX_TURTLES && next_turtle_spawn < 0.f) {
-	//	// Reset timer
-	//	next_turtle_spawn = (TURTLE_DELAY_MS / 2) + uniform_dist(rng) * (TURTLE_DELAY_MS / 2);
-	//	// Create turtle
-	//	Entity entity = createTurtle(renderer, {0,0});
-	//	// Setting random initial position and constant velocity
-	//	Motion& motion = registry.motions.get(entity);
-	//	motion.position =
-	//		vec2(window_width_px -200.f,
-	//			 50.f + uniform_dist(rng) * (window_height_px - 100.f));
-	//	motion.velocity = vec2(-100.f, 0.f);
-	//}
-
-	// Processing the salmon state
-	assert(registry.screenStates.components.size() <= 1);
-	ScreenState &screen = registry.screenStates.components[0];
-
-	float min_timer_ms = 3000.f;
-	for (Entity entity : registry.deathTimers.entities)
-	{
-		// progress timer
-		DeathTimer &timer = registry.deathTimers.get(entity);
-		timer.timer_ms -= elapsed_ms_since_last_update;
-		if (timer.timer_ms < min_timer_ms)
-		{
-			min_timer_ms = timer.timer_ms;
-		}
-
-		// restart the game once the death timer expired
-		if (timer.timer_ms < 0)
-		{
-			registry.deathTimers.remove(entity);
-			screen.screen_darken_factor = 0;
-			restart_game();
-			return true;
-		}
-	}
-	// reduce window brightness if any of the present salmons is dying
-	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
-
-
-	Entity blood = registry.healthBar.entities[0];
-	Motion& motion = registry.motions.get(blood);
-	if (motion.scale.x <= 0.5f)
-	{
-		GameSceneState = 0;
 	}
 
 	return true;
@@ -251,9 +197,9 @@ void WorldSystem::restart_game()
 
 void WorldSystem::init_combat(int initCombat)
 {
-	int w, h;
-	glfwGetWindowSize(window, &w, &h);
-	vec2 boundary = { 260, 800 };
+	// int w, h;
+	// glfwGetWindowSize(window, &w, &h);
+	vec2 boundary = { 260+50, 800-50 };
 	std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> distribution1(boundary.x, boundary.y);
@@ -264,8 +210,8 @@ void WorldSystem::init_combat(int initCombat)
 		registry.colors.insert(pinballenemy, { distribution2(gen), distribution2(gen), distribution2(gen) });
 	}
 
-	//Entity player_ball = createBall(renderer, {400, 400});
-	//createNewRectangleTiedToEntity(player_ball, 12.f, 12.f, registry.motions.get(player_ball).position);
+	Entity player_ball = createBall(renderer, {400, 400});
+	createNewRectangleTiedToEntity(player_ball, 12.f, 12.f, registry.motions.get(player_ball).position, true, 1.0);
 
 	//wall
 	Entity leftwall = createPolygonByVertex(renderer, {{220, 749}, {220, 1}, {240, 1}, {240, 749}}, GEOMETRY_BUFFER_ID::OCT);
@@ -277,8 +223,8 @@ void WorldSystem::init_combat(int initCombat)
 	//Entity flipper = createPolygonByVertex(renderer, {{300, 600}, {300, 580}, {400, 580}, {400, 600}}, GEOMETRY_BUFFER_ID::RECT);
 
 	//ball
-	Entity squareball = createPolygonByVertex(renderer, { {500, 570}, {500, 520}, {550, 520}, {550, 570} }, GEOMETRY_BUFFER_ID::OCT);
-	createNewRectangleTiedToEntity(squareball, 50.f, 50.f, registry.motions.get(squareball).position, true, 1.0);
+	// Entity squareball = createPolygonByVertex(renderer, { {500, 570}, {500, 520}, {550, 520}, {550, 570} }, GEOMETRY_BUFFER_ID::OCT);
+	// createNewRectangleTiedToEntity(squareball, 50.f, 50.f, registry.motions.get(squareball).position, true, 1.0);
 
 
 	//slide
@@ -295,20 +241,13 @@ void WorldSystem::init_combat(int initCombat)
 
 
 	//enemy
-	Entity enemyobj = createPolygonByVertex(renderer, { {360, 380}, {360, 320}, {520, 320}, {520, 380} }, GEOMETRY_BUFFER_ID::OCT);
-	createNewRectangleTiedToEntity(enemyobj, 120.f, 50.f, registry.motions.get(enemyobj).position, false, 1.0);
-	PinBallEnemy &pinballEnemy = registry.pinballEnemies.emplace(enemyobj);
-	registry.colors.insert(enemyobj, { 0.6, 0, 0 });
+	// Entity enemyobj = createPolygonByVertex(renderer, { {360, 380}, {360, 320}, {520, 320}, {520, 380} }, GEOMETRY_BUFFER_ID::OCT);
+	// createNewRectangleTiedToEntity(enemyobj, 120.f, 50.f, registry.motions.get(enemyobj).position, false, 1.0);
+	// PinBallEnemy &pinballEnemy = registry.pinballEnemies.emplace(enemyobj);
+	// registry.colors.insert(enemyobj, { 0.6, 0, 0 });
 
 	playerFlipper pf;
 	registry.playerFlippers.insert(flipper, pf);
-
-	Entity pinballenemyHealthBg = createPinBallEnemyHealth(renderer, { 520, 50 });
-	registry.colors.insert(pinballenemyHealthBg, { 0.2, 0.2, 0.2 });
-
-	Entity pinballenemyHealth = createPinBallEnemyHealth(renderer, { 520, 50 });
-	registry.colors.insert(pinballenemyHealth, { 1, 0, 0 });
-	registry.healthBar.emplace(pinballenemyHealth);
 }
 
 // Compute collisions between entities
