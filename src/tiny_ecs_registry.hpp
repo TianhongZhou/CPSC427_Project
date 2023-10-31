@@ -11,6 +11,7 @@ class ECSRegistry
 
 public:
 	// Manually created list of all components this game has
+	
     ComponentContainer<EnterCombatTimer> enterCombatTimer;
     ComponentContainer<Combat> combat;
     ComponentContainer<MainWorld> mainWorld;
@@ -34,14 +35,18 @@ public:
 	ComponentContainer<Light> lights;
 	ComponentContainer<PositionKeyFrame> positionKeyFrames;
 	ComponentContainer<HealthBar> healthBar;
+	
+	ComponentContainer<PlayerBullet> playerBullets;
+	ComponentContainer<EnemyBullet> enemyBullets;
+	ComponentContainer<Ball> balls;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
 	{
         registry_list.push_back(&combat);
-        registry_list.push_back(&mainWorld);
-        registry_list.push_back(&deathTimers);
+		registry_list.push_back(&mainWorld);
+		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);
 		registry_list.push_back(&collisions);
 		registry_list.push_back(&players);
@@ -61,6 +66,10 @@ public:
 		registry_list.push_back(&lights);
 		registry_list.push_back(&positionKeyFrames);
 		registry_list.push_back(&healthBar);
+
+		registry_list.push_back(&playerBullets);
+		registry_list.push_back(&enemyBullets);
+		registry_list.push_back(&balls);
 	}
 
 	void clear_all_components() {
