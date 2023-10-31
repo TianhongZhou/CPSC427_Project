@@ -698,6 +698,22 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 		}
 	}
 
+	//Generate enemy
+	std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> distribution1(-450.0f, 450.0f);
+    std::uniform_real_distribution<float> distribution2(0.0f, 1.0f);
+
+	generate_enemy_timer += elapsed_ms_since_last_update / 1000.0f; // Convert elapsed time to seconds
+
+    if (generate_enemy_timer >= 2.f) {
+		vec2 pos = registry.motions.get(registry.rooms.entities[0]).position;
+		Entity ene = createRoomEnemy(renderer, { pos[0]+distribution1(gen), pos[1]+distribution1(gen) }, pos, 700.f, false);
+		registry.colors.insert(ene, { distribution2(gen), distribution2(gen), distribution2(gen) });
+        // Reset the timer
+        generate_enemy_timer = 0.0f;
+    }
+
 	return true;
 }
 
