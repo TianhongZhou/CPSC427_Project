@@ -267,11 +267,24 @@ Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos)
 	enemy.boundary = boundary;
 	enemy.maxHealth = 100.f;
 	enemy.currentHealth = 100.f;
+
+	Entity healthBar = createPinBallEnemyHealth(renderer, { pos.x, pos.y-50 });
+	registry.colors.insert(healthBar, { 0.2, 0.2, 0.2 });
+	Entity healthAmortized = createPinBallEnemyHealth(renderer, { pos.x, pos.y-50 });
+	registry.colors.insert(healthAmortized, { 1, 1, 1 });
+
+	Entity health = createPinBallEnemyHealth(renderer, { pos.x, pos.y-50 });
+	registry.colors.insert(health, { 1, 0, 0 });
+	registry.healthBar.emplace(health);
+	enemy.healthBar[0] = healthBar;
+	enemy.healthBar[1] = health;
+	enemy.healthBar[2] = healthAmortized;
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			EFFECT_ASSET_ID::SALMON,
-			GEOMETRY_BUFFER_ID::PINBALLENEMY });
+			GEOMETRY_BUFFER_ID::OCT });
+	createNewRectangleTiedToEntity(entity, 120.f, 50.f, registry.motions.get(entity).position, false, 1.0);		
 
 	return entity;
 }
@@ -289,7 +302,7 @@ Entity createBall(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 10.f;
+	motion.scale = mesh.original_size * 20.f;
 
 	// registry.players.emplace(entity);
 	registry.renderRequests.insert(

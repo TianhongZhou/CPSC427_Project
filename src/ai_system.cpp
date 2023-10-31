@@ -40,6 +40,27 @@ void AISystem::step(float elapsed_ms)
 			{
 				enemy.randomMoveTimer -= step_seconds;
 			}
+
+			// Health bar follows enemy
+			for (int j=0; j<enemy.healthBar.size(); j++) {
+				if (motion_container.has(enemy.healthBar[j])) {
+					Motion& healthbarMotion = motion_container.get(enemy.healthBar[j]);
+					healthbarMotion.position.x = enemyMotion.position.x;
+					healthbarMotion.position.y = enemyMotion.position.y-50.f;
+				}
+			}
+
+			// Update healthbar
+			if (motion_container.has(enemy.healthBar[1]) && motion_container.has(enemy.healthBar[2])) {
+				Motion& barMotion = motion_container.get(enemy.healthBar[0]);
+				Motion& healthMotion = motion_container.get(enemy.healthBar[1]);
+				Motion& amortizedMotion = motion_container.get(enemy.healthBar[2]);
+				healthMotion.scale.x =  barMotion.scale.x * enemy.currentHealth/enemy.maxHealth;
+				if (amortizedMotion.scale.x>healthMotion.scale.x) {
+					amortizedMotion.scale.x -= 0.5f;
+				}
+			}
+			
 		}
 	}
 }
