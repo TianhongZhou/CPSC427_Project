@@ -220,19 +220,19 @@ void WorldSystem::init_combat(int initCombat)
     std::uniform_real_distribution<float> distribution2(0.f, 1.f);
 
 	for (int i=0; i<initCombat; i++) {
-		Entity pinballenemy = createPinBallEnemy(renderer, {distribution1(gen),80*(i+1)}, boundary);
+		Entity pinballenemy = createPinBallEnemy(renderer, {distribution1(gen),180*(i+1)}, boundary);
 		registry.colors.insert(pinballenemy, { distribution2(gen), distribution2(gen), distribution2(gen) });
 	}
 
 	Entity player_ball = createBall(renderer, {400, 400});
-	createNewRectangleTiedToEntity(player_ball, 12.f, 12.f, registry.motions.get(player_ball).position, true, 1.0);
+	createNewRectangleTiedToEntity(player_ball, 30.f, 30.f, registry.motions.get(player_ball).position, true, 0.7);
 
 	//wall
 	Entity leftwall = createPolygonByVertex(renderer, {{220, 749}, {220, 1}, {240, 1}, {240, 749}}, GEOMETRY_BUFFER_ID::OCT);
-	createNewRectangleTiedToEntity(leftwall, 20.f, 698.f, registry.motions.get(leftwall).position, false, 1.0);
+	createNewRectangleTiedToEntity(leftwall, 20.f, 748.f, registry.motions.get(leftwall).position, false, 1.0);
 
 	Entity rightwall = createPolygonByVertex(renderer, { {820, 749}, {820, 1}, {840, 1}, {840, 749} }, GEOMETRY_BUFFER_ID::OCT);
-	createNewRectangleTiedToEntity(rightwall, 20.f, 698.f, registry.motions.get(rightwall).position, false, 1.0);
+	createNewRectangleTiedToEntity(rightwall, 20.f, 748.f, registry.motions.get(rightwall).position, false, 1.0);
 
 	//Entity flipper = createPolygonByVertex(renderer, {{300, 600}, {300, 580}, {400, 580}, {400, 600}}, GEOMETRY_BUFFER_ID::RECT);
 
@@ -242,10 +242,10 @@ void WorldSystem::init_combat(int initCombat)
 
 
 	//slide
-	Entity leftslide = createPolygonByVertex(renderer, { {220, 750}, {220, 730}, {400, 730}, {400, 750} }, GEOMETRY_BUFFER_ID::RECT);
+	Entity leftslide = createPolygonByVertex(renderer, { {220, 750}, {220, 730}, {400, 750}, {400, 730} }, GEOMETRY_BUFFER_ID::RECT);
 	createNewRectangleTiedToEntity(leftslide, 180.f, 20.f, registry.motions.get(leftslide).position, false, 1.0);
 
-	Entity rightslide = createPolygonByVertex(renderer, { {660, 750}, {660, 730}, {840, 730}, {840, 750} }, GEOMETRY_BUFFER_ID::RECT);
+	Entity rightslide = createPolygonByVertex(renderer, { {660, 750}, {660, 730}, {840, 750}, {840, 730} }, GEOMETRY_BUFFER_ID::RECT);
 	createNewRectangleTiedToEntity(rightslide, 180.f, 20.f, registry.motions.get(rightslide).position, false, 1.0);
 
 
