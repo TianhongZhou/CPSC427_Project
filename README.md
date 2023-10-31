@@ -50,11 +50,17 @@
     - drawShadow in render_system.cpp
     - createShadow in world_init.cpp
 - ### Playability
-    - ####
-    - #### Blood
-	    - createPinBallEnemyBlood in world_init.cpp
-	    - init_combat in world_system.cpp
-	    - detectAndSolveAllCollisions in physics_system.cpp
+    - #### MainWorld enemy AI system
+   	    - stepWorld in ai_system.cpp
+    - #### MainWorld enemy periodic generation
+   	    - stepWorld in world_system.cpp
+    - #### MainWorld player-enemy collision and combat trigering
+   	    - stepWorld in world_system.cpp
+   	    - init_combat in world_system.cpp
+    - #### Health system
+	    - createPinBallEnemyHealth in world_init.cpp
+	    - createPinBallEnemy in world_init.cpp
+	    - step in ai_system.cpp
 
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:
