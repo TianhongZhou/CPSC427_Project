@@ -50,6 +50,8 @@
     - shadow.png in textures
     - drawShadow in render_system.cpp
     - createShadow in world_init.cpp
+- ### Help
+    - draw_world in render_system.cpp
 - ### Playability
     - #### MainWorld enemy AI system
    	    - stepWorld in ai_system.cpp
