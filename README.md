@@ -78,6 +78,20 @@ The original development plan for the week of Sept. 31 and Oct. 8 is as followin
     - Basic scene for dungeon completed (game space boundaries, some actions for character/assets)
     - Basic collision detection for dungeon (at least for boundaries)
     - Basic scene change 
+- Week: Oct 15
+    - Basic dungeon logic
+    - Basic dungeon progression system (cards the player chooses after combat or collect items)
+    - Render some art assets with game
+- Week: Oct 22 - Minimal Playability
+    - (Smooth) enemy collision and scene change
+    - Tutorial design
+    - Different types of dungeon rooms
+    - Sprite sheet animation
+    - Integrate more art assets
+- Week: Oct 29
+    - Implement a basic tutorial
+    - Basic randomized dungeon generation logic 
+    - Improved dungeon progression system
+    - Scale difficulty of combat with dungeon progression
 
-All points listed above are finished on time, while basic movement across the dungeon is done in the week of Oct. 8 instead of Sept. 31. All other parts follow the plan exactly. There are no discrepancies between the development plan and actual development progress.
-
+Basic dungeon logic is done on Oct. 30 instead in the week of Oct. 15. Did not implement basic dungeon progression system. Rendering is done in the week of Oct. 22 instead of Oct. 15. Did not implement different types of dungeon rooms. Tutorial design is done in the week of Oct. 29 instead of Oct 22. Except for the ones mentioned above, all other points listed are finished on time. The discrepancies between the development plan and actual development progress is also listed.
