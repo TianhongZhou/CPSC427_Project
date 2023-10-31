@@ -550,7 +550,7 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 		Motion& motion = registry.motions.get(entity);
 		motion.position = registry.motions.get(player).position;
 
-		float radius = 30; //* (uniform_dist(rng) + 0.3f);
+		float radius = 20; //* (uniform_dist(rng) + 0.3f);
 		motion.scale = { radius, radius };
 
 		vec2 player_v = registry.motions.get(player).velocity;
@@ -706,7 +706,7 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 
 	generate_enemy_timer += elapsed_ms_since_last_update / 1000.0f; // Convert elapsed time to seconds
 
-    if (generate_enemy_timer >= 5.f) {
+    if (generate_enemy_timer >= 3.f) {
 		vec2 pos = registry.motions.get(registry.rooms.entities[0]).position;
 		Entity ene = createRoomEnemy(renderer, { pos[0]+distribution1(gen), pos[1]+distribution1(gen) }, pos, 700.f, false);
 		registry.colors.insert(ene, { distribution2(gen), distribution2(gen), distribution2(gen) });

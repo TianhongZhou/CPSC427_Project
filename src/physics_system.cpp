@@ -15,7 +15,7 @@ vec2 get_bounding_box(const Motion &motion)
 // surely implement a more accurate detection
 bool collides(const Motion &motion1, const Motion &motion2)
 {
-	/*vec2 dp = motion1.position - motion2.position;
+	vec2 dp = motion1.position - motion2.position;
 	float dist_squared = dot(dp, dp);
 	const vec2 other_bonding_box = get_bounding_box(motion1) / 2.f;
 	const float other_r_squared = dot(other_bonding_box, other_bonding_box);
@@ -24,12 +24,12 @@ bool collides(const Motion &motion1, const Motion &motion2)
 	const float r_squared = max(other_r_squared, my_r_squared);
 	if (dist_squared < r_squared)
 		return true;
-	return false;*/
+	return false;
 
-	vec2 dp = motion1.position - motion2.position;
+	/*vec2 dp = motion1.position - motion2.position;
 	float dist = length(dp);
 	float radius_sum = (abs(motion1.scale.x) + abs(motion2.scale.x)) / 2.f;
-	return dist <= radius_sum;
+	return dist <= radius_sum;*/
 }
 
 float MAX_Y_COORD = 750.0f;
