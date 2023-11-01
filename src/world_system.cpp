@@ -220,19 +220,19 @@ void WorldSystem::init_combat(int initCombat)
     std::uniform_real_distribution<float> distribution2(0.f, 1.f);
 
 	for (int i=0; i<initCombat; i++) {
-		Entity pinballenemy = createPinBallEnemy(renderer, {distribution1(gen),80*(i+1)}, boundary);
+		Entity pinballenemy = createPinBallEnemy(renderer, {distribution1(gen),180*(i+1)}, boundary);
 		registry.colors.insert(pinballenemy, { distribution2(gen), distribution2(gen), distribution2(gen) });
 	}
 
 	Entity player_ball = createBall(renderer, {400, 400});
-	createNewRectangleTiedToEntity(player_ball, 12.f, 12.f, registry.motions.get(player_ball).position, true, 1.0);
+	createNewRectangleTiedToEntity(player_ball, 30.f, 30.f, registry.motions.get(player_ball).position, true, 0.7);
 
 	//wall
 	Entity leftwall = createPolygonByVertex(renderer, {{220, 749}, {220, 1}, {240, 1}, {240, 749}}, GEOMETRY_BUFFER_ID::OCT);
-	createNewRectangleTiedToEntity(leftwall, 20.f, 698.f, registry.motions.get(leftwall).position, false, 1.0);
+	createNewRectangleTiedToEntity(leftwall, 20.f, 748.f, registry.motions.get(leftwall).position, false, 1.0);
 
 	Entity rightwall = createPolygonByVertex(renderer, { {820, 749}, {820, 1}, {840, 1}, {840, 749} }, GEOMETRY_BUFFER_ID::OCT);
-	createNewRectangleTiedToEntity(rightwall, 20.f, 698.f, registry.motions.get(rightwall).position, false, 1.0);
+	createNewRectangleTiedToEntity(rightwall, 20.f, 748.f, registry.motions.get(rightwall).position, false, 1.0);
 
 	//Entity flipper = createPolygonByVertex(renderer, {{300, 600}, {300, 580}, {400, 580}, {400, 600}}, GEOMETRY_BUFFER_ID::RECT);
 
@@ -242,10 +242,10 @@ void WorldSystem::init_combat(int initCombat)
 
 
 	//slide
-	Entity leftslide = createPolygonByVertex(renderer, { {220, 750}, {220, 730}, {400, 730}, {400, 750} }, GEOMETRY_BUFFER_ID::RECT);
+	Entity leftslide = createPolygonByVertex(renderer, { {220, 750}, {220, 730}, {400, 750}, {400, 730} }, GEOMETRY_BUFFER_ID::RECT);
 	createNewRectangleTiedToEntity(leftslide, 180.f, 20.f, registry.motions.get(leftslide).position, false, 1.0);
 
-	Entity rightslide = createPolygonByVertex(renderer, { {660, 750}, {660, 730}, {840, 730}, {840, 750} }, GEOMETRY_BUFFER_ID::RECT);
+	Entity rightslide = createPolygonByVertex(renderer, { {660, 750}, {660, 730}, {840, 750}, {840, 730} }, GEOMETRY_BUFFER_ID::RECT);
 	createNewRectangleTiedToEntity(rightslide, 180.f, 20.f, registry.motions.get(rightslide).position, false, 1.0);
 
 
@@ -550,7 +550,7 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 		Motion& motion = registry.motions.get(entity);
 		motion.position = registry.motions.get(player).position;
 
-		float radius = 30; //* (uniform_dist(rng) + 0.3f);
+		float radius = 20; //* (uniform_dist(rng) + 0.3f);
 		motion.scale = { radius, radius };
 
 		vec2 player_v = registry.motions.get(player).velocity;
@@ -706,7 +706,7 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 
 	generate_enemy_timer += elapsed_ms_since_last_update / 1000.0f; // Convert elapsed time to seconds
 
-    if (generate_enemy_timer >= 2.f) {
+    if (generate_enemy_timer >= 3.f) {
 		vec2 pos = registry.motions.get(registry.rooms.entities[0]).position;
 		Entity ene = createRoomEnemy(renderer, { pos[0]+distribution1(gen), pos[1]+distribution1(gen) }, pos, 700.f, false);
 		registry.colors.insert(ene, { distribution2(gen), distribution2(gen), distribution2(gen) });
@@ -730,7 +730,7 @@ void WorldSystem::handle_collisions_world()
 		if (registry.players.has(entity))
 		{
 			// Checking Player - Enemy collisions
-			if (registry.mainWorldEnemies.has(entity_other))
+			if (registry.mainWorldEnemies.has(entity_other) && registry.positionKeyFrames.has(entity_other) && registry.mainWorldEnemies.size() == 1)
 			{
 				if (!registry.enterCombatTimer.has(entity))
 				{
@@ -763,8 +763,22 @@ void WorldSystem::handle_collisions_world()
 		if (registry.mainWorldEnemies.has(entity) && registry.playerBullets.has(entity_other) ||
 			registry.mainWorldEnemies.has(entity_other) && registry.playerBullets.has(entity)) {
 			// remove enemy upon collision
-			registry.remove_all_components_of(entity);
-			registry.remove_all_components_of(entity_other);
+			if (!registry.positionKeyFrames.has(entity) && !registry.positionKeyFrames.has(entity_other)) {
+				registry.remove_all_components_of(entity);
+				registry.remove_all_components_of(entity_other);
+			}
+		}
+
+		// enemyy bullet vs player collision
+		if (registry.enemyBullets.has(entity) && registry.players.has(entity_other) ||
+			registry.enemyBullets.has(entity_other) && registry.players.has(entity)) {
+			// handle damage interaction (nothing for now)
+			if (registry.enemyBullets.has(entity)) {
+				registry.remove_all_components_of(entity);
+			}
+			else {
+				registry.remove_all_components_of(entity_other);
+			}
 		}
 	}
 

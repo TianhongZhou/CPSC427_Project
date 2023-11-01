@@ -56,9 +56,11 @@ void AISystem::step(float elapsed_ms)
 				Motion& healthMotion = motion_container.get(enemy.healthBar[1]);
 				Motion& amortizedMotion = motion_container.get(enemy.healthBar[2]);
 				healthMotion.scale.x =  barMotion.scale.x * enemy.currentHealth/enemy.maxHealth;
+				healthMotion.position.x = barMotion.position.x - (barMotion.scale.x - healthMotion.scale.x) / 2;
 				if (amortizedMotion.scale.x>healthMotion.scale.x) {
 					amortizedMotion.scale.x -= 0.5f;
 				}
+				amortizedMotion.position.x = barMotion.position.x - (barMotion.scale.x - amortizedMotion.scale.x) / 2;
 			}
 			
 		}
@@ -109,7 +111,7 @@ void AISystem::step_world(float elapsed_ms)
 			}
 
 			float distanceToPlayer = glm::length(playerMotion.position - enemyMotion.position);
-			if (enemy.seePlayer)
+			if (enemy.seePlayer && !registry.positionKeyFrames.has(motion_container.entities[i]))
 			{
 				// Enemy chasing player
 				// enemyMotion.angle = angleToPlayer;
