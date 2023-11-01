@@ -708,8 +708,10 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 
     if (generate_enemy_timer >= 3.f) {
 		vec2 pos = registry.motions.get(registry.rooms.entities[0]).position;
-		Entity ene = createRoomEnemy(renderer, { pos[0]+distribution1(gen), pos[1]+distribution1(gen) }, pos, 700.f, false);
-		registry.colors.insert(ene, { distribution2(gen), distribution2(gen), distribution2(gen) });
+		if (registry.mainWorldEnemies.entities.size()< 8) {
+			Entity ene = createRoomEnemy(renderer, { pos[0]+distribution1(gen), pos[1]+distribution1(gen) }, pos, 700.f, false);
+			registry.colors.insert(ene, { distribution2(gen), distribution2(gen), distribution2(gen) });
+		}
         // Reset the timer
         generate_enemy_timer = 0.0f;
     }
