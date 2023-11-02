@@ -13,6 +13,7 @@
 #include <SDL_mixer.h>
 
 #include "render_system.hpp"
+#include "pinball_system.hpp"
 
 extern int GameSceneState;
 extern int InitCombat;
@@ -46,13 +47,10 @@ public:
 	bool is_over()const;
 
 	// initialize combat
-	void init_combat(int initCombat);
+	void init_combat(int initCombat, PinballSystem pinballSystem);
 
     // exit combat
     void exit_combat();
-
-    // removes world objects from the rendering list
-    void hide_world();
 
 
 private:
