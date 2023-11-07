@@ -51,6 +51,7 @@ public:
 
     // exit combat
     void exit_combat();
+    void redirect_inputs_world();
 
 
 private:
@@ -94,4 +95,5 @@ private:
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
 
 	std::unordered_set<int> pressedKeys;
+
 };

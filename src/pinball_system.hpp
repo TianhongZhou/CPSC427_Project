@@ -14,8 +14,6 @@
 
 #include "render_system.hpp"
 
-// Container for all our entities and game logic. Individual rendering / update is
-// deferred to the relative update() methods
 class PinballSystem
 {
 public:
@@ -41,6 +39,8 @@ public:
 
 
 private:
+    // redirect inputs to pinball callback functions
+    void redirect_inputs_pinball();
     // Input callback functions
     void on_key(int key, int, int action, int mod);
     void on_mouse_move(vec2 pos);

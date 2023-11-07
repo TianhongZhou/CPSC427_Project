@@ -88,22 +88,9 @@ GLFWwindow *WorldSystem::create_window()
 		fprintf(stderr, "Failed to glfwCreateWindow");
 		return nullptr;
 	}
+    redirect_inputs_world();
 
-	// Setting callbacks to member functions (that's why the redirect is needed)
-	// Input is handled using GLFW, for more info see
-	// http://www.glfw.org/docs/latest/input_guide.html
-	glfwSetWindowUserPointer(window, this);
-	auto key_redirect = [](GLFWwindow *wnd, int _0, int _1, int _2, int _3)
-	{ ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
-	auto cursor_pos_redirect = [](GLFWwindow *wnd, double _0, double _1)
-	{ ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_mouse_move({_0, _1}); };
-	auto mouse_button_redirect = [](GLFWwindow *wnd, int button, int action, int mods)
-	{ ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_mouse_click(button, action, mods); };
-	glfwSetKeyCallback(window, key_redirect);
-	glfwSetCursorPosCallback(window, cursor_pos_redirect);
-	glfwSetMouseButtonCallback(window, mouse_button_redirect);
-
-	//////////////////////////////////////
+    //////////////////////////////////////
 	// Loading music and sounds with SDL
 	if (SDL_Init(SDL_INIT_AUDIO) < 0)
 	{
@@ -130,6 +117,21 @@ GLFWwindow *WorldSystem::create_window()
 	}
 
 	return window;
+}
+
+void WorldSystem::redirect_inputs_world() {// Setting callbacks to member functions (that's why the redirect is needed)
+// Input is handled using GLFW, for more info see
+// http://www.glfw.org/docs/latest/input_guide.html
+    glfwSetWindowUserPointer(window, this);
+    auto key_redirect = [](GLFWwindow *wnd, int _0, int _1, int _2, int _3)
+    { ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
+    auto cursor_pos_redirect = [](GLFWwindow *wnd, double _0, double _1)
+    { ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_mouse_move({_0, _1}); };
+    auto mouse_button_redirect = [](GLFWwindow *wnd, int button, int action, int mods)
+    { ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_mouse_click(button, action, mods); };
+    glfwSetKeyCallback(window, key_redirect);
+    glfwSetCursorPosCallback(window, cursor_pos_redirect);
+    glfwSetMouseButtonCallback(window, mouse_button_redirect);
 }
 
 void WorldSystem::init(RenderSystem *renderer_arg)
@@ -191,7 +193,6 @@ void WorldSystem::restart_game()
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-	// Create a new salmon
 	rooms[0] = createRoom(renderer, { 600, 400 });
 	player = createPlayer(renderer, { 350, 200 });
 	registry.lights.emplace(player);
@@ -326,7 +327,6 @@ bool WorldSystem::is_over() const
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod)
 {
-
 	if (action == GLFW_PRESS)
 	{
 		pressedKeys.insert(key);
@@ -450,32 +450,32 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		InitCombat = 1;
 	}
 
-	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_P)
-	{
-		Entity& flipper = registry.playerFlippers.entities[0];
-
-		physObj& flipperPhys = registry.physObjs.get(flipper);
-
-		flipperPhys.Vertices[3].accel += vec2(0.f, -0.8f);
-	}
-
-	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
-	{
-		Entity& flipper = registry.playerFlippers.entities[0];
-
-		physObj& flipperPhys = registry.physObjs.get(flipper);
-
-		flipperPhys.Vertices[1].accel += vec2(0.1f, 0.f);
-	}
-
-	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_LEFT)
-	{
-		Entity& flipper = registry.playerFlippers.entities[0];
-
-		physObj& flipperPhys = registry.physObjs.get(flipper);
-
-		flipperPhys.Vertices[1].accel += vec2(-0.1f, 0.f);
-	}
+//	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_P)
+//	{
+//		Entity& flipper = registry.playerFlippers.entities[0];
+//
+//		physObj& flipperPhys = registry.physObjs.get(flipper);
+//
+//		flipperPhys.Vertices[3].accel += vec2(0.f, -0.8f);
+//	}
+//
+//	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
+//	{
+//		Entity& flipper = registry.playerFlippers.entities[0];
+//
+//		physObj& flipperPhys = registry.physObjs.get(flipper);
+//
+//		flipperPhys.Vertices[1].accel += vec2(0.1f, 0.f);
+//	}
+//
+//	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_LEFT)
+//	{
+//		Entity& flipper = registry.playerFlippers.entities[0];
+//
+//		physObj& flipperPhys = registry.physObjs.get(flipper);
+//
+//		flipperPhys.Vertices[1].accel += vec2(-0.1f, 0.f);
+//	}
 
 	// Debugging
 	if (key == GLFW_KEY_D)
@@ -485,19 +485,19 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		else
 			debugging.in_debug_mode = true;
 	}
-
-	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA)
-	{
-		current_speed -= 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD)
-	{
-		current_speed += 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	current_speed = fmax(0.f, current_speed);
+//
+//	// Control the current speed with `<` `>`
+//	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA)
+//	{
+//		current_speed -= 0.1f;
+//		printf("Current speed = %f\n", current_speed);
+//	}
+//	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD)
+//	{
+//		current_speed += 0.1f;
+//		printf("Current speed = %f\n", current_speed);
+//	}
+//	current_speed = fmax(0.f, current_speed);
 
 	// player attack
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && GameSceneState == 0) {
@@ -589,6 +589,7 @@ void WorldSystem::exit_combat() {
 	while (registry.combat.entities.size() > 0)
 		registry.remove_all_components_of(registry.combat.entities.back());
 
+    redirect_inputs_world();
     GameSceneState = 0;
 }
 
