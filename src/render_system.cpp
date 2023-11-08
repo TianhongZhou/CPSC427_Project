@@ -546,7 +546,9 @@ void RenderSystem::draw_world(bool &tutorial_open) {
             //{
             //	scale.y = 0.31;
             //}
-            drawShadow(entity, projection_2D, M_PI / 2 - angle, scale);
+            if (!registry.spikes.has(entity)) {
+                drawShadow(entity, projection_2D, M_PI / 2 - angle, scale);
+            }
         }
 
         //drawTexturedMesh(entity, projection_2D);

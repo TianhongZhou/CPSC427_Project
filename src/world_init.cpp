@@ -202,7 +202,7 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 	std::uniform_real_distribution<float> distribution1(100.0f, w - 100.f);
 	std::uniform_real_distribution<float> distribution2(200.0f, h - 200.f);
 	for (int i = 0; i < 10; i++) {
-		Entity spikes = createSpikes({ distribution1(gen), distribution2(gen) }, {80, 80});
+		Entity spikes = createSpikes({ 100 * i, distribution2(gen) }, {80, 80});
 		registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
 	}
 

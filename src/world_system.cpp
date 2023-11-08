@@ -723,21 +723,21 @@ void WorldSystem::check_room_boundary()
 		if (registry.players.has(motion_container.entities[i]) || registry.mainWorldEnemies.has(motion_container.entities[i]))
 		{
 			Motion& motion = motion_container.components[i];
-			if (roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f > motion.position.x)
+			if (roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f + 30 > motion.position.x)
 			{
-				motion.position.x = roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f;
+				motion.position.x = roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f + 30;
 			}
-			else if (roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f < motion.position.x)
+			else if (roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f - 10 < motion.position.x)
 			{
-				motion.position.x = roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f;
+				motion.position.x = roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f - 10;
 			}
 			if (roomMotion.position.y - (roomMotion.scale.y / 2) + 25.f > motion.position.y)
 			{
 				motion.position.y = roomMotion.position.y - (roomMotion.scale.y / 2) + 25.f;
 			}
-			else if (roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f < motion.position.y)
+			else if (roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f - 70 < motion.position.y)
 			{
-				motion.position.y = roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f;
+				motion.position.y = roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f - 70;
 			}
 		}
 	}
