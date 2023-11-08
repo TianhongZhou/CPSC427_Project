@@ -189,9 +189,12 @@ void WorldSystem::restart_game()
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
+	int w, h;
+	glfwGetWindowSize(window, &w, &h);
+
 	// Create a new salmon
 	rooms[0] = createStartingRoom(renderer, { 600, 400 }, window);
-	player = createPlayer(renderer, { 350, 200 });
+	player = createPlayer(renderer, { w/2, h * 4 / 5 }); // spawn at the bottom of room for now
 	registry.lights.emplace(player);
 }
 
@@ -653,13 +656,17 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 
 	//spawn_room_enemies(elapsed_ms_since_last_update);
 
+	// TODO: move this to the top later
+	int w, h;
+	glfwGetWindowSize(window, &w, &h);
+
 	// Enter next room
 	Motion& player_motion = registry.motions.get(player);
-	if (player_motion.position.y < 100.f && player_motion.position.x > 500.f)
+	if (player_motion.position.y < 60.f && player_motion.position.x > w/2 - 40 && player_motion.position.x < w / 2 + 40)
 		//&& registry.mainWorldEnemies.size()) 
 	{
 		enter_next_room();
-		player_motion.position = { 200, 500 };
+		player_motion.position = { w/2, h * 4/ 5};
 	}
 
 	return true;
@@ -808,12 +815,19 @@ void WorldSystem::handle_collisions_world()
 		if (registry.enemyBullets.has(entity) && registry.players.has(entity_other) ||
 			registry.enemyBullets.has(entity_other) && registry.players.has(entity)) {
 			// handle damage interaction (nothing for now)
+			restart_game();
 			if (registry.enemyBullets.has(entity)) {
 				registry.remove_all_components_of(entity);
 			}
 			else {
 				registry.remove_all_components_of(entity_other);
 			}
+		}
+
+		// spike collision
+		if (registry.spikes.has(entity) && registry.players.has(entity_other)) {
+			// handle damage interaction (nothing for now)
+			restart_game();
 		}
 	}
 

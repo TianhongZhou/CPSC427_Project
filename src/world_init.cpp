@@ -183,7 +183,7 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 	int w, h;
 	glfwGetWindowSize(window, &w, &h);
 	// Add door
-	Entity door = createPebble({ 0,0 }, { 0,0 }); //intialized below
+	Entity door = createPebble({ 0,0 }, { 0,0 }); //intialized below, TODO: change from createpebble
 	Motion& door_motion = registry.motions.get(door);
 	float door_width = 50;
 	float door_height = 60;
@@ -196,6 +196,15 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 	// Add spikes
 	Entity road = createSpikes({ 100, 100 }, { 80, 80 });
 	registry.colors.insert(road, { 0.5, 0.5, 0.5 });
+
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> distribution1(100.0f, w - 100.f);
+	std::uniform_real_distribution<float> distribution2(200.0f, h - 200.f);
+	for (int i = 0; i < 10; i++) {
+		Entity spikes = createSpikes({ distribution1(gen), distribution2(gen) }, {80, 80});
+		registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
+	}
 
 	return entity;
 }
@@ -510,7 +519,7 @@ Entity createSpikes(vec2 pos, vec2 size)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = size;
 
-	//registry.playerBullets.emplace(entity);
+	registry.spikes.emplace(entity);
 
 	registry.renderRequests.insert(
 		entity,

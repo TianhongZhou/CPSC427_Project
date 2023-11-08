@@ -36,9 +36,11 @@ public:
 	ComponentContainer<PositionKeyFrame> positionKeyFrames;
 	ComponentContainer<HealthBar> healthBar;
 	
+	// World assets
 	ComponentContainer<PlayerBullet> playerBullets;
 	ComponentContainer<EnemyBullet> enemyBullets;
 	ComponentContainer<Ball> balls;
+	ComponentContainer<Spikes> spikes;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -67,9 +69,11 @@ public:
 		registry_list.push_back(&positionKeyFrames);
 		registry_list.push_back(&healthBar);
 
+		// World assets
 		registry_list.push_back(&playerBullets);
 		registry_list.push_back(&enemyBullets);
 		registry_list.push_back(&balls);
+		registry_list.push_back(&spikes);
 	}
 
 	void clear_all_components() {
