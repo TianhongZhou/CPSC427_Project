@@ -190,23 +190,9 @@ void WorldSystem::restart_game()
 	registry.list_all_components();
 
 	// Create a new salmon
-	rooms[0] = createRoom(renderer, { 600, 400 });
+	rooms[0] = createStartingRoom(renderer, { 600, 400 }, window);
 	player = createPlayer(renderer, { 350, 200 });
 	registry.lights.emplace(player);
-
-
-	//int w, h;
-	//glfwGetWindowSize(window, &w, &h);
-	//// Add a ball
-	//Entity entity = createPebble({ 0,0 }, { 0,0 }); //intialized below
-	//Motion& motion = registry.motions.get(entity);
-	//motion.position = {400, 400};
-	//motion.scale = {30, 30};
-	//motion.angle = 0; 
-	//motion.velocity = { 200, 200 };
-
-
-	//registry.colors.insert(entity, { 1, 1, 1 });
 }
 
 void WorldSystem::init_combat(int initCombat)
@@ -618,14 +604,7 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 				registry.remove_all_components_of(motion_container.entities[i]);
 		}
 	}
-	// save player orientation for attack
-	Motion& motion = registry.motions.get(player);
-	if (motion.velocity.y != 0.f || motion.velocity.x != 0.f) {
-		last_angle = atan(motion.velocity.y / motion.velocity.x);
-		if (motion.velocity.x < 0) {
-			last_angle += atan(1) * 4;
-		}
-	}
+	save_player_last_direction();
 
 	// handling entering combat state
 	float min_timer_ms = 3000.f;
@@ -651,33 +630,7 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 		}
 	}
 
-	// get room motion
-	Motion &roomMotion = registry.motions.get(rooms[0]);
-
-	// Boundary check for player and enemy if they are in room boundary
-	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i)
-	{
-		if (registry.players.has(motion_container.entities[i]) || registry.mainWorldEnemies.has(motion_container.entities[i]))
-		{
-			Motion &motion = motion_container.components[i];
-			if (roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f > motion.position.x)
-			{
-				motion.position.x = roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f;
-			}
-			else if (roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f < motion.position.x)
-			{
-				motion.position.x = roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f;
-			}
-			if (roomMotion.position.y - (roomMotion.scale.y / 2) + 25.f > motion.position.y)
-			{
-				motion.position.y = roomMotion.position.y - (roomMotion.scale.y / 2) + 25.f;
-			}
-			else if (roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f < motion.position.y)
-			{
-				motion.position.y = roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f;
-			}
-		}
-	}
+	check_room_boundary();
 
 	for (Entity entity : registry.highLightEnemies.entities)
 	{
@@ -698,26 +651,106 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 		}
 	}
 
-	//Generate enemy
-	std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> distribution1(-450.0f, 450.0f);
-    std::uniform_real_distribution<float> distribution2(0.0f, 1.0f);
+	//spawn_room_enemies(elapsed_ms_since_last_update);
 
-	generate_enemy_timer += elapsed_ms_since_last_update / 1000.0f; // Convert elapsed time to seconds
-
-    if (generate_enemy_timer >= 3.f) {
-		vec2 pos = registry.motions.get(registry.rooms.entities[0]).position;
-		if (registry.mainWorldEnemies.entities.size()< 8) {
-			Entity ene = createRoomEnemy(renderer, { pos[0]+distribution1(gen), pos[1]+distribution1(gen) }, pos, 700.f, false);
-			registry.colors.insert(ene, { distribution2(gen), distribution2(gen), distribution2(gen) });
-		}
-        // Reset the timer
-        generate_enemy_timer = 0.0f;
-    }
+	// Enter next room
+	Motion& player_motion = registry.motions.get(player);
+	if (player_motion.position.y < 100.f && player_motion.position.x > 500.f)
+		//&& registry.mainWorldEnemies.size()) 
+	{
+		enter_next_room();
+		player_motion.position = { 200, 500 };
+	}
 
 	return true;
 }
+
+// Enter next room
+void WorldSystem::enter_next_room()
+{	
+	// Remove all entities that we created
+	while (registry.motions.entities.size() > 0)
+		registry.remove_all_components_of(registry.motions.entities.back());
+	rooms[0] = createRoom(renderer, { 600, 400 });
+	player = createPlayer(renderer, { 350, 200 });
+	registry.lights.emplace(player);
+
+}
+
+// Generate enemies in room
+// TODO: when multiple rooms are implemented, make sure it checks the right room
+void WorldSystem::spawn_room_enemies(float elapsed_ms_since_last_update)
+{
+	//Generate enemy
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> distribution1(-450.0f, 450.0f);
+	std::uniform_real_distribution<float> distribution2(0.0f, 1.0f);
+
+	generate_enemy_timer += elapsed_ms_since_last_update / 1000.0f; // Convert elapsed time to seconds
+
+	if (generate_enemy_timer >= 3.f) {
+		vec2 pos = registry.motions.get(registry.rooms.entities[0]).position;
+		if (registry.mainWorldEnemies.entities.size() < 8) {
+			Entity ene = createRoomEnemy(renderer, { pos[0] + distribution1(gen), pos[1] + distribution1(gen) }, pos, 700.f, false);
+			registry.colors.insert(ene, { distribution2(gen), distribution2(gen), distribution2(gen) });
+		}
+		// Reset the timer
+		generate_enemy_timer = 0.0f;
+	}
+}
+
+
+// Room boundary check
+// TODO: when multiple rooms are implemented, make sure it checks the right room
+
+void WorldSystem::check_room_boundary()
+{	
+	auto& motion_container = registry.motions;
+	// get room motion
+	Motion& roomMotion = registry.motions.get(rooms[0]);
+
+	// Boundary check for player and enemy if they are in room boundary
+	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i)
+	{
+		if (registry.players.has(motion_container.entities[i]) || registry.mainWorldEnemies.has(motion_container.entities[i]))
+		{
+			Motion& motion = motion_container.components[i];
+			if (roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f > motion.position.x)
+			{
+				motion.position.x = roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f;
+			}
+			else if (roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f < motion.position.x)
+			{
+				motion.position.x = roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f;
+			}
+			if (roomMotion.position.y - (roomMotion.scale.y / 2) + 25.f > motion.position.y)
+			{
+				motion.position.y = roomMotion.position.y - (roomMotion.scale.y / 2) + 25.f;
+			}
+			else if (roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f < motion.position.y)
+			{
+				motion.position.y = roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f;
+			}
+		}
+	}
+}
+
+// Save player's last facing direction for projectile shooting
+void WorldSystem::save_player_last_direction() 
+{
+	// save player orientation for attack
+	Motion& motion = registry.motions.get(player);
+	if (motion.velocity.y != 0.f || motion.velocity.x != 0.f) {
+		last_angle = atan(motion.velocity.y / motion.velocity.x);
+		if (motion.velocity.x < 0) {
+			last_angle += atan(1) * 4;
+		}
+	}
+}
+
+
+
 
 // Compute collisions between entities
 void WorldSystem::handle_collisions_world()
