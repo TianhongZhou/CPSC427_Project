@@ -95,7 +95,7 @@ void AISystem::step_world(float elapsed_ms)
 
 			//shoot player
 
-			if (bullet_spawn_timer < 0) {
+			if (bullet_spawn_timer < 0 && !registry.positionKeyFrames.has(motion_container.entities[i])) {
 
 				// Create enemy bullet
 				Entity entity = createEnemyBullet({ 0,0 }, { 0,0 }); //intialized below

@@ -201,7 +201,7 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<float> distribution1(100.0f, w - 100.f);
 	std::uniform_real_distribution<float> distribution2(200.0f, h - 200.f);
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 4; i++) {
 		Entity spikes = createSpikes({ 100 * i, distribution2(gen) }, {80, 80});
 		registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
 	}
@@ -239,7 +239,7 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
     std::uniform_real_distribution<float> distribution1(-450.0f, 450.0f);
     std::uniform_real_distribution<float> distribution2(0.0f, 1.0f);
 	Room& room = registry.rooms.get(entity);
-	for (int i=0; i<3; i++) {
+	for (int i=0; i<2; i++) {
 		room.enemies[i] = createRoomEnemy(renderer, { pos[0]+distribution1(gen), pos[1]+distribution1(gen), }, pos, 700.f, i == 0);
 		registry.colors.insert(room.enemies[i], { distribution2(gen), distribution2(gen), distribution2(gen) });
 	}
