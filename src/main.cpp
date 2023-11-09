@@ -64,7 +64,7 @@ int main()
 		else if (GameSceneState == 1) {
 
 			if (InitCombat) {
-				world_system.init_combat(InitCombat, pinballSystem);
+				world_system.init_combat(pinballSystem);
 				InitCombat = 0;
 			}
 

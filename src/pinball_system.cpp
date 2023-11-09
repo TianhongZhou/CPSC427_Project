@@ -10,6 +10,8 @@
 #include "physics_system.hpp"
 #include "world_system.hpp"
 
+const size_t NUM_ENEMIES = 2;
+
 PinballSystem::PinballSystem() {
 
 }
@@ -123,10 +125,10 @@ void PinballSystem::restart() {
     std::uniform_real_distribution<float> distribution1(boundary.x, boundary.y);
     std::uniform_real_distribution<float> distribution2(0.f, 1.f);
 
-//    for (int i=0; i<initCombat; i++) {
+    for (int i=0; i<NUM_ENEMIES; i++) {
     Entity pinballenemy = createPinBallEnemy(renderer, {distribution1(gen), 180 * (2)}, boundary);
     registry.colors.insert(pinballenemy, {distribution2(gen), distribution2(gen), distribution2(gen)});
-//    }
+    }
 
     Entity player_ball = createBall(renderer, {400, 400});
     createNewRectangleTiedToEntity(player_ball, 30.f, 30.f, registry.motions.get(player_ball).position, true, 0.7);

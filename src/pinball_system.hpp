@@ -14,6 +14,7 @@
 
 #include "render_system.hpp"
 
+// forward declaration TODO: add stackOverflow link
 class WorldSystem;
 
 // Game logic associated with pinball combat system
@@ -47,7 +48,7 @@ private:
     void on_mouse_move(vec2 pos);
     void on_mouse_click(int button, int action, int mods);
 
-    // sets game states to default and spawns pinball entities
+    // Sets game states to default and spawns pinball entities
     void restart();
 
     // OpenGL window handle

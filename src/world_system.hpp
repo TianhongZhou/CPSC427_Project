@@ -35,18 +35,16 @@ public:
 	~WorldSystem();
 
 	// Steps the game ahead by ms milliseconds
-	bool step(float elapsed_ms);
 	bool step_world(float elapsed_ms);
 
 	// Check for collisions
-	void handle_collisions();
 	void handle_collisions_world();
 
 	// Should the game be over ?
 	bool is_over()const;
 
 	// initialize combat
-	void init_combat(int initCombat, PinballSystem pinballSystem);
+	void init_combat(PinballSystem pinballSystem);
 
     // redirect keyboard/mouse inputs back into world callback functions
     void redirect_inputs_world();
