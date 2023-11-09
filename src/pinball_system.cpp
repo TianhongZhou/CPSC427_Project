@@ -40,9 +40,10 @@ PinballSystem::~PinballSystem() {
 //    }
 //}
 
-void PinballSystem::init(GLFWwindow *window_arg, RenderSystem *renderer_arg) {
+void PinballSystem::init(GLFWwindow *window_arg, RenderSystem *renderer_arg, WorldSystem* world_arg) {
     this->window = window_arg;
     this->renderer = renderer_arg;
+    this->world = world_arg;
     // Set all states to default
     init_combat();
     redirect_inputs_pinball();
@@ -96,10 +97,10 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
 // On key callback
 void PinballSystem::on_key(int key, int, int action, int mod) {
     // TODO: fix exiting combat
-//    if (action == GLFW_RELEASE && key == GLFW_KEY_X)
-//    {
-//        exit_combat();
-//    }
+    if (action == GLFW_RELEASE && key == GLFW_KEY_X)
+    {
+        exit_combat();
+    }
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_P)
     {
@@ -544,8 +545,9 @@ void PinballSystem::handle_collisions() {
 //    }
 //}
 
-//void PinballSystem::exit_combat() {
-//    while (registry.combat.entities.size() > 0)
-//        registry.remove_all_components_of(registry.combat.entities.back());
-//    GameSceneState = 0;
-//}
+void PinballSystem::exit_combat() {
+    while (registry.combat.entities.size() > 0)
+        registry.remove_all_components_of(registry.combat.entities.back());
+    world->redirect_inputs_world();
+    GameSceneState = 0;
+}

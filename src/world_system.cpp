@@ -119,9 +119,10 @@ GLFWwindow *WorldSystem::create_window()
 	return window;
 }
 
-void WorldSystem::redirect_inputs_world() {// Setting callbacks to member functions (that's why the redirect is needed)
-// Input is handled using GLFW, for more info see
-// http://www.glfw.org/docs/latest/input_guide.html
+void WorldSystem::redirect_inputs_world() {
+    // Setting callbacks to member functions (that's why the redirect is needed)
+    // Input is handled using GLFW, for more info see
+    // http://www.glfw.org/docs/latest/input_guide.html
     glfwSetWindowUserPointer(window, this);
     auto key_redirect = [](GLFWwindow *wnd, int _0, int _1, int _2, int _3)
     { ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
@@ -205,7 +206,7 @@ void WorldSystem::restart_game()
 	//Motion& motion = registry.motions.get(entity);
 	//motion.position = {400, 400};
 	//motion.scale = {30, 30};
-	//motion.angle = 0; 
+	//motion.angle = 0;
 	//motion.velocity = { 200, 200 };
 
 
@@ -215,7 +216,7 @@ void WorldSystem::restart_game()
 //// MOVED TO PinballSystem::init_combat
 void WorldSystem::init_combat(int initCombat, PinballSystem pinballSystem)
 {
-    pinballSystem.init(window, renderer);
+    pinballSystem.init(window, renderer, this);
 
 
 //	// int w, h;
@@ -566,14 +567,14 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 			angle = last_angle;
 		}
 		else {
-			// CHECK: This is to fix flipping of the axis 
+			// CHECK: This is to fix flipping of the axis
 			if (player_v.x < 0) {
 				angle += atan(1) * 4;
 			}
 			last_angle = angle;
 		}
-		motion.angle = angle; 
-		
+		motion.angle = angle;
+
 
 		//motion.velocity = vec2(200.f + uniform_dist(rng)*200, 100.f - uniform_dist(rng)*200);
 		//float angle = registry.motions.get(player).angle;

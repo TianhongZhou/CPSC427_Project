@@ -14,13 +14,15 @@
 
 #include "render_system.hpp"
 
+class WorldSystem;
+
 class PinballSystem
 {
 public:
     PinballSystem();
 
     // starts the game
-    void init(GLFWwindow* window, RenderSystem* renderer);
+    void init(GLFWwindow* window, RenderSystem* renderer, WorldSystem* world);
 
     // Releases all associated resources
     ~PinballSystem();
@@ -56,6 +58,8 @@ private:
     GLFWwindow* window;
 
     RenderSystem* renderer;
+
+    WorldSystem* world;
 
     // C++ random number generator
 //    std::default_random_engine rng;
