@@ -15,39 +15,14 @@ PinballSystem::PinballSystem() {
 }
 
 PinballSystem::~PinballSystem() {
-//    // Destroy music components
-//    if (background_music != nullptr)
-//        Mix_FreeMusic(background_music);
-//    if (salmon_dead_sound != nullptr)
-//        // Mix_FreeChunk(salmon_dead_sound);
-//        if (player_attack_sound != nullptr)
-//            Mix_FreeChunk(player_attack_sound);
-//    Mix_CloseAudio();
-//
-//    // Destroy all created components
-//    registry.clear_all_components();
-//
-//    // Close the window
-//    glfwDestroyWindow(window);
 }
-
-// Debugging
-//namespace
-//{
-//    void glfw_err_cb(int error, const char *desc)
-//    {
-//        fprintf(stderr, "%d: %s", error, desc);
-//    }
-//}
 
 void PinballSystem::init(GLFWwindow *window_arg, RenderSystem *renderer_arg, WorldSystem* world_arg) {
     this->window = window_arg;
     this->renderer = renderer_arg;
     this->world = world_arg;
-    // Set all states to default
-    init_combat();
+    restart();
     redirect_inputs_pinball();
-//    restart_game();
 }
 
 void PinballSystem::redirect_inputs_pinball() {
@@ -96,7 +71,6 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
 
 // On key callback
 void PinballSystem::on_key(int key, int, int action, int mod) {
-    // TODO: fix exiting combat
     if (action == GLFW_RELEASE && key == GLFW_KEY_X)
     {
         exit_combat();
@@ -140,37 +114,7 @@ void PinballSystem::on_mouse_click(int button, int action, int mods) {
     (int) mods;
 }
 
-// Reset the world state to its initial state
-void PinballSystem::restart_game() {
-    // Debugging for memory/component leaks
-    registry.list_all_components();
-    printf("Restarting\n");
-
-
-    // Remove all entities that we created
-    // All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
-    while (registry.motions.entities.size() > 0)
-        registry.remove_all_components_of(registry.motions.entities.back());
-
-    // Debugging for memory/component leaks
-    registry.list_all_components();
-
-
-    //int w, h;
-    //glfwGetWindowSize(window, &w, &h);
-    //// Add a ball
-    //Entity entity = createPebble({ 0,0 }, { 0,0 }); //intialized below
-    //Motion& motion = registry.motions.get(entity);
-    //motion.position = {400, 400};
-    //motion.scale = {30, 30};
-    //motion.angle = 0;
-    //motion.velocity = { 200, 200 };
-
-
-    //registry.colors.insert(entity, { 1, 1, 1 });
-}
-
-void PinballSystem::init_combat() {
+void PinballSystem::restart() {
     // int w, h;
     // glfwGetWindowSize(window, &w, &h);
     vec2 boundary = {260 + 50, 800 - 50};
@@ -276,274 +220,6 @@ void PinballSystem::handle_collisions() {
     // Remove all collisions from this simulation step
     registry.collisions.clear();
 }
-
-//// Should the game be over ?
-//bool PinballSystem::is_over() const
-//{
-//    return bool(glfwWindowShouldClose(window));
-//}
-
-//// On key callback
-//void PinballSystem::on_key(int key, int, int action, int mod)
-//{
-//
-//    if (action == GLFW_PRESS)
-//    {
-//        pressedKeys.insert(key);
-//    }
-//
-//    if (action == GLFW_RELEASE)
-//    {
-//        pressedKeys.erase(key);
-//    }
-//
-//    Motion& motion = registry.motions.get(player);
-//    bool inCombat = GameSceneState || registry.enterCombatTimer.has(player);;
-//
-//    bool conflictUpAndDown = pressedKeys.count(GLFW_KEY_UP) && pressedKeys.count(GLFW_KEY_DOWN);
-//    bool conflictLeftAndRight = pressedKeys.count(GLFW_KEY_LEFT) && pressedKeys.count(GLFW_KEY_RIGHT);
-//
-//    if (!conflictUpAndDown && (key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) && (action == GLFW_PRESS || action == GLFW_REPEAT) && GameSceneState == 0)
-//    {
-//        motion.velocity.y = (key == GLFW_KEY_UP) ? -200.f : 200.f;
-//    }
-//    else if (conflictUpAndDown)
-//    {
-//        motion.velocity.y = 0.f;
-//    }
-//
-//    if (!conflictLeftAndRight && (key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) && (action == GLFW_PRESS || action == GLFW_REPEAT) && GameSceneState == 0)
-//    {
-//        motion.velocity.x = (key == GLFW_KEY_LEFT) ? -200.f : 200.f;
-//    }
-//    else if (conflictLeftAndRight)
-//    {
-//        motion.velocity.x = 0.f;
-//    }
-//
-//    if (action == GLFW_RELEASE)
-//    {
-//        if ((key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) && !conflictUpAndDown)
-//        {
-//            if (pressedKeys.count(GLFW_KEY_UP) && GameSceneState == 0)
-//            {
-//                motion.velocity.y = -200.f;
-//            }
-//            else if (pressedKeys.count(GLFW_KEY_DOWN) && GameSceneState == 0)
-//            {
-//                motion.velocity.y = 200.f;
-//            }
-//            else
-//            {
-//                motion.velocity.y = 0.f;
-//            }
-//        }
-//
-//        if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) && !conflictLeftAndRight)
-//        {
-//            if (pressedKeys.count(GLFW_KEY_LEFT) && GameSceneState == 0)
-//            {
-//                motion.velocity.x = -200.f;
-//            }
-//            else if (pressedKeys.count(GLFW_KEY_RIGHT) && GameSceneState == 0)
-//            {
-//                motion.velocity.x = 200.f;
-//            }
-//            else
-//            {
-//                motion.velocity.x = 0.f;
-//            }
-//        }
-//    }
-//
-//    if ((motion.velocity.x == 0.f) && (motion.velocity.y == 0.f))
-//    {
-//        if (registry.spriteSheets.has(player))
-//        {
-//            SpriteSheet& spriteSheet = registry.spriteSheets.get(player);
-//            RenderRequest& renderRequest = registry.renderRequests.get(player);
-//            renderRequest.used_texture = spriteSheet.origin;
-//            registry.spriteSheets.remove(player);
-//        }
-//    }
-//    else
-//    {
-//        if (!registry.spriteSheets.has(player))
-//        {
-//            SpriteSheet& spriteSheet = registry.spriteSheets.emplace_with_duplicates(player);
-//            spriteSheet.next_sprite = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;
-//            spriteSheet.frameIncrement = 0.06f;
-//            spriteSheet.frameAccumulator = 0.0f;
-//            spriteSheet.spriteSheetHeight = 1;
-//            spriteSheet.spriteSheetWidth = 6;
-//            spriteSheet.totalFrames = 6;
-//            spriteSheet.origin = TEXTURE_ASSET_ID::PLAYER;
-//            spriteSheet.loop = true;
-//            if (motion.velocity.x < 0.f)
-//            {
-//                spriteSheet.xFlip = true;
-//            }
-//            RenderRequest& renderRequest = registry.renderRequests.get(player);
-//            renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;
-//        }
-//    }
-//
-//    // Resetting game
-//    if (action == GLFW_RELEASE && key == GLFW_KEY_R)
-//    {
-//        int w, h;
-//        glfwGetWindowSize(window, &w, &h);
-//
-//        restart_game();
-//    }
-//
-//    // Exit Combat
-//    if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_X)
-//    {
-//        exit_combat();
-//    }
-//
-//    // Enter Combat
-//    if (GameSceneState == 0 && action == GLFW_RELEASE && key == GLFW_KEY_C)
-//    {
-//        GameSceneState = 1;
-//        InitCombat = 1;
-//    }
-//
-//    if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_P)
-//    {
-//        Entity& flipper = registry.playerFlippers.entities[0];
-//
-//        physObj& flipperPhys = registry.physObjs.get(flipper);
-//
-//        flipperPhys.Vertices[3].accel += vec2(0.f, -0.8f);
-//    }
-//
-//    if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
-//    {
-//        Entity& flipper = registry.playerFlippers.entities[0];
-//
-//        physObj& flipperPhys = registry.physObjs.get(flipper);
-//
-//        flipperPhys.Vertices[1].accel += vec2(0.1f, 0.f);
-//    }
-//
-//    if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_LEFT)
-//    {
-//        Entity& flipper = registry.playerFlippers.entities[0];
-//
-//        physObj& flipperPhys = registry.physObjs.get(flipper);
-//
-//        flipperPhys.Vertices[1].accel += vec2(-0.1f, 0.f);
-//    }
-//
-//    // Debugging
-//    if (key == GLFW_KEY_D)
-//    {
-//        if (action == GLFW_RELEASE)
-//            debugging.in_debug_mode = false;
-//        else
-//            debugging.in_debug_mode = true;
-//    }
-//
-//    // Control the current speed with `<` `>`
-//    if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA)
-//    {
-//        current_speed -= 0.1f;
-//        printf("Current speed = %f\n", current_speed);
-//    }
-//    if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD)
-//    {
-//        current_speed += 0.1f;
-//        printf("Current speed = %f\n", current_speed);
-//    }
-//    current_speed = fmax(0.f, current_speed);
-//
-//    // player attack
-//    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && GameSceneState == 0) {
-//        on_mouse_click(GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0);
-//    }
-//}
-//
-//void WorldSystem::on_mouse_move(vec2 mouse_position) {
-//
-//    if (registry.mousePosArray.size() == 0) {
-//        Entity e;
-//        mousePos mp;
-//        mp.pos = mouse_position;
-//        registry.mousePosArray.insert(e, mp);
-//    }
-//
-//    registry.mousePosArray.components[0].pos = mouse_position;
-//
-//    (vec2) mouse_position; // dummy to avoid compiler warning
-//}
-//
-//void WorldSystem::on_mouse_click(int button, int action, int mods)
-//{
-//
-//    if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT && GameSceneState == 0)
-//    {
-//        Mix_PlayChannel(-1, player_attack_sound, 0);
-//
-//        bool temp = false;
-//        if (registry.spriteSheets.has(player))
-//        {
-//            SpriteSheet &spriteSheet = registry.spriteSheets.get(player);
-//            if (spriteSheet.next_sprite == TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET)
-//            {
-//                return;
-//            }
-//            temp = spriteSheet.xFlip;
-//        }
-//        SpriteSheet &spriteSheet = registry.spriteSheets.emplace_with_duplicates(player);
-//        spriteSheet.next_sprite = TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET;
-//        spriteSheet.frameIncrement = 0.08f;
-//        spriteSheet.frameAccumulator = 0.0f;
-//        spriteSheet.spriteSheetHeight = 1;
-//        spriteSheet.spriteSheetWidth = 6;
-//        spriteSheet.totalFrames = 6;
-//        spriteSheet.origin = TEXTURE_ASSET_ID::PLAYER;
-//        spriteSheet.xFlip = temp;
-//        RenderRequest &renderRequest = registry.renderRequests.get(player);
-//        renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET;
-//
-//
-//        // Create player bullet
-//        Entity entity = createPlayerBullet({ 0,0 }, { 0,0 }); //intialized below
-//
-//        Motion& motion = registry.motions.get(entity);
-//        motion.position = registry.motions.get(player).position;
-//
-//        float radius = 20; //* (uniform_dist(rng) + 0.3f);
-//        motion.scale = { radius, radius };
-//
-//        vec2 player_v = registry.motions.get(player).velocity;
-//        float angle = atan(player_v.y / player_v.x);
-//
-//        // Set bullet angle and save last angle
-//        if (player_v.x == 0.f && player_v.y == 0.f) {
-//            angle = last_angle;
-//        }
-//        else {
-//            // CHECK: This is to fix flipping of the axis
-//            if (player_v.x < 0) {
-//                angle += atan(1) * 4;
-//            }
-//            last_angle = angle;
-//        }
-//        motion.angle = angle;
-//
-//
-//        //motion.velocity = vec2(200.f + uniform_dist(rng)*200, 100.f - uniform_dist(rng)*200);
-//        //float angle = registry.motions.get(player).angle;
-//        motion.velocity = vec2(500.f, 0.f);
-//        //motion.velocity.x = velocity.x * cos(angle) + velocity.y * sin(angle);
-//        //motion.velocity.y = velocity.x * sin(angle) + velocity.y * cos(angle);
-//
-//        registry.colors.insert(entity, { 1, 1, 1 });
-//    }
-//}
 
 void PinballSystem::exit_combat() {
     while (registry.combat.entities.size() > 0)

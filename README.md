@@ -59,7 +59,7 @@
    	    - stepWorld in world_system.cpp
     - #### MainWorld player-enemy collision and combat trigering
    	    - stepWorld in world_system.cpp
-   	    - init_combat in world_system.cpp
+   	    - restart in world_system.cpp
     - #### Health system
 	    - createPinBallEnemyHealth in world_init.cpp
 	    - createPinBallEnemy in world_init.cpp

@@ -213,7 +213,7 @@ void WorldSystem::restart_game()
 	//registry.colors.insert(entity, { 1, 1, 1 });
 }
 
-//// MOVED TO PinballSystem::init_combat
+//// MOVED TO PinballSystem::restart
 void WorldSystem::init_combat(int initCombat, PinballSystem pinballSystem)
 {
     pinballSystem.init(window, renderer, this);
@@ -339,7 +339,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	}
 
 	Motion& motion = registry.motions.get(player);
-	bool inCombat = GameSceneState || registry.enterCombatTimer.has(player);;
+//	bool inCombat = GameSceneState || registry.enterCombatTimer.has(player);;
 
 	bool conflictUpAndDown = pressedKeys.count(GLFW_KEY_UP) && pressedKeys.count(GLFW_KEY_DOWN);
 	bool conflictLeftAndRight = pressedKeys.count(GLFW_KEY_LEFT) && pressedKeys.count(GLFW_KEY_RIGHT);
@@ -438,11 +438,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		restart_game();
 	}
 
-	// Exit Combat
-	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_X)
-	{
-		exit_combat();
-	}
 
 	// Enter Combat
 	if (GameSceneState == 0 && action == GLFW_RELEASE && key == GLFW_KEY_C)
@@ -586,13 +581,13 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 	}
 }
 
-void WorldSystem::exit_combat() {
-	while (registry.combat.entities.size() > 0)
-		registry.remove_all_components_of(registry.combat.entities.back());
-
-    redirect_inputs_world();
-    GameSceneState = 0;
-}
+//void WorldSystem::exit_combat() {
+//	while (registry.combat.entities.size() > 0)
+//		registry.remove_all_components_of(registry.combat.entities.back());
+//
+//    redirect_inputs_world();
+//    GameSceneState = 0;
+//}
 
 // ================================================== WORLD ===============================================================================
 

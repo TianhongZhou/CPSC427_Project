@@ -48,8 +48,7 @@ public:
 	// initialize combat
 	void init_combat(int initCombat, PinballSystem pinballSystem);
 
-    // exit combat
-    void exit_combat();
+    // redirect keyboard/mouse inputs back into world callback functions
     void redirect_inputs_world();
 
 
@@ -61,8 +60,6 @@ private:
 
 	// restart level
 	void restart_game();
-
-
 
 	// OpenGL window handle
 	GLFWwindow* window;

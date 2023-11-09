@@ -16,6 +16,7 @@
 
 class WorldSystem;
 
+// Game logic associated with pinball combat system
 class PinballSystem
 {
 public:
@@ -33,9 +34,6 @@ public:
     // Check for collisions
     void handle_collisions();
 
-    // Should the game be over ?
-    bool is_over()const;
-
     // exit combat
     void exit_combat();
 
@@ -43,16 +41,14 @@ public:
 private:
     // redirect inputs to pinball callback functions
     void redirect_inputs_pinball();
+
     // Input callback functions
     void on_key(int key, int, int action, int mod);
     void on_mouse_move(vec2 pos);
     void on_mouse_click(int button, int action, int mods);
 
-    // restart level
-    void restart_game();
-
-    // initialize combat
-    void init_combat();
+    // sets game states to default and spawns pinball entities
+    void restart();
 
     // OpenGL window handle
     GLFWwindow* window;
