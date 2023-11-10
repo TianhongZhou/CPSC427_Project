@@ -14,7 +14,8 @@
 
 #include "render_system.hpp"
 
-// forward declaration TODO: add stackOverflow link
+// forward declaration
+// https://stackoverflow.com/questions/4757565/what-are-forward-declarations-in-c
 class WorldSystem;
 
 // Game logic associated with pinball combat system
