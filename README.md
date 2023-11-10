@@ -95,3 +95,10 @@ The original development plan for the week of Sept. 31 and Oct. 8 is as followin
     - Scale difficulty of combat with dungeon progression
 
 Basic dungeon logic is done on Oct. 30 instead in the week of Oct. 15. Did not implement basic dungeon progression system. Rendering is done in the week of Oct. 22 instead of Oct. 15. Did not implement different types of dungeon rooms. Tutorial design is done in the week of Oct. 29 instead of Oct 22. Except for the ones mentioned above, all other points listed are finished on time. The discrepancies between the development plan and actual development progress is also listed.
+
+References:
+
+Physics 
+https://www.youtube.com/watch?v=lS_qeBy3aQI, 
+http://programmerart.weebly.com/separating-axis-theorem.html, 
+https://www.gamedev.net/tutorials/programming/math-and-physics/a-verlet-based-approach-for-2d-game-physics-r2714/
