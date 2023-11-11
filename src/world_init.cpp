@@ -154,6 +154,61 @@ Entity createRoad(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
+Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
+{
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+	registry.mainWorld.emplace(entity);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+
+	/*int w, h;
+	glfwGetWindowSize(window, &w, &h);*/
+	motion.scale = { window_width_px, window_height_px };
+
+	registry.rooms.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::GROUND,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	// add things
+	int w, h;
+	glfwGetWindowSize(window, &w, &h);
+	// Add door
+	Entity door = createPebble({ 0,0 }, { 0,0 }); //intialized below, TODO: change from createpebble
+	Motion& door_motion = registry.motions.get(door);
+	float door_width = 50;
+	float door_height = 60;
+	door_motion.position = { w / 2.f - door_width / 2.f, door_height / 2.f };
+	door_motion.scale = { door_width, door_height };
+	door_motion.angle = 0;
+	door_motion.velocity = { 0,0 };
+	registry.colors.insert(door, { 0, 0, 0 });
+
+	// Add spikes
+	Entity road = createSpikes({ 100, 100 }, { 80, 80 });
+	registry.colors.insert(road, { 0.5, 0.5, 0.5 });
+
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> distribution1(100.0f, w - 100.f);
+	std::uniform_real_distribution<float> distribution2(200.0f, h - 200.f);
+	for (int i = 0; i < 4; i++) {
+		Entity spikes = createSpikes({ 100 * i, distribution2(gen) }, {80, 80});
+		registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
+	}
+
+	return entity;
+}
+
 Entity createRoom(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
@@ -166,7 +221,10 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 700.f;
+
+	/*int w, h;
+	glfwGetWindowSize(window, &w, &h);*/
+	motion.scale = {window_width_px, window_height_px};
 
 	registry.rooms.emplace(entity);
 
@@ -181,7 +239,7 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
     std::uniform_real_distribution<float> distribution1(-450.0f, 450.0f);
     std::uniform_real_distribution<float> distribution2(0.0f, 1.0f);
 	Room& room = registry.rooms.get(entity);
-	for (int i=0; i<3; i++) {
+	for (int i=0; i<2; i++) {
 		room.enemies[i] = createRoomEnemy(renderer, { pos[0]+distribution1(gen), pos[1]+distribution1(gen), }, pos, 700.f, i == 0);
 		registry.colors.insert(room.enemies[i], { distribution2(gen), distribution2(gen), distribution2(gen) });
 	}
@@ -438,13 +496,39 @@ Entity createPebble(vec2 pos, vec2 size)
 
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::FISH, // TEXTURE_COUNT indicates that no txture is needed
+		{ TEXTURE_ASSET_ID::GROUND, // TEXTURE_COUNT indicates that no txture is needed
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }
 
+//Entity createDoor(RenderSystem* renderer, vec2 pos)
+//{
+//
+//}
+
+Entity createSpikes(vec2 pos, vec2 size)
+{
+	auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = size;
+
+	registry.spikes.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::FISH, // TEXTURE_COUNT indicates that no txture is needed
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
 
 Entity createPlayerBullet(vec2 pos, vec2 size)
 {

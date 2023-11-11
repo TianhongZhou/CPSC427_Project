@@ -59,6 +59,11 @@ private:
 	// restart level
 	void restart_game();
 
+	void enter_next_room();
+	void spawn_room_enemies(float elapsed_ms_since_last_update);
+	void check_room_boundary();
+	void save_player_last_direction();
+
 	// OpenGL window handle
 	GLFWwindow* window;
 
