@@ -305,6 +305,8 @@ void updateAllEdges()
 	}
 }
 
+
+
 void detectAndSolveAllCollisions()
 {
 	for (uint i = 0; i < registry.physObjs.size(); i++)
@@ -419,7 +421,7 @@ void applyGlobalConstraints()
 					if (status.invincibilityTimer == 0.0f) {
 						status.health -= registry.damages.get(registry.physObjs.entities[i]).damage;
 						status.invincibilityTimer += 500.0f;
-						printf("PlayerHealth = %f", status.health);
+						printf("PlayerHealth = %f ", status.health);
 					}
 				}
 				else {
@@ -716,3 +718,6 @@ void PhysicsSystem::step_world(float elapsed_ms)
 	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
+
+
+

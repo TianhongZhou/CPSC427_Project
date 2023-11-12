@@ -12,6 +12,9 @@
 
 const size_t NUM_ENEMIES = 2;
 
+
+float DASH_STRENTH = 0.5f;
+
 PinballSystem::PinballSystem() {
 
 }
@@ -43,6 +46,63 @@ void PinballSystem::redirect_inputs_pinball() {
     glfwSetKeyCallback(window, key_redirect);
     glfwSetCursorPosCallback(window, cursor_pos_redirect);
     glfwSetMouseButtonCallback(window, mouse_button_redirect);
+}
+
+// had to copy accelerateObj here since I don't know if creating a instance of physics system to call the function would cause performance issues
+
+void accelerate2(vec2 acc, Vertex_Phys& obj)
+{
+    obj.accel += acc;
+}
+
+
+void accelerateObj2(vec2 acc, physObj& obj)
+{
+    for (int i = 0; i < obj.VertexCount; i++) {
+        accelerate2(acc, obj.Vertices[i]);
+    }
+}
+
+void pinballDash() {
+    if (registry.pinballPlayerStatus.components[0].dashCooldown == 0) {
+
+        registry.pinballPlayerStatus.components[0].dashCooldown += 1000.0f;
+
+        physObj& pinballPhys = registry.physObjs.get(registry.pinballPlayerStatus.entities[0]);
+
+
+        // this would not behave correctly before adding the main enemy
+        if (registry.pinballEnemies.components.size() <= 1) {
+            printf("no target ");
+            accelerateObj2(vec2(0.0f, -DASH_STRENTH), pinballPhys);
+            return;
+        }
+
+
+
+
+
+        float minDist = 1000.0f;
+
+        vec2 direction = vec2(0.0f, 1.0f);
+
+
+        for (int i = 0; i < registry.pinballEnemies.components.size(); i++) {
+
+            Entity enemy = registry.pinballEnemies.entities[i];
+            float dist = distance(registry.physObjs.get(enemy).center, pinballPhys.center);
+
+            if (dist < minDist) {
+                minDist = dist;
+                direction = normalize(vec2(registry.physObjs.get(enemy).center.x - pinballPhys.center.x,
+                    registry.physObjs.get(enemy).center.y - pinballPhys.center.y));
+            }
+        }
+
+        accelerateObj2(direction * DASH_STRENTH, pinballPhys);
+
+    }
+
 }
 
 
@@ -86,6 +146,19 @@ void updateTimers(float ms) {
             }
             else {
                 highGravTimer = 0.0f;
+            }
+        }
+
+
+        float& dashCd = registry.pinballPlayerStatus.components[0].dashCooldown;
+
+        if (dashCd != 0.0f) {
+
+            if (dashCd > ms) {
+                dashCd -= ms;
+            }
+            else {
+                dashCd = 0.0f;
             }
         }
 
@@ -153,6 +226,12 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
     }
 
 
+    if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT_SHIFT)
+    {
+        pinballDash();
+    }
+
+
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
     {
@@ -192,12 +271,10 @@ void PinballSystem::restart() {
     std::uniform_real_distribution<float> distribution1(boundary.x, boundary.y);
     std::uniform_real_distribution<float> distribution2(0.f, 1.f);
 
-    for (int i=0; i<NUM_ENEMIES; i++) {
-    Entity pinballenemy = createPinBallEnemy(renderer, {distribution1(gen), 180 * (2)}, boundary);
-    registry.colors.insert(pinballenemy, {distribution2(gen), distribution2(gen), distribution2(gen)});
-    }
 
-    Entity player_ball = createBall(renderer, {400, 400});
+ 
+
+    Entity player_ball = createBall(renderer, { 400, 400 });
     createNewRectangleTiedToEntity(player_ball, 30.f, 30.f, registry.motions.get(player_ball).position, true, 0.7);
 
     // setting up player status for pinball
@@ -213,6 +290,17 @@ void PinballSystem::restart() {
 
 
     //
+
+
+
+
+
+    for (int i=0; i<NUM_ENEMIES; i++) {
+    Entity pinballenemy = createPinBallEnemy(renderer, {distribution1(gen), 180 * (2)}, boundary);
+    registry.colors.insert(pinballenemy, {distribution2(gen), distribution2(gen), distribution2(gen)});
+    }
+
+
 
     registry.pinballPlayerStatus.emplace(player_ball, status);
     registry.damages.emplace(player_ball, playerballDamage);

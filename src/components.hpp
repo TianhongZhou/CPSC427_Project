@@ -227,6 +227,7 @@ struct PinballPlayerStatus {
 	float invincibilityTimer;
 	float highGravityTimer;
 	float antiGravityTimer;
+	float dashCooldown;
 };
 
 struct DamageToPlayer {
