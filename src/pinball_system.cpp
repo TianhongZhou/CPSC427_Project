@@ -45,6 +45,55 @@ void PinballSystem::redirect_inputs_pinball() {
     glfwSetMouseButtonCallback(window, mouse_button_redirect);
 }
 
+
+
+void updateTimers(float ms) {
+
+    if (registry.pinballPlayerStatus.components.size() != 0) {
+
+        float& invTimer = registry.pinballPlayerStatus.components[0].invincibilityTimer;
+
+        if (invTimer != 0.0f) {
+
+            if (invTimer > ms) {
+                invTimer -= ms;
+            }
+            else {
+                invTimer = 0.0f;
+            }
+        }
+
+
+        float& antiTimer = registry.pinballPlayerStatus.components[0].antiGravityTimer;
+
+        if (antiTimer != 0.0f) {
+
+            if (antiTimer > ms) {
+                antiTimer -= ms;
+            }
+            else {
+                antiTimer = 0.0f;
+            }
+        }
+
+
+        float& highGravTimer = registry.pinballPlayerStatus.components[0].highGravityTimer;
+
+        if (highGravTimer != 0.0f) {
+
+            if (highGravTimer > ms) {
+                highGravTimer -= ms;
+            }
+            else {
+                highGravTimer = 0.0f;
+            }
+        }
+
+    }
+
+}
+
+
 // Update our game world
 bool PinballSystem::step(float elapsed_ms_since_last_update) {
     // Entity blood = registry.healthBar.entities[0];
@@ -68,6 +117,9 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
         }
     }
 
+    updateTimers(elapsed_ms_since_last_update);
+
+
     return true;
 }
 
@@ -78,14 +130,29 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
         exit_combat();
     }
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_P)
+    if (action == GLFW_RELEASE && key == GLFW_KEY_SPACE)
     {
         Entity& flipper = registry.playerFlippers.entities[0];
 
         physObj& flipperPhys = registry.physObjs.get(flipper);
 
-        flipperPhys.Vertices[3].accel += vec2(0.f, -0.8f);
+        flipperPhys.Vertices[0].accel += vec2(0.f, -0.8f);
+        flipperPhys.Vertices[1].accel += vec2(0.f, -0.8f);
     }
+
+
+    if (action == GLFW_RELEASE && key == GLFW_KEY_U)
+    {
+        registry.pinballPlayerStatus.components[0].antiGravityTimer += 5000.0f;
+    }
+
+
+    if (action == GLFW_RELEASE && key == GLFW_KEY_I)
+    {
+        registry.pinballPlayerStatus.components[0].highGravityTimer += 5000.0f;
+    }
+
+
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
     {
@@ -93,7 +160,7 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
 
         physObj& flipperPhys = registry.physObjs.get(flipper);
 
-        flipperPhys.Vertices[1].accel += vec2(0.1f, 0.f);
+        flipperPhys.Vertices[1].accel += vec2(0.2f, 0.f);
     }
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT)
@@ -102,7 +169,7 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
 
         physObj& flipperPhys = registry.physObjs.get(flipper);
 
-        flipperPhys.Vertices[1].accel += vec2(-0.1f, 0.f);
+        flipperPhys.Vertices[1].accel += vec2(-0.2f, 0.f);
     }
 }
 
@@ -133,6 +200,23 @@ void PinballSystem::restart() {
     Entity player_ball = createBall(renderer, {400, 400});
     createNewRectangleTiedToEntity(player_ball, 30.f, 30.f, registry.motions.get(player_ball).position, true, 0.7);
 
+    // setting up player status for pinball
+    PinballPlayerStatus status;
+    status.health = 100.0f;
+    status.invincibilityTimer = 0.0f;
+    status.antiGravityTimer = 0.0f;
+    status.highGravityTimer = 0.0f;
+
+    // setting up playerball self damage
+    DamageToPlayer playerballDamage;
+    playerballDamage.damage = 20.0f;
+
+
+    //
+
+    registry.pinballPlayerStatus.emplace(player_ball, status);
+    registry.damages.emplace(player_ball, playerballDamage);
+
     //wall
     Entity leftwall = createPolygonByVertex(renderer, {{220, 749},
                                                        {220, 1},
@@ -153,18 +237,18 @@ void PinballSystem::restart() {
     // createNewRectangleTiedToEntity(squareball, 50.f, 50.f, registry.motions.get(squareball).position, true, 1.0);
 
 
-    //slide
-    Entity leftslide = createPolygonByVertex(renderer, {{220, 750},
-                                                        {220, 730},
-                                                        {400, 750},
-                                                        {400, 730}}, GEOMETRY_BUFFER_ID::RECT);
-    createNewRectangleTiedToEntity(leftslide, 180.f, 20.f, registry.motions.get(leftslide).position, false, 1.0);
+    ////slide
+    //Entity leftslide = createPolygonByVertex(renderer, {{220, 750},
+    //                                                    {220, 730},
+    //                                                    {400, 750},
+    //                                                    {400, 730}}, GEOMETRY_BUFFER_ID::RECT);
+    //createNewRectangleTiedToEntity(leftslide, 180.f, 20.f, registry.motions.get(leftslide).position, false, 1.0);
 
-    Entity rightslide = createPolygonByVertex(renderer, {{660, 750},
-                                                         {660, 730},
-                                                         {840, 750},
-                                                         {840, 730}}, GEOMETRY_BUFFER_ID::RECT);
-    createNewRectangleTiedToEntity(rightslide, 180.f, 20.f, registry.motions.get(rightslide).position, false, 1.0);
+    //Entity rightslide = createPolygonByVertex(renderer, {{660, 750},
+    //                                                     {660, 730},
+    //                                                     {840, 750},
+    //                                                     {840, 730}}, GEOMETRY_BUFFER_ID::RECT);
+    //createNewRectangleTiedToEntity(rightslide, 180.f, 20.f, registry.motions.get(rightslide).position, false, 1.0);
 
 
     //flipper
@@ -229,3 +313,5 @@ void PinballSystem::exit_combat() {
     world->redirect_inputs_world();
     GameSceneState = 0;
 }
+
+

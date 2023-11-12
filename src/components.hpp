@@ -222,6 +222,18 @@ struct PositionKeyFrame {
 };
 
 
+struct PinballPlayerStatus {
+	float health;
+	float invincibilityTimer;
+	float highGravityTimer;
+	float antiGravityTimer;
+};
+
+struct DamageToPlayer {
+	float damage;
+};
+
+
 
 /**
  * The following enumerators represent global identifiers refering to graphic

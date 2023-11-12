@@ -32,7 +32,9 @@ bool collides(const Motion &motion1, const Motion &motion2)
 	return dist <= radius_sum;*/
 }
 
-float MAX_Y_COORD = 750.0f;
+float MAX_Y_COORD = 810.0f;
+
+
 
 float MIN_Y_COORD = 0.0f;
 
@@ -40,11 +42,18 @@ float MIN_X_COORD = 220.0f;
 
 float FLIPPERHEIGHT = 720.f;
 
-float FLIPPERDELTA = 30.f;
+float FLIPPERDELTA = 50.f;
 
 float MAX_X_COORD = 840.0f;
 
-vec2 GRAV = {0.f, 0.0003f};
+vec2 GRAV = {0.f, 0.00035f};
+
+
+vec2 BOTTOM_BOUNCE = vec2(0.0f, -0.09f);
+
+
+
+
 // struct Vertex_Phys {
 //	vec2 pos;
 //	vec2 oldPos;
@@ -278,6 +287,14 @@ void accelerate(vec2 acc, Vertex_Phys &obj)
 	obj.accel += acc;
 }
 
+
+void accelerateObj(vec2 acc, physObj& obj)
+{
+	for (int i = 0; i < obj.VertexCount; i++) {
+		accelerate(acc, obj.Vertices[i]);
+	}
+}
+
 void updateAllEdges()
 {
 	for (uint i = 0; i < registry.physObjs.size(); i++)
@@ -356,7 +373,17 @@ void applyObjGrav()
 
 			for (int i2 = 0; i2 < obj.VertexCount; i2++)
 			{
-				accelerate(GRAV, (obj.Vertices[i2]));
+				PinballPlayerStatus& status = registry.pinballPlayerStatus.components[0];
+
+				if (status.antiGravityTimer != 0) {
+					accelerate(-GRAV, (obj.Vertices[i2]));
+				}
+				else if (status.highGravityTimer != 0) {
+					accelerate(3.0f*GRAV, (obj.Vertices[i2]));
+				}
+				else {
+					accelerate(GRAV, (obj.Vertices[i2]));
+				}
 			}
 		}
 	}
@@ -384,7 +411,21 @@ void applyGlobalConstraints()
 		{
 			if (obj.Vertices[i2].pos.y > MAX_Y_COORD)
 			{
-				obj.Vertices[i2].pos.y = MAX_Y_COORD;
+				
+
+				if (registry.pinballPlayerStatus.has(registry.physObjs.entities[i])) {
+					PinballPlayerStatus& status = registry.pinballPlayerStatus.get(registry.physObjs.entities[i]);
+					accelerateObj(BOTTOM_BOUNCE, obj);
+					if (status.invincibilityTimer == 0.0f) {
+						status.health -= registry.damages.get(registry.physObjs.entities[i]).damage;
+						status.invincibilityTimer += 500.0f;
+						printf("PlayerHealth = %f", status.health);
+					}
+				}
+				else {
+
+					obj.Vertices[i2].pos.y = MAX_Y_COORD;
+				}
 			}
 
 			if (obj.Vertices[i2].pos.y < MIN_Y_COORD)
@@ -432,9 +473,14 @@ void flipperConstraints()
 
 		physObj &flipperPhys = registry.physObjs.get(flipper);
 
-		if (flipperPhys.Vertices[1].pos.y != FLIPPERHEIGHT)
+		//if (flipperPhys.Vertices[1].pos.y != FLIPPERHEIGHT)
+		//{
+		//	flipperPhys.Vertices[1].pos.y = FLIPPERHEIGHT;
+		//}
+
+		if (flipperPhys.Vertices[2].pos.y > FLIPPERHEIGHT + FLIPPERDELTA)
 		{
-			flipperPhys.Vertices[1].pos.y = FLIPPERHEIGHT;
+			flipperPhys.Vertices[2].pos.y = FLIPPERHEIGHT + FLIPPERDELTA;
 		}
 
 		if (flipperPhys.Vertices[3].pos.y > FLIPPERHEIGHT + FLIPPERDELTA)
@@ -442,9 +488,14 @@ void flipperConstraints()
 			flipperPhys.Vertices[3].pos.y = FLIPPERHEIGHT + FLIPPERDELTA;
 		}
 
-		if (flipperPhys.Vertices[3].pos.y < FLIPPERHEIGHT - FLIPPERDELTA)
+		if (flipperPhys.Vertices[2].pos.y < FLIPPERHEIGHT)
 		{
-			flipperPhys.Vertices[3].pos.y = FLIPPERHEIGHT - FLIPPERDELTA;
+			flipperPhys.Vertices[2].pos.y = FLIPPERHEIGHT;
+		}
+
+		if (flipperPhys.Vertices[3].pos.y < FLIPPERHEIGHT )
+		{
+			flipperPhys.Vertices[3].pos.y = FLIPPERHEIGHT;
 		}
 	}
 
