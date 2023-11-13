@@ -593,7 +593,9 @@ void update(float dt)
 
 void updateWithSubstep(float dt, float steps)
 {
-
+	if (dt > 200.f) {
+		dt = 5.f;
+	}
 	for (int i = 0; i < steps; i++)
 	{
 		update(dt / steps);
