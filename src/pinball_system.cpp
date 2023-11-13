@@ -225,6 +225,24 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
         pinballDash();
     }
 
+    if (action == GLFW_RELEASE && key == GLFW_KEY_K)
+    {
+        Entity projectile_ball = createBall(renderer, { 400, 400 });
+        createNewRectangleTiedToEntity(projectile_ball, 30.f, 30.f, registry.motions.get(projectile_ball).position, true, 1);
+
+        TemporaryProjectile temp;
+        temp.hitsLeft = 2;
+        DamageToPlayer d;
+        d.damage = 20.0f;
+        DamageToEnemy d2;
+        d2.damage = 40.0f;
+
+        registry.attackPower.emplace(projectile_ball, d2);
+        registry.damages.emplace(projectile_ball, d);
+        registry.temporaryProjectiles.emplace(projectile_ball, temp);
+
+    }
+
 
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
@@ -269,7 +287,8 @@ void PinballSystem::restart() {
  
 
     Entity player_ball = createBall(renderer, { 400, 400 });
-    createNewRectangleTiedToEntity(player_ball, 30.f, 30.f, registry.motions.get(player_ball).position, true, 0.7);
+    createNewRectangleTiedToEntity(player_ball, 30.f, 30.f, registry.motions.get(player_ball).position, true, 1);
+
 
     // setting up player status for pinball
     PinballPlayerStatus status;

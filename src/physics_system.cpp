@@ -423,10 +423,12 @@ void updateAllCenters()
 
 void applyGlobalConstraints()
 {
-
+	
 	for (uint i = 0; i < registry.physObjs.size(); i++)
 	{
 		physObj &obj = registry.physObjs.components[i];
+
+		Entity* toRemove = nullptr;
 
 		for (int i2 = 0; i2 < obj.VertexCount; i2++)
 		{
@@ -437,20 +439,27 @@ void applyGlobalConstraints()
 				if (registry.damages.has(registry.physObjs.entities[i])) {
 					PinballPlayerStatus& status = registry.pinballPlayerStatus.components[0];
 					accelerateObj(BOTTOM_BOUNCE, obj);
+					
 					if (status.invincibilityTimer == 0.0f) {
 						status.health -= registry.damages.get(registry.physObjs.entities[i]).damage;
 						status.invincibilityTimer += 500.0f;
-						printf("PlayerHealth = %f ", status.health);
+						//printf("PlayerHealth = %f ", status.health);
+
+						// potential bug in this one
+						if (registry.temporaryProjectiles.has(registry.physObjs.entities[i])) {
+							if (registry.temporaryProjectiles.get(registry.physObjs.entities[i]).hitsLeft - 1 <= 0) {
+								toRemove = &registry.physObjs.entities[i];
+								//printf("ready to remove");
+							}
+							else {
+								registry.temporaryProjectiles.get(registry.physObjs.entities[i]).hitsLeft--;
+								printf("hits = %i ", registry.temporaryProjectiles.get(registry.physObjs.entities[i]).hitsLeft);
+							}
+						}
+
 					}
 
-					if (registry.temporaryProjectiles.has(registry.physObjs.entities[i])) {
-						if (registry.temporaryProjectiles.get(registry.physObjs.entities[i]).hitsLeft - 1 <= 0) {
-							registry.remove_all_components_of(registry.physObjs.entities[i]);
-						}
-						else {
-							registry.temporaryProjectiles.get(registry.physObjs.entities[i]).hitsLeft--;
-						}
-					}
+
 
 				}
 				else {
@@ -474,6 +483,13 @@ void applyGlobalConstraints()
 			{
 				obj.Vertices[i2].pos.x = MAX_X_COORD;
 			}
+		}
+		
+		// can only remove after all vertex of an obj has been looped through
+		if (toRemove != nullptr) {
+			//printf("removed");
+			
+			registry.remove_all_components_of(*toRemove);
 		}
 	}
 }
