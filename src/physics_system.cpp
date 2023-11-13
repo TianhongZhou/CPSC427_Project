@@ -434,17 +434,28 @@ void applyGlobalConstraints()
 			{
 				
 
-				if (registry.pinballPlayerStatus.has(registry.physObjs.entities[i])) {
-					PinballPlayerStatus& status = registry.pinballPlayerStatus.get(registry.physObjs.entities[i]);
+				if (registry.damages.has(registry.physObjs.entities[i])) {
+					PinballPlayerStatus& status = registry.pinballPlayerStatus.components[0];
 					accelerateObj(BOTTOM_BOUNCE, obj);
 					if (status.invincibilityTimer == 0.0f) {
 						status.health -= registry.damages.get(registry.physObjs.entities[i]).damage;
 						status.invincibilityTimer += 500.0f;
 						printf("PlayerHealth = %f ", status.health);
 					}
+
+					if (registry.temporaryProjectiles.has(registry.physObjs.entities[i])) {
+						if (registry.temporaryProjectiles.get(registry.physObjs.entities[i]).hitsLeft - 1 <= 0) {
+							registry.remove_all_components_of(registry.physObjs.entities[i]);
+						}
+						else {
+							registry.temporaryProjectiles.get(registry.physObjs.entities[i]).hitsLeft--;
+						}
+					}
+
 				}
 				else {
-
+					
+					
 					obj.Vertices[i2].pos.y = MAX_Y_COORD;
 				}
 			}
