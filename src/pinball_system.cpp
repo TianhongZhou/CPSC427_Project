@@ -13,7 +13,7 @@
 const size_t NUM_ENEMIES = 2;
 
 
-float DASH_STRENTH = 0.5f;
+float DASH_STRENTH = 0.2f;
 
 PinballSystem::PinballSystem() {
 
@@ -70,6 +70,11 @@ void pinballDash() {
 
         physObj& pinballPhys = registry.physObjs.get(registry.pinballPlayerStatus.entities[0]);
 
+        for (int i = 0; i < pinballPhys.VertexCount; i++) {
+            pinballPhys.Vertices[i].oldPos = pinballPhys.Vertices[i].pos;
+
+        }
+        
 
         // this would not behave correctly before adding the main enemy
         if (registry.pinballEnemies.components.size() <= 1) {
@@ -105,61 +110,50 @@ void pinballDash() {
 
 }
 
+void countdown(float& timer, float ms) {
+    if (timer != 0.0f) {
+
+        if (timer > ms) {
+            timer -= ms;
+        }
+        else {
+            timer = 0.0f;
+        }
+    }
+}
+
 
 
 void updateTimers(float ms) {
 
     if (registry.pinballPlayerStatus.components.size() != 0) {
 
-        float& invTimer = registry.pinballPlayerStatus.components[0].invincibilityTimer;
+        //float& invTimer = registry.pinballPlayerStatus.components[0].invincibilityTimer;
 
-        if (invTimer != 0.0f) {
+//if (invTimer != 0.0f) {
 
-            if (invTimer > ms) {
-                invTimer -= ms;
-            }
-            else {
-                invTimer = 0.0f;
-            }
-        }
-
-
-        float& antiTimer = registry.pinballPlayerStatus.components[0].antiGravityTimer;
-
-        if (antiTimer != 0.0f) {
-
-            if (antiTimer > ms) {
-                antiTimer -= ms;
-            }
-            else {
-                antiTimer = 0.0f;
-            }
-        }
+//    if (invTimer > ms) {
+//        invTimer -= ms;
+//    }
+//    else {
+//        invTimer = 0.0f;
+//    }
+//}
 
 
-        float& highGravTimer = registry.pinballPlayerStatus.components[0].highGravityTimer;
-
-        if (highGravTimer != 0.0f) {
-
-            if (highGravTimer > ms) {
-                highGravTimer -= ms;
-            }
-            else {
-                highGravTimer = 0.0f;
-            }
-        }
+        countdown(registry.pinballPlayerStatus.components[0].invincibilityTimer, ms);
 
 
-        float& dashCd = registry.pinballPlayerStatus.components[0].dashCooldown;
+        countdown(registry.pinballPlayerStatus.components[0].antiGravityTimer, ms);
 
-        if (dashCd != 0.0f) {
 
-            if (dashCd > ms) {
-                dashCd -= ms;
-            }
-            else {
-                dashCd = 0.0f;
-            }
+        countdown(registry.pinballPlayerStatus.components[0].highGravityTimer, ms);
+
+
+        countdown(registry.pinballPlayerStatus.components[0].dashCooldown, ms);
+
+        for (int i = 0; i < registry.pinballEnemies.components.size(); i++) {
+            countdown(registry.pinballEnemies.components[i].invincibilityTimer, ms);
         }
 
     }
@@ -288,22 +282,28 @@ void PinballSystem::restart() {
     DamageToPlayer playerballDamage;
     playerballDamage.damage = 20.0f;
 
+    DamageToEnemy playerballAttack;
+    playerballAttack.damage = 20.0f;
+
+    registry.pinballPlayerStatus.emplace(player_ball, status);
+    registry.damages.emplace(player_ball, playerballDamage);
+    registry.attackPower.emplace(player_ball, playerballAttack);
 
     //
 
 
-
+    Entity pinballenemyMain = createPinBallEnemy(renderer, vec2(525,30), boundary,4.0f);
+    registry.colors.insert(pinballenemyMain, { distribution2(gen), distribution2(gen), distribution2(gen) });
 
 
     for (int i=0; i<NUM_ENEMIES; i++) {
-    Entity pinballenemy = createPinBallEnemy(renderer, {distribution1(gen), 180 * (2)}, boundary);
+    Entity pinballenemy = createPinBallEnemy(renderer, {distribution1(gen), 180 * (2)}, boundary,1.0f);
     registry.colors.insert(pinballenemy, {distribution2(gen), distribution2(gen), distribution2(gen)});
     }
 
 
 
-    registry.pinballPlayerStatus.emplace(player_ball, status);
-    registry.damages.emplace(player_ball, playerballDamage);
+ 
 
     //wall
     Entity leftwall = createPolygonByVertex(renderer, {{220, 749},

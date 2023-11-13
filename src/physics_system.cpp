@@ -333,16 +333,35 @@ void detectAndSolveAllCollisions()
 					registry.pinballEnemies.has(entity_b) && !registry.pinballEnemies.has(entity_a)) {
 					Entity enemy = entity_a;
 					// remove enemy upon collision
+					Entity projectile;
 					if (registry.pinballEnemies.has(entity_a)) {
 						//registry.remove_all_components_of(entity_a);
 						enemy = entity_a;
+						projectile = entity_b;
 					}
 					else {
 						//registry.remove_all_components_of(entity_b);
 						enemy = entity_b;
+						projectile = entity_a;
 					}
 					PinBallEnemy& pinballEnemy = registry.pinballEnemies.get(enemy);
-					pinballEnemy.currentHealth = pinballEnemy.currentHealth-1.5f<0? 0: pinballEnemy.currentHealth-1.5f;
+					if (pinballEnemy.invincibilityTimer == 0 && registry.attackPower.has(projectile)) {
+						float damage = registry.attackPower.get(projectile).damage;
+
+						pinballEnemy.currentHealth = pinballEnemy.currentHealth - damage < 0 ? 0 : pinballEnemy.currentHealth - damage;
+
+						pinballEnemy.invincibilityTimer += 200.0f;
+
+						// deducting hits left for temp projectile
+						if (registry.temporaryProjectiles.has(projectile)) {
+							if (registry.temporaryProjectiles.get(projectile).hitsLeft - 1 <= 0) {
+								registry.remove_all_components_of(projectile);
+							}
+							else {
+								registry.temporaryProjectiles.get(projectile).hitsLeft--;
+							}
+						}
+					}
 				}
 			}
 		}

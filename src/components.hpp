@@ -67,6 +67,7 @@ struct PinBallEnemy
 	std::array<Entity,3> healthBar;
 	float maxHealth = 100.f;
 	float currentHealth = 100.f;
+	float invincibilityTimer;
 };
 
 // A timer that will highlight a room enemy
@@ -234,6 +235,13 @@ struct DamageToPlayer {
 	float damage;
 };
 
+struct DamageToEnemy {
+	float damage;
+};
+
+struct TemporaryProjectile {
+	int hitsLeft;
+};
 
 
 /**
