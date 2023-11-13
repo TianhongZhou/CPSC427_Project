@@ -306,7 +306,7 @@ Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
- Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos, vec2 boundary)
+ Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos, vec2 boundary, float xScale)
 {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PINBALLENEMY);
@@ -319,12 +319,14 @@ Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 80.f, 0.f };
-	motion.scale = mesh.original_size * 50.f;
+	motion.scale = vec2(mesh.original_size.x * xScale , mesh.original_size.y) * 50.f;
+		
 
 	PinBallEnemy& enemy = registry.pinballEnemies.emplace(entity);
 	enemy.boundary = boundary;
 	enemy.maxHealth = 100.f;
 	enemy.currentHealth = 100.f;
+	enemy.invincibilityTimer = 0.0f;
 
 	Entity healthBar = createPinBallEnemyHealth(renderer, { pos.x, pos.y-50 });
 	registry.colors.insert(healthBar, { 0.2, 0.2, 0.2 });
@@ -342,7 +344,7 @@ Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos)
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			EFFECT_ASSET_ID::SALMON,
 			GEOMETRY_BUFFER_ID::OCT });
-	createNewRectangleTiedToEntity(entity, 120.f, 50.f, registry.motions.get(entity).position, false, 1.0);		
+	createNewRectangleTiedToEntity(entity, 120.f* xScale, 50.f, registry.motions.get(entity).position, false, 1.0);
 
 	return entity;
 }

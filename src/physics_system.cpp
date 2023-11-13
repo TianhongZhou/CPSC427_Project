@@ -32,7 +32,9 @@ bool collides(const Motion &motion1, const Motion &motion2)
 	return dist <= radius_sum;*/
 }
 
-float MAX_Y_COORD = 750.0f;
+float MAX_Y_COORD = 810.0f;
+
+
 
 float MIN_Y_COORD = 0.0f;
 
@@ -40,11 +42,18 @@ float MIN_X_COORD = 220.0f;
 
 float FLIPPERHEIGHT = 720.f;
 
-float FLIPPERDELTA = 30.f;
+float FLIPPERDELTA = 50.f;
 
 float MAX_X_COORD = 840.0f;
 
-vec2 GRAV = {0.f, 0.0003f};
+vec2 GRAV = {0.f, 0.00035f};
+
+
+vec2 BOTTOM_BOUNCE = vec2(0.0f, -0.09f);
+
+
+
+
 // struct Vertex_Phys {
 //	vec2 pos;
 //	vec2 oldPos;
@@ -278,6 +287,14 @@ void accelerate(vec2 acc, Vertex_Phys &obj)
 	obj.accel += acc;
 }
 
+
+void accelerateObj(vec2 acc, physObj& obj)
+{
+	for (int i = 0; i < obj.VertexCount; i++) {
+		accelerate(acc, obj.Vertices[i]);
+	}
+}
+
 void updateAllEdges()
 {
 	for (uint i = 0; i < registry.physObjs.size(); i++)
@@ -287,6 +304,8 @@ void updateAllEdges()
 		updateEdges(obj);
 	}
 }
+
+
 
 void detectAndSolveAllCollisions()
 {
@@ -314,16 +333,35 @@ void detectAndSolveAllCollisions()
 					registry.pinballEnemies.has(entity_b) && !registry.pinballEnemies.has(entity_a)) {
 					Entity enemy = entity_a;
 					// remove enemy upon collision
+					Entity projectile;
 					if (registry.pinballEnemies.has(entity_a)) {
 						//registry.remove_all_components_of(entity_a);
 						enemy = entity_a;
+						projectile = entity_b;
 					}
 					else {
 						//registry.remove_all_components_of(entity_b);
 						enemy = entity_b;
+						projectile = entity_a;
 					}
 					PinBallEnemy& pinballEnemy = registry.pinballEnemies.get(enemy);
-					pinballEnemy.currentHealth = pinballEnemy.currentHealth-1.5f<0? 0: pinballEnemy.currentHealth-1.5f;
+					if (pinballEnemy.invincibilityTimer == 0 && registry.attackPower.has(projectile)) {
+						float damage = registry.attackPower.get(projectile).damage;
+
+						pinballEnemy.currentHealth = pinballEnemy.currentHealth - damage < 0 ? 0 : pinballEnemy.currentHealth - damage;
+
+						pinballEnemy.invincibilityTimer += 200.0f;
+
+						// deducting hits left for temp projectile
+						if (registry.temporaryProjectiles.has(projectile)) {
+							if (registry.temporaryProjectiles.get(projectile).hitsLeft - 1 <= 0) {
+								registry.remove_all_components_of(projectile);
+							}
+							else {
+								registry.temporaryProjectiles.get(projectile).hitsLeft--;
+							}
+						}
+					}
 				}
 			}
 		}
@@ -356,7 +394,17 @@ void applyObjGrav()
 
 			for (int i2 = 0; i2 < obj.VertexCount; i2++)
 			{
-				accelerate(GRAV, (obj.Vertices[i2]));
+				PinballPlayerStatus& status = registry.pinballPlayerStatus.components[0];
+
+				if (status.antiGravityTimer != 0) {
+					accelerate(-GRAV, (obj.Vertices[i2]));
+				}
+				else if (status.highGravityTimer != 0) {
+					accelerate(3.0f*GRAV, (obj.Vertices[i2]));
+				}
+				else {
+					accelerate(GRAV, (obj.Vertices[i2]));
+				}
 			}
 		}
 	}
@@ -375,16 +423,50 @@ void updateAllCenters()
 
 void applyGlobalConstraints()
 {
-
+	
 	for (uint i = 0; i < registry.physObjs.size(); i++)
 	{
 		physObj &obj = registry.physObjs.components[i];
+
+		Entity* toRemove = nullptr;
 
 		for (int i2 = 0; i2 < obj.VertexCount; i2++)
 		{
 			if (obj.Vertices[i2].pos.y > MAX_Y_COORD)
 			{
-				obj.Vertices[i2].pos.y = MAX_Y_COORD;
+				
+
+				if (registry.damages.has(registry.physObjs.entities[i])) {
+					PinballPlayerStatus& status = registry.pinballPlayerStatus.components[0];
+					accelerateObj(BOTTOM_BOUNCE, obj);
+					
+					if (status.invincibilityTimer == 0.0f) {
+						status.health -= registry.damages.get(registry.physObjs.entities[i]).damage;
+						status.invincibilityTimer += 500.0f;
+						//printf("PlayerHealth = %f ", status.health);
+
+						// potential bug in this one
+						if (registry.temporaryProjectiles.has(registry.physObjs.entities[i])) {
+							if (registry.temporaryProjectiles.get(registry.physObjs.entities[i]).hitsLeft - 1 <= 0) {
+								toRemove = &registry.physObjs.entities[i];
+								//printf("ready to remove");
+							}
+							else {
+								registry.temporaryProjectiles.get(registry.physObjs.entities[i]).hitsLeft--;
+								printf("hits = %i ", registry.temporaryProjectiles.get(registry.physObjs.entities[i]).hitsLeft);
+							}
+						}
+
+					}
+
+
+
+				}
+				else {
+					
+					
+					obj.Vertices[i2].pos.y = MAX_Y_COORD;
+				}
 			}
 
 			if (obj.Vertices[i2].pos.y < MIN_Y_COORD)
@@ -401,6 +483,13 @@ void applyGlobalConstraints()
 			{
 				obj.Vertices[i2].pos.x = MAX_X_COORD;
 			}
+		}
+		
+		// can only remove after all vertex of an obj has been looped through
+		if (toRemove != nullptr) {
+			//printf("removed");
+			
+			registry.remove_all_components_of(*toRemove);
 		}
 	}
 }
@@ -432,9 +521,14 @@ void flipperConstraints()
 
 		physObj &flipperPhys = registry.physObjs.get(flipper);
 
-		if (flipperPhys.Vertices[1].pos.y != FLIPPERHEIGHT)
+		//if (flipperPhys.Vertices[1].pos.y != FLIPPERHEIGHT)
+		//{
+		//	flipperPhys.Vertices[1].pos.y = FLIPPERHEIGHT;
+		//}
+
+		if (flipperPhys.Vertices[2].pos.y > FLIPPERHEIGHT + FLIPPERDELTA)
 		{
-			flipperPhys.Vertices[1].pos.y = FLIPPERHEIGHT;
+			flipperPhys.Vertices[2].pos.y = FLIPPERHEIGHT + FLIPPERDELTA;
 		}
 
 		if (flipperPhys.Vertices[3].pos.y > FLIPPERHEIGHT + FLIPPERDELTA)
@@ -442,9 +536,14 @@ void flipperConstraints()
 			flipperPhys.Vertices[3].pos.y = FLIPPERHEIGHT + FLIPPERDELTA;
 		}
 
-		if (flipperPhys.Vertices[3].pos.y < FLIPPERHEIGHT - FLIPPERDELTA)
+		if (flipperPhys.Vertices[2].pos.y < FLIPPERHEIGHT)
 		{
-			flipperPhys.Vertices[3].pos.y = FLIPPERHEIGHT - FLIPPERDELTA;
+			flipperPhys.Vertices[2].pos.y = FLIPPERHEIGHT;
+		}
+
+		if (flipperPhys.Vertices[3].pos.y < FLIPPERHEIGHT )
+		{
+			flipperPhys.Vertices[3].pos.y = FLIPPERHEIGHT;
 		}
 	}
 
@@ -665,3 +764,6 @@ void PhysicsSystem::step_world(float elapsed_ms)
 	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
+
+
+
