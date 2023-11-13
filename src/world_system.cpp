@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "physics_system.hpp"
+#include "pinball_system.hpp"
 
 // Game configuration
 const size_t MAX_TURTLES = 15;
@@ -87,22 +88,9 @@ GLFWwindow *WorldSystem::create_window()
 		fprintf(stderr, "Failed to glfwCreateWindow");
 		return nullptr;
 	}
+    redirect_inputs_world();
 
-	// Setting callbacks to member functions (that's why the redirect is needed)
-	// Input is handled using GLFW, for more info see
-	// http://www.glfw.org/docs/latest/input_guide.html
-	glfwSetWindowUserPointer(window, this);
-	auto key_redirect = [](GLFWwindow *wnd, int _0, int _1, int _2, int _3)
-	{ ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
-	auto cursor_pos_redirect = [](GLFWwindow *wnd, double _0, double _1)
-	{ ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_mouse_move({_0, _1}); };
-	auto mouse_button_redirect = [](GLFWwindow *wnd, int button, int action, int mods)
-	{ ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_mouse_click(button, action, mods); };
-	glfwSetKeyCallback(window, key_redirect);
-	glfwSetCursorPosCallback(window, cursor_pos_redirect);
-	glfwSetMouseButtonCallback(window, mouse_button_redirect);
-
-	//////////////////////////////////////
+    //////////////////////////////////////
 	// Loading music and sounds with SDL
 	if (SDL_Init(SDL_INIT_AUDIO) < 0)
 	{
@@ -131,6 +119,22 @@ GLFWwindow *WorldSystem::create_window()
 	return window;
 }
 
+void WorldSystem::redirect_inputs_world() {
+    // Setting callbacks to member functions (that's why the redirect is needed)
+    // Input is handled using GLFW, for more info see
+    // http://www.glfw.org/docs/latest/input_guide.html
+    glfwSetWindowUserPointer(window, this);
+    auto key_redirect = [](GLFWwindow *wnd, int _0, int _1, int _2, int _3)
+    { ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
+    auto cursor_pos_redirect = [](GLFWwindow *wnd, double _0, double _1)
+    { ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_mouse_move({_0, _1}); };
+    auto mouse_button_redirect = [](GLFWwindow *wnd, int button, int action, int mods)
+    { ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_mouse_click(button, action, mods); };
+    glfwSetKeyCallback(window, key_redirect);
+    glfwSetCursorPosCallback(window, cursor_pos_redirect);
+    glfwSetMouseButtonCallback(window, mouse_button_redirect);
+}
+
 void WorldSystem::init(RenderSystem *renderer_arg)
 {
 	this->renderer = renderer_arg;
@@ -140,33 +144,6 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 
 	// Set all states to default
 	restart_game();
-}
-
-// Update our game world
-bool WorldSystem::step(float elapsed_ms_since_last_update)
-{
-	// Entity blood = registry.healthBar.entities[0];
-	// Motion& motion = registry.motions.get(blood);
-	// if (motion.scale.x <= 0.5f)
-	// {
-	// 	GameSceneState = 0;
-	// }
-	if (registry.pinballEnemies.entities.size()==0) {
-		// exit_combat();
-		// GameSceneState = 0;
-	} else {
-		for (Entity entity: registry.pinballEnemies.entities) {
-		PinBallEnemy& enemy = registry.pinballEnemies.get(entity);
-		if (enemy.currentHealth<=0) {
-			for (int j=0; j<enemy.healthBar.size(); j++) {
-				registry.remove_all_components_of(enemy.healthBar[j]);
-			}
-			registry.remove_all_components_of(entity);
-		}
-	}
-	}
-
-	return true;
 }
 
 // Reset the world state to its initial state
@@ -189,127 +166,20 @@ void WorldSystem::restart_game()
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
+	int w, h;
+	glfwGetWindowSize(window, &w, &h);
+
 	// Create a new salmon
-	rooms[0] = createRoom(renderer, { 600, 400 });
-	player = createPlayer(renderer, { 350, 200 });
+	rooms[0] = createStartingRoom(renderer, { 600, 400 }, window);
+	player = createPlayer(renderer, { w/2, h * 4 / 5 }); // spawn at the bottom of room for now
 	registry.lights.emplace(player);
-
-
-	//int w, h;
-	//glfwGetWindowSize(window, &w, &h);
-	//// Add a ball
-	//Entity entity = createPebble({ 0,0 }, { 0,0 }); //intialized below
-	//Motion& motion = registry.motions.get(entity);
-	//motion.position = {400, 400};
-	//motion.scale = {30, 30};
-	//motion.angle = 0; 
-	//motion.velocity = { 200, 200 };
-
-
-	//registry.colors.insert(entity, { 1, 1, 1 });
 }
 
-void WorldSystem::init_combat(int initCombat)
+//// MOVED TO PinballSystem::restart
+void WorldSystem::init_combat(PinballSystem pinballSystem)
 {
-	// int w, h;
-	// glfwGetWindowSize(window, &w, &h);
-	vec2 boundary = { 260+50, 800-50 };
-	std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> distribution1(boundary.x, boundary.y);
-    std::uniform_real_distribution<float> distribution2(0.f, 1.f);
+    pinballSystem.init(window, renderer, this);
 
-	for (int i=0; i<initCombat; i++) {
-		Entity pinballenemy = createPinBallEnemy(renderer, {distribution1(gen),180*(i+1)}, boundary);
-		registry.colors.insert(pinballenemy, { distribution2(gen), distribution2(gen), distribution2(gen) });
-	}
-
-	Entity player_ball = createBall(renderer, {400, 400});
-	createNewRectangleTiedToEntity(player_ball, 30.f, 30.f, registry.motions.get(player_ball).position, true, 0.7);
-
-	//wall
-	Entity leftwall = createPolygonByVertex(renderer, {{220, 749}, {220, 1}, {240, 1}, {240, 749}}, GEOMETRY_BUFFER_ID::OCT);
-	createNewRectangleTiedToEntity(leftwall, 20.f, 748.f, registry.motions.get(leftwall).position, false, 1.0);
-
-	Entity rightwall = createPolygonByVertex(renderer, { {820, 749}, {820, 1}, {840, 1}, {840, 749} }, GEOMETRY_BUFFER_ID::OCT);
-	createNewRectangleTiedToEntity(rightwall, 20.f, 748.f, registry.motions.get(rightwall).position, false, 1.0);
-
-	//Entity flipper = createPolygonByVertex(renderer, {{300, 600}, {300, 580}, {400, 580}, {400, 600}}, GEOMETRY_BUFFER_ID::RECT);
-
-	//ball
-	// Entity squareball = createPolygonByVertex(renderer, { {500, 570}, {500, 520}, {550, 520}, {550, 570} }, GEOMETRY_BUFFER_ID::OCT);
-	// createNewRectangleTiedToEntity(squareball, 50.f, 50.f, registry.motions.get(squareball).position, true, 1.0);
-
-
-	//slide
-	Entity leftslide = createPolygonByVertex(renderer, { {220, 750}, {220, 730}, {400, 750}, {400, 730} }, GEOMETRY_BUFFER_ID::RECT);
-	createNewRectangleTiedToEntity(leftslide, 180.f, 20.f, registry.motions.get(leftslide).position, false, 1.0);
-
-	Entity rightslide = createPolygonByVertex(renderer, { {660, 750}, {660, 730}, {840, 750}, {840, 730} }, GEOMETRY_BUFFER_ID::RECT);
-	createNewRectangleTiedToEntity(rightslide, 180.f, 20.f, registry.motions.get(rightslide).position, false, 1.0);
-
-
-	//flipper
-	Entity flipper = createPolygonByVertex(renderer, {{480, 600}, {480, 580}, {580, 580}, {580, 600}}, GEOMETRY_BUFFER_ID::RECT);
-	createNewRectangleTiedToEntity(flipper, 100.f, 20.f, registry.motions.get(flipper).position, true, 0.0);
-
-
-	//enemy
-	// Entity enemyobj = createPolygonByVertex(renderer, { {360, 380}, {360, 320}, {520, 320}, {520, 380} }, GEOMETRY_BUFFER_ID::OCT);
-	// createNewRectangleTiedToEntity(enemyobj, 120.f, 50.f, registry.motions.get(enemyobj).position, false, 1.0);
-	// PinBallEnemy &pinballEnemy = registry.pinballEnemies.emplace(enemyobj);
-	// registry.colors.insert(enemyobj, { 0.6, 0, 0 });
-
-	playerFlipper pf;
-	registry.playerFlippers.insert(flipper, pf);
-}
-
-// Compute collisions between entities
-void WorldSystem::handle_collisions()
-{
-	// Loop over all collisions detected by the physics system
-	auto &collisionsRegistry = registry.collisions;
-	for (uint i = 0; i < collisionsRegistry.components.size(); i++)
-	{
-		// The entity and its collider
-		Entity entity = collisionsRegistry.entities[i];
-		Entity entity_other = collisionsRegistry.components[i].other_entity;
-
-		// For now, we are only interested in collisions that involve the salmon
-		if (registry.players.has(entity))
-		{
-			// Player& player = registry.players.get(entity);
-
-			// Checking Player - Room collisions
-			if (registry.rooms.has(entity_other))
-			{
-				// initiate death unless already dying
-				if (!registry.deathTimers.has(entity))
-				{
-					// Scream, reset timer, and make the salmon sink
-					registry.deathTimers.emplace(entity);
-					Mix_PlayChannel(-1, salmon_dead_sound, 0);
-
-					// !!! TODO A1: change the salmon orientation and color on death
-				}
-			}
-			// Checking Player - mainWorldEnemies collisions
-			else if (registry.mainWorldEnemies.has(entity_other))
-			{
-				if (!registry.deathTimers.has(entity))
-				{
-					// chew, count points, and set the LightUp timer
-					registry.remove_all_components_of(entity_other);
-					// Mix_PlayChannel(-1, player_attack_sound, 0);
-					++points;
-
-				}
-			}
-		}
-	}
-
-	// Remove all collisions from this simulation step
-	registry.collisions.clear();
 }
 
 // Should the game be over ?
@@ -321,7 +191,6 @@ bool WorldSystem::is_over() const
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod)
 {
-
 	if (action == GLFW_PRESS)
 	{
 		pressedKeys.insert(key);
@@ -333,7 +202,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	}
 
 	Motion& motion = registry.motions.get(player);
-	bool inCombat = GameSceneState || registry.enterCombatTimer.has(player);;
+//	bool inCombat = GameSceneState || registry.enterCombatTimer.has(player);;
 
 	bool conflictUpAndDown = pressedKeys.count(GLFW_KEY_UP) && pressedKeys.count(GLFW_KEY_DOWN);
 	bool conflictLeftAndRight = pressedKeys.count(GLFW_KEY_LEFT) && pressedKeys.count(GLFW_KEY_RIGHT);
@@ -432,11 +301,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		restart_game();
 	}
 
-	// Exit Combat
-	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_X)
-	{
-		exit_combat();
-	}
 
 	// Enter Combat
 	if (GameSceneState == 0 && action == GLFW_RELEASE && key == GLFW_KEY_C)
@@ -445,32 +309,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		InitCombat = 1;
 	}
 
-	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_P)
-	{
-		Entity& flipper = registry.playerFlippers.entities[0];
-
-		physObj& flipperPhys = registry.physObjs.get(flipper);
-
-		flipperPhys.Vertices[3].accel += vec2(0.f, -0.8f);
-	}
-
-	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
-	{
-		Entity& flipper = registry.playerFlippers.entities[0];
-
-		physObj& flipperPhys = registry.physObjs.get(flipper);
-
-		flipperPhys.Vertices[1].accel += vec2(0.1f, 0.f);
-	}
-
-	if (GameSceneState == 1 && action == GLFW_RELEASE && key == GLFW_KEY_LEFT)
-	{
-		Entity& flipper = registry.playerFlippers.entities[0];
-
-		physObj& flipperPhys = registry.physObjs.get(flipper);
-
-		flipperPhys.Vertices[1].accel += vec2(-0.1f, 0.f);
-	}
 
 	// Debugging
 	if (key == GLFW_KEY_D)
@@ -480,19 +318,19 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		else
 			debugging.in_debug_mode = true;
 	}
-
-	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA)
-	{
-		current_speed -= 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD)
-	{
-		current_speed += 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	current_speed = fmax(0.f, current_speed);
+//
+//	// Control the current speed with `<` `>`
+//	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA)
+//	{
+//		current_speed -= 0.1f;
+//		printf("Current speed = %f\n", current_speed);
+//	}
+//	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD)
+//	{
+//		current_speed += 0.1f;
+//		printf("Current speed = %f\n", current_speed);
+//	}
+//	current_speed = fmax(0.f, current_speed);
 
 	// player attack
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && GameSceneState == 0) {
@@ -561,14 +399,14 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 			angle = last_angle;
 		}
 		else {
-			// CHECK: This is to fix flipping of the axis 
+			// CHECK: This is to fix flipping of the axis
 			if (player_v.x < 0) {
 				angle += atan(1) * 4;
 			}
 			last_angle = angle;
 		}
-		motion.angle = angle; 
-		
+		motion.angle = angle;
+
 
 		//motion.velocity = vec2(200.f + uniform_dist(rng)*200, 100.f - uniform_dist(rng)*200);
 		//float angle = registry.motions.get(player).angle;
@@ -578,13 +416,6 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 
 		registry.colors.insert(entity, { 1, 1, 1 });
 	}
-}
-
-void WorldSystem::exit_combat() {
-	while (registry.combat.entities.size() > 0)
-		registry.remove_all_components_of(registry.combat.entities.back());
-
-    GameSceneState = 0;
 }
 
 // ================================================== WORLD ===============================================================================
@@ -618,14 +449,7 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 				registry.remove_all_components_of(motion_container.entities[i]);
 		}
 	}
-	// save player orientation for attack
-	Motion& motion = registry.motions.get(player);
-	if (motion.velocity.y != 0.f || motion.velocity.x != 0.f) {
-		last_angle = atan(motion.velocity.y / motion.velocity.x);
-		if (motion.velocity.x < 0) {
-			last_angle += atan(1) * 4;
-		}
-	}
+	save_player_last_direction();
 
 	// handling entering combat state
 	float min_timer_ms = 3000.f;
@@ -651,33 +475,7 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 		}
 	}
 
-	// get room motion
-	Motion &roomMotion = registry.motions.get(rooms[0]);
-
-	// Boundary check for player and enemy if they are in room boundary
-	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i)
-	{
-		if (registry.players.has(motion_container.entities[i]) || registry.mainWorldEnemies.has(motion_container.entities[i]))
-		{
-			Motion &motion = motion_container.components[i];
-			if (roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f > motion.position.x)
-			{
-				motion.position.x = roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f;
-			}
-			else if (roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f < motion.position.x)
-			{
-				motion.position.x = roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f;
-			}
-			if (roomMotion.position.y - (roomMotion.scale.y / 2) + 25.f > motion.position.y)
-			{
-				motion.position.y = roomMotion.position.y - (roomMotion.scale.y / 2) + 25.f;
-			}
-			else if (roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f < motion.position.y)
-			{
-				motion.position.y = roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f;
-			}
-		}
-	}
+	check_room_boundary();
 
 	for (Entity entity : registry.highLightEnemies.entities)
 	{
@@ -698,26 +496,110 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 		}
 	}
 
-	//Generate enemy
-	std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> distribution1(-450.0f, 450.0f);
-    std::uniform_real_distribution<float> distribution2(0.0f, 1.0f);
+	//spawn_room_enemies(elapsed_ms_since_last_update);
 
-	generate_enemy_timer += elapsed_ms_since_last_update / 1000.0f; // Convert elapsed time to seconds
+	// TODO: move this to the top later
+	int w, h;
+	glfwGetWindowSize(window, &w, &h);
 
-    if (generate_enemy_timer >= 3.f) {
-		vec2 pos = registry.motions.get(registry.rooms.entities[0]).position;
-		if (registry.mainWorldEnemies.entities.size()< 8) {
-			Entity ene = createRoomEnemy(renderer, { pos[0]+distribution1(gen), pos[1]+distribution1(gen) }, pos, 700.f, false);
-			registry.colors.insert(ene, { distribution2(gen), distribution2(gen), distribution2(gen) });
-		}
-        // Reset the timer
-        generate_enemy_timer = 0.0f;
-    }
+	// Enter next room
+	Motion& player_motion = registry.motions.get(player);
+	if (player_motion.position.y < 60.f && player_motion.position.x > w/2 - 40 && player_motion.position.x < w / 2 + 40)
+		//&& registry.mainWorldEnemies.size()) 
+	{
+		enter_next_room();
+		player_motion.position = { w/2, h * 4/ 5};
+	}
 
 	return true;
 }
+
+// Enter next room
+void WorldSystem::enter_next_room()
+{	
+	// Remove all entities that we created
+	while (registry.motions.entities.size() > 0)
+		registry.remove_all_components_of(registry.motions.entities.back());
+	rooms[0] = createRoom(renderer, { 600, 400 });
+	player = createPlayer(renderer, { 350, 200 });
+	registry.lights.emplace(player);
+
+}
+
+// Generate enemies in room
+// TODO: when multiple rooms are implemented, make sure it checks the right room
+void WorldSystem::spawn_room_enemies(float elapsed_ms_since_last_update)
+{
+	//Generate enemy
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> distribution1(-450.0f, 450.0f);
+	std::uniform_real_distribution<float> distribution2(0.0f, 1.0f);
+
+	generate_enemy_timer += elapsed_ms_since_last_update / 1000.0f; // Convert elapsed time to seconds
+
+	if (generate_enemy_timer >= 3.f) {
+		vec2 pos = registry.motions.get(registry.rooms.entities[0]).position;
+		if (registry.mainWorldEnemies.entities.size() < 8) {
+			Entity ene = createRoomEnemy(renderer, { pos[0] + distribution1(gen), pos[1] + distribution1(gen) }, pos, 700.f, false);
+			registry.colors.insert(ene, { distribution2(gen), distribution2(gen), distribution2(gen) });
+		}
+		// Reset the timer
+		generate_enemy_timer = 0.0f;
+	}
+}
+
+
+// Room boundary check
+// TODO: when multiple rooms are implemented, make sure it checks the right room
+
+void WorldSystem::check_room_boundary()
+{	
+	auto& motion_container = registry.motions;
+	// get room motion
+	Motion& roomMotion = registry.motions.get(rooms[0]);
+
+	// Boundary check for player and enemy if they are in room boundary
+	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i)
+	{
+		if (registry.players.has(motion_container.entities[i]) || registry.mainWorldEnemies.has(motion_container.entities[i]))
+		{
+			Motion& motion = motion_container.components[i];
+			if (roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f + 30 > motion.position.x)
+			{
+				motion.position.x = roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f + 30;
+			}
+			else if (roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f - 10 < motion.position.x)
+			{
+				motion.position.x = roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f - 10;
+			}
+			if (roomMotion.position.y - (roomMotion.scale.y / 2) + 25.f > motion.position.y)
+			{
+				motion.position.y = roomMotion.position.y - (roomMotion.scale.y / 2) + 25.f;
+			}
+			else if (roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f - 70 < motion.position.y)
+			{
+				motion.position.y = roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f - 70;
+			}
+		}
+	}
+}
+
+// Save player's last facing direction for projectile shooting
+void WorldSystem::save_player_last_direction() 
+{
+	// save player orientation for attack
+	Motion& motion = registry.motions.get(player);
+	if (motion.velocity.y != 0.f || motion.velocity.x != 0.f) {
+		last_angle = atan(motion.velocity.y / motion.velocity.x);
+		if (motion.velocity.x < 0) {
+			last_angle += atan(1) * 4;
+		}
+	}
+}
+
+
+
 
 // Compute collisions between entities
 void WorldSystem::handle_collisions_world()
@@ -775,12 +657,19 @@ void WorldSystem::handle_collisions_world()
 		if (registry.enemyBullets.has(entity) && registry.players.has(entity_other) ||
 			registry.enemyBullets.has(entity_other) && registry.players.has(entity)) {
 			// handle damage interaction (nothing for now)
+			restart_game();
 			if (registry.enemyBullets.has(entity)) {
 				registry.remove_all_components_of(entity);
 			}
 			else {
 				registry.remove_all_components_of(entity_other);
 			}
+		}
+
+		// spike collision
+		if (registry.spikes.has(entity) && registry.players.has(entity_other)) {
+			// handle damage interaction (nothing for now)
+			restart_game();
 		}
 	}
 

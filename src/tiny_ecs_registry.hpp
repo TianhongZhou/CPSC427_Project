@@ -35,10 +35,16 @@ public:
 	ComponentContainer<Light> lights;
 	ComponentContainer<PositionKeyFrame> positionKeyFrames;
 	ComponentContainer<HealthBar> healthBar;
+	ComponentContainer<PinballPlayerStatus> pinballPlayerStatus;
+	ComponentContainer<DamageToPlayer> damages;
+	ComponentContainer<DamageToEnemy> attackPower;
+	ComponentContainer<TemporaryProjectile> temporaryProjectiles;
 	
+	// World assets
 	ComponentContainer<PlayerBullet> playerBullets;
 	ComponentContainer<EnemyBullet> enemyBullets;
 	ComponentContainer<Ball> balls;
+	ComponentContainer<Spikes> spikes;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -66,10 +72,16 @@ public:
 		registry_list.push_back(&lights);
 		registry_list.push_back(&positionKeyFrames);
 		registry_list.push_back(&healthBar);
+		registry_list.push_back(&pinballPlayerStatus);
+		registry_list.push_back(&damages);
+		registry_list.push_back(&attackPower);
+		registry_list.push_back(&temporaryProjectiles);
 
+		// World assets
 		registry_list.push_back(&playerBullets);
 		registry_list.push_back(&enemyBullets);
 		registry_list.push_back(&balls);
+		registry_list.push_back(&spikes);
 	}
 
 	void clear_all_components() {

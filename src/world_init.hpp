@@ -20,7 +20,7 @@ Entity createPolygonByVertex(RenderSystem* renderer, const std::vector<vec2>& ve
 // the pin ball enemy blood
 Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos);
 // the pin ball enemy
-Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos, vec2 boundary);
+Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos, vec2 boundary, float xScale);
 // the enemy wave
 Entity createEnemyWave(RenderSystem* renderer, vec2 pos);
 // the room
@@ -41,6 +41,11 @@ Entity createTurtle(RenderSystem* renderer, vec2 position);
 Entity createLine(vec2 position, vec2 size);
 // a pebble
 Entity createPebble(vec2 pos, vec2 size);
+
+Entity createSpikes(vec2 pos, vec2 size);
+
+Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
+
 // player and enemy bullets
 Entity createPlayerBullet(vec2 pos, vec2 size);
 Entity createEnemyBullet(vec2 pos, vec2 size);

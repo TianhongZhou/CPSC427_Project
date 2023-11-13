@@ -5,6 +5,11 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
+struct Spikes
+{
+
+};
+
 struct Ball
 {
 
@@ -62,6 +67,7 @@ struct PinBallEnemy
 	std::array<Entity,3> healthBar;
 	float maxHealth = 100.f;
 	float currentHealth = 100.f;
+	float invincibilityTimer;
 };
 
 // A timer that will highlight a room enemy
@@ -216,6 +222,26 @@ struct PositionKeyFrame {
 	float timeAccumulator;
 };
 
+
+struct PinballPlayerStatus {
+	float health;
+	float invincibilityTimer;
+	float highGravityTimer;
+	float antiGravityTimer;
+	float dashCooldown;
+};
+
+struct DamageToPlayer {
+	float damage;
+};
+
+struct DamageToEnemy {
+	float damage;
+};
+
+struct TemporaryProjectile {
+	int hitsLeft;
+};
 
 
 /**
