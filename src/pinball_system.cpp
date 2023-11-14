@@ -347,19 +347,19 @@ void PinballSystem::on_mouse_move(vec2 mouse_position) {
         physObj& flipper = registry.physObjs.get(registry.playerFlippers.entities[0]);
         flipper.Vertices[0].pos =
             vec2(mouse_position.x - width / 2, flipper.Vertices[0].pos.y);
-        flipper.Vertices[0].oldPos = flipper.Vertices[0].pos;
+        flipper.Vertices[0].oldPos = vec2(mouse_position.x - width / 2, flipper.Vertices[0].oldPos.y);
 
         flipper.Vertices[1].pos =
             vec2(mouse_position.x + width / 2, flipper.Vertices[1].pos.y);
-        flipper.Vertices[1].oldPos = flipper.Vertices[1].pos;
+        flipper.Vertices[1].oldPos = vec2(mouse_position.x + width / 2, flipper.Vertices[1].oldPos.y);
 
         flipper.Vertices[2].pos =
             vec2(mouse_position.x + width / 2, flipper.Vertices[2].pos.y);
-        flipper.Vertices[2].oldPos = flipper.Vertices[2].pos;
+        flipper.Vertices[2].oldPos = vec2(mouse_position.x + width / 2, flipper.Vertices[2].oldPos.y);
 
         flipper.Vertices[3].pos =
             vec2(mouse_position.x - width / 2, flipper.Vertices[3].pos.y);
-        flipper.Vertices[3].oldPos = flipper.Vertices[3].pos;
+        flipper.Vertices[3].oldPos = vec2(mouse_position.x - width / 2, flipper.Vertices[3].oldPos.y);
 
     }
 
