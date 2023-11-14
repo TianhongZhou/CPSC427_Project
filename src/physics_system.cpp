@@ -41,13 +41,15 @@ float MAX_Y_COORD = 810.0f;
 
 float MIN_Y_COORD = 0.0f;
 
+float MAX_X_COORD = 840.0f;
+
 float MIN_X_COORD = 220.0f;
 
 float FLIPPERHEIGHT = 720.f;
 
 float FLIPPERDELTA = 50.f;
 
-float MAX_X_COORD = 840.0f;
+
 
 vec2 GRAV = {0.f, 0.00035f};
 
