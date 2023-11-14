@@ -296,6 +296,7 @@ void PinballSystem::restart() {
     status.invincibilityTimer = 0.0f;
     status.antiGravityTimer = 0.0f;
     status.highGravityTimer = 0.0f;
+    status.comboCounter = 0;
 
     // setting up playerball self damage
     DamageToPlayer playerballDamage;
