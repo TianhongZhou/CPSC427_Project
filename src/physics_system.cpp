@@ -362,11 +362,13 @@ void detectAndSolveAllCollisions()
 
 						// deducting hits left for temp projectile
 						if (registry.temporaryProjectiles.has(projectile)) {
-							if (registry.temporaryProjectiles.get(projectile).hitsLeft - 1 <= 0) {
-								registry.remove_all_components_of(projectile);
-							}
-							else {
-								registry.temporaryProjectiles.get(projectile).hitsLeft--;
+							if (!registry.temporaryProjectiles.get(projectile).bonusBall) {
+								if (registry.temporaryProjectiles.get(projectile).hitsLeft - 1 <= 0) {
+									registry.remove_all_components_of(projectile);
+								}
+								else {
+									registry.temporaryProjectiles.get(projectile).hitsLeft--;
+								}
 							}
 						}
 					}

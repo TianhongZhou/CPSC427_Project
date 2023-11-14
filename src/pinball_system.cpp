@@ -13,6 +13,9 @@
 const size_t NUM_ENEMIES = 2;
 
 
+float PLAYER_BASE_ATTACK = 20.0f;
+
+
 float DASH_STRENTH = 0.2f;
 
 PinballSystem::PinballSystem() {
@@ -161,6 +164,8 @@ void updateTimers(float ms) {
 }
 
 
+
+
 // Update our game world
 bool PinballSystem::step(float elapsed_ms_since_last_update) {
     // Entity blood = registry.healthBar.entities[0];
@@ -189,6 +194,37 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
 
     return true;
 }
+
+//void spawnBonusBall() {
+//    if (registry.pinballPlayerStatus.components[0].comboCounter >= 5) {
+//
+//        registry.pinballPlayerStatus.components[0].comboCounter - 5;
+//
+//        printf("Spawned bonus ball! Combo count=%i ", registry.pinballPlayerStatus.components[0].comboCounter);
+//
+//        vec2 spawnPos = vec2(registry.physObjs.get(registry.playerFlippers.entities[0]).center.x,
+//            registry.physObjs.get(registry.playerFlippers.entities[0]).center.y - 50.0f);
+//
+//        Entity projectile_ball = createBall(renderer, spawnPos);
+//        createNewRectangleTiedToEntity(projectile_ball, 30.f, 30.f, registry.motions.get(projectile_ball).position, true, 1);
+//
+//        TemporaryProjectile temp;
+//        temp.hitsLeft = 1;
+//        temp.bonusBall = true;
+//        DamageToPlayer d;
+//        d.damage = 5.0f;
+//        DamageToEnemy d2;
+//        d2.damage = PLAYER_BASE_ATTACK * 0.5;
+//
+//        registry.attackPower.emplace(projectile_ball, d2);
+//        registry.damages.emplace(projectile_ball, d);
+//        registry.temporaryProjectiles.emplace(projectile_ball, temp);
+//    }
+//    else {
+//        printf("Not enough combo ");
+//    }
+//}
+
 
 // On key callback
 void PinballSystem::on_key(int key, int, int action, int mod) {
@@ -232,6 +268,7 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
 
         TemporaryProjectile temp;
         temp.hitsLeft = 2;
+        temp.bonusBall = false;
         DamageToPlayer d;
         d.damage = 20.0f;
         DamageToEnemy d2;
@@ -243,6 +280,37 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
 
     }
 
+
+    if (action == GLFW_RELEASE && key == GLFW_KEY_Q)
+    {
+        if (registry.pinballPlayerStatus.components[0].comboCounter >= 5) {
+
+            registry.pinballPlayerStatus.components[0].comboCounter - 5;
+
+            printf("Spawned bonus ball! Combo count=%i ", registry.pinballPlayerStatus.components[0].comboCounter);
+
+            vec2 spawnPos = vec2(registry.physObjs.get(registry.playerFlippers.entities[0]).center.x,
+                registry.physObjs.get(registry.playerFlippers.entities[0]).center.y - 50.0f);
+
+            Entity projectile_ball = createBall(renderer, spawnPos);
+            createNewRectangleTiedToEntity(projectile_ball, 30.f, 30.f, registry.motions.get(projectile_ball).position, true, 1);
+
+            TemporaryProjectile temp;
+            temp.hitsLeft = 1;
+            temp.bonusBall = true;
+            DamageToPlayer d;
+            d.damage = 5.0f;
+            DamageToEnemy d2;
+            d2.damage = PLAYER_BASE_ATTACK * 0.5;
+
+            registry.attackPower.emplace(projectile_ball, d2);
+            registry.damages.emplace(projectile_ball, d);
+            registry.temporaryProjectiles.emplace(projectile_ball, temp);
+        }
+        else {
+            printf("Not enough combo ");
+        }
+    }
 
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
@@ -284,6 +352,23 @@ void PinballSystem::restart() {
     std::uniform_real_distribution<float> distribution2(0.f, 1.f);
 
 
+
+    //flipper
+    Entity flipper = createPolygonByVertex(renderer, { {480, 600},
+                                                      {480, 580},
+                                                      {580, 580},
+                                                      {580, 600} }, GEOMETRY_BUFFER_ID::RECT);
+    createNewRectangleTiedToEntity(flipper, 100.f, 20.f, registry.motions.get(flipper).position, true, 0.0);
+
+
+    //enemy
+    // Entity enemyobj = createPolygonByVertex(renderer, { {360, 380}, {360, 320}, {520, 320}, {520, 380} }, GEOMETRY_BUFFER_ID::OCT);
+    // createNewRectangleTiedToEntity(enemyobj, 120.f, 50.f, registry.motions.get(enemyobj).position, false, 1.0);
+    // PinBallEnemy &pinballEnemy = registry.pinballEnemies.emplace(enemyobj);
+    // registry.colors.insert(enemyobj, { 0.6, 0, 0 });
+
+    playerFlipper pf;
+    registry.playerFlippers.insert(flipper, pf);
  
 
     Entity player_ball = createBall(renderer, { 400, 400 });
@@ -303,7 +388,7 @@ void PinballSystem::restart() {
     playerballDamage.damage = 20.0f;
 
     DamageToEnemy playerballAttack;
-    playerballAttack.damage = 20.0f;
+    playerballAttack.damage = PLAYER_BASE_ATTACK;
 
     registry.pinballPlayerStatus.emplace(player_ball, status);
     registry.damages.emplace(player_ball, playerballDamage);
@@ -359,22 +444,7 @@ void PinballSystem::restart() {
     //createNewRectangleTiedToEntity(rightslide, 180.f, 20.f, registry.motions.get(rightslide).position, false, 1.0);
 
 
-    //flipper
-    Entity flipper = createPolygonByVertex(renderer, {{480, 600},
-                                                      {480, 580},
-                                                      {580, 580},
-                                                      {580, 600}}, GEOMETRY_BUFFER_ID::RECT);
-    createNewRectangleTiedToEntity(flipper, 100.f, 20.f, registry.motions.get(flipper).position, true, 0.0);
 
-
-    //enemy
-    // Entity enemyobj = createPolygonByVertex(renderer, { {360, 380}, {360, 320}, {520, 320}, {520, 380} }, GEOMETRY_BUFFER_ID::OCT);
-    // createNewRectangleTiedToEntity(enemyobj, 120.f, 50.f, registry.motions.get(enemyobj).position, false, 1.0);
-    // PinBallEnemy &pinballEnemy = registry.pinballEnemies.emplace(enemyobj);
-    // registry.colors.insert(enemyobj, { 0.6, 0, 0 });
-
-    playerFlipper pf;
-    registry.playerFlippers.insert(flipper, pf);
 }
 
 // Compute collisions between entities

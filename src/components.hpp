@@ -242,6 +242,7 @@ struct DamageToEnemy {
 
 struct TemporaryProjectile {
 	int hitsLeft;
+	bool bonusBall;
 };
 
 
