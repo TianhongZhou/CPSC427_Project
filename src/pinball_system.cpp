@@ -13,6 +13,10 @@
 const size_t NUM_ENEMIES = 2;
 
 
+float MAX_X_COORD2 = 840.0f;
+
+float MIN_X_COORD2 = 220.0f;
+
 float PLAYER_BASE_ATTACK = 20.0f;
 
 
@@ -334,6 +338,31 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
 
 void PinballSystem::on_mouse_move(vec2 mouse_position) {
     (vec2) mouse_position;
+
+    float width = 100.0f;
+    float height = 20.0f;
+
+
+    if ((mouse_position.x + width / 2) < MAX_X_COORD2  && (mouse_position.x - width / 2) > MIN_X_COORD2) {
+        physObj& flipper = registry.physObjs.get(registry.playerFlippers.entities[0]);
+        flipper.Vertices[0].pos =
+            vec2(mouse_position.x - width / 2, flipper.Vertices[0].pos.y);
+        flipper.Vertices[0].oldPos = flipper.Vertices[0].pos;
+
+        flipper.Vertices[1].pos =
+            vec2(mouse_position.x + width / 2, flipper.Vertices[1].pos.y);
+        flipper.Vertices[1].oldPos = flipper.Vertices[1].pos;
+
+        flipper.Vertices[2].pos =
+            vec2(mouse_position.x + width / 2, flipper.Vertices[2].pos.y);
+        flipper.Vertices[2].oldPos = flipper.Vertices[2].pos;
+
+        flipper.Vertices[3].pos =
+            vec2(mouse_position.x - width / 2, flipper.Vertices[3].pos.y);
+        flipper.Vertices[3].oldPos = flipper.Vertices[3].pos;
+
+    }
+
 }
 
 void PinballSystem::on_mouse_click(int button, int action, int mods) {
