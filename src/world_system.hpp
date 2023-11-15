@@ -63,6 +63,9 @@ private:
 	void spawn_room_enemies(float elapsed_ms_since_last_update);
 	void check_room_boundary();
 	void save_player_last_direction();
+	
+	void DropBuffAdd(DropBuff& drop);
+	void GenerateDropBuff(Entity entity);
 
 	// OpenGL window handle
 	GLFWwindow* window;

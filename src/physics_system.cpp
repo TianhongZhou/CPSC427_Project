@@ -32,11 +32,16 @@ bool collides(const Motion &motion1, const Motion &motion2)
 	return dist <= radius_sum;*/
 }
 
+float COMBO_DAMAGE_MULTIPLIER = 0.01f;
+
+
 float MAX_Y_COORD = 810.0f;
 
 
 
 float MIN_Y_COORD = 0.0f;
+
+float MAX_X_COORD = 840.0f;
 
 float MIN_X_COORD = 220.0f;
 
@@ -44,7 +49,7 @@ float FLIPPERHEIGHT = 720.f;
 
 float FLIPPERDELTA = 50.f;
 
-float MAX_X_COORD = 840.0f;
+
 
 vec2 GRAV = {0.f, 0.00035f};
 
@@ -346,19 +351,26 @@ void detectAndSolveAllCollisions()
 					}
 					PinBallEnemy& pinballEnemy = registry.pinballEnemies.get(enemy);
 					if (pinballEnemy.invincibilityTimer == 0 && registry.attackPower.has(projectile)) {
-						float damage = registry.attackPower.get(projectile).damage;
+						float damage = 
+							registry.attackPower.get(projectile).damage * (1+ COMBO_DAMAGE_MULTIPLIER * registry.pinballPlayerStatus.components[0].comboCounter);
 
 						pinballEnemy.currentHealth = pinballEnemy.currentHealth - damage < 0 ? 0 : pinballEnemy.currentHealth - damage;
 
 						pinballEnemy.invincibilityTimer += 200.0f;
 
+						//ticking up combo
+						registry.pinballPlayerStatus.components[0].comboCounter++;
+						printf("Combo = %i ", registry.pinballPlayerStatus.components[0].comboCounter);
+
 						// deducting hits left for temp projectile
 						if (registry.temporaryProjectiles.has(projectile)) {
-							if (registry.temporaryProjectiles.get(projectile).hitsLeft - 1 <= 0) {
-								registry.remove_all_components_of(projectile);
-							}
-							else {
-								registry.temporaryProjectiles.get(projectile).hitsLeft--;
+							if (!registry.temporaryProjectiles.get(projectile).bonusBall) {
+								if (registry.temporaryProjectiles.get(projectile).hitsLeft - 1 <= 0) {
+									registry.remove_all_components_of(projectile);
+								}
+								else {
+									registry.temporaryProjectiles.get(projectile).hitsLeft--;
+								}
 							}
 						}
 					}
@@ -444,6 +456,10 @@ void applyGlobalConstraints()
 						status.health -= registry.damages.get(registry.physObjs.entities[i]).damage;
 						status.invincibilityTimer += 500.0f;
 						//printf("PlayerHealth = %f ", status.health);
+
+						// reset combo
+						status.comboCounter = 0;
+						printf("Combo = %i ", status.comboCounter);
 
 						// potential bug in this one
 						if (registry.temporaryProjectiles.has(registry.physObjs.entities[i])) {

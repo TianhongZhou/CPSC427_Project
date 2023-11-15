@@ -2,6 +2,32 @@
 #include "tiny_ecs_registry.hpp"
 #include <iostream>
 #include <random>
+#include <cstdlib>
+#include <ctime> 
+
+Entity createDropBuff(RenderSystem* renderer, vec2 pos, TEXTURE_ASSET_ID id)
+{
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = mesh.original_size * 80.f;
+
+	registry.renderRequests.insert(
+		entity,
+		{ id,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE,
+			vec2(0.f, -0.5f),
+			vec2(0.f, 0.f)});
+
+	return entity;
+}
 
 Entity createShadow(RenderSystem* renderer, vec2 pos)
 {
@@ -66,7 +92,7 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
     registry.mainWorld.emplace(entity);
-
+	registry.pinBalls.emplace(entity);
 
     // Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -106,7 +132,8 @@ Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPostion, float
 		{ TEXTURE_ASSET_ID::ENEMYWALKSPRITESHEET,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE,
-			vec2(0.2, -0.5)});
+			vec2(0.2, -0.5),
+			vec2(-10, 48.f / 2.0f + 20) });
 	Enemy& ene = registry.mainWorldEnemies.get(entity);
 	ene.roomPositon = roomPostion;
 	ene.roomScale = roomScale;
@@ -201,9 +228,21 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<float> distribution1(100.0f, w - 100.f);
 	std::uniform_real_distribution<float> distribution2(200.0f, h - 200.f);
+	srand(time(NULL));
 	for (int i = 0; i < 4; i++) {
 		Entity spikes = createSpikes({ 100 * i, distribution2(gen) }, {80, 80});
 		registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
+		
+		int randomValue = rand() % 2;
+		TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::DROPBALLSIZE;
+
+		if (randomValue == 1) {
+			id = TEXTURE_ASSET_ID::DROPBALLDAMAGE;
+		}
+		Entity drop = createDropBuff(renderer, { distribution1(gen), distribution2(gen)}, id);
+		DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
+		dropBuff.id = randomValue;
+		dropBuff.increaseValue = rand() % 7 + 2;
 	}
 
 	return entity;
@@ -253,6 +292,21 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
 	keyFrames.push_back({ 30.0f, 400, 400 });
 	keyFrames.push_back({ 40.0f, 600, 400 });
 	positionKeyFrame.keyFrames = keyFrames;
+
+	srand(time(NULL));
+
+	for (int i = 0; i < 4; i++) {
+		int randomValue = rand() % 2;
+		TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::DROPBALLSIZE;
+
+		if (randomValue == 1) {
+			id = TEXTURE_ASSET_ID::DROPBALLDAMAGE;
+		}
+		Entity drop = createDropBuff(renderer, { pos[0] + distribution1(gen), pos[1] + distribution2(gen) }, id);
+		DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
+		dropBuff.id = randomValue;
+		dropBuff.increaseValue = rand() % 7 + 2;
+	}
 
 	return entity;
 }
@@ -349,7 +403,7 @@ Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
-Entity createBall(RenderSystem* renderer, vec2 pos) 
+Entity createBall(RenderSystem* renderer, vec2 pos, float size) 
 {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::BALL);
@@ -362,7 +416,7 @@ Entity createBall(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 25.f;
+	motion.scale = mesh.original_size * size * 0.8f;
 
 	// registry.players.emplace(entity);
 	registry.renderRequests.insert(
@@ -370,90 +424,6 @@ Entity createBall(RenderSystem* renderer, vec2 pos)
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			EFFECT_ASSET_ID::SALMON,
 			GEOMETRY_BUFFER_ID::BALL });
-
-	return entity;
-}
-
-Entity createSalmon(RenderSystem* renderer, vec2 pos)
-{
-	auto entity = Entity();
-
-	// Store a reference to the potentially re-used mesh object
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SALMON);
-	registry.meshPtrs.emplace(entity, &mesh);
-
-    // Setting initial motion values
-	Motion& motion = registry.motions.emplace(entity);
-	motion.position = pos;
-	motion.angle = 0.f;
-	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 150.f;
-	motion.scale.x *= -1; // point front to the right
-
-	// Create and (empty) Salmon component to be able to refer to all turtles
-	registry.players.emplace(entity);
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
-			EFFECT_ASSET_ID::SALMON,
-			GEOMETRY_BUFFER_ID::SALMON });
-
-	return entity;
-}
-
-Entity createFish(RenderSystem* renderer, vec2 position)
-{
-	// Reserve en entity
-	auto entity = Entity();
-
-	// Store a reference to the potentially re-used mesh object
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-	registry.meshPtrs.emplace(entity, &mesh);
-
-	// Initialize the position, scale, and physics components
-	auto& motion = registry.motions.emplace(entity);
-	motion.angle = 0.f;
-	motion.velocity = { -50.f, 0.f };
-	motion.position = position;
-
-	// Setting initial values, scale is negative to make it face the opposite way
-	motion.scale = vec2({ -FISH_BB_WIDTH, FISH_BB_HEIGHT });
-
-	// Create an (empty) Fish component to be able to refer to all fish
-	registry.mainWorldEnemies.emplace(entity);
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::FISH,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
-
-	return entity;
-}
-
-Entity createTurtle(RenderSystem* renderer, vec2 position)
-{
-	auto entity = Entity();
-
-	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-	registry.meshPtrs.emplace(entity, &mesh);
-
-	// Initialize the motion
-	auto& motion = registry.motions.emplace(entity);
-	motion.angle = 0.f;
-	motion.velocity = { -100.f, 0.f };
-	motion.position = position;
-
-	// Setting initial values, scale is negative to make it face the opposite way
-	motion.scale = vec2({ -TURTLE_BB_WIDTH, TURTLE_BB_HEIGHT });
-
-	// Create and (empty) Turtle component to be able to refer to all turtles
-	registry.rooms.emplace(entity);
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::TURTLE,
-		 EFFECT_ASSET_ID::TEXTURED,
-		 GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }
@@ -549,7 +519,9 @@ Entity createPlayerBullet(vec2 pos, vec2 size)
 		entity,
 		{ TEXTURE_ASSET_ID::PLAYERBULLET, // TEXTURE_COUNT indicates that no txture is needed
 			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+			GEOMETRY_BUFFER_ID::SPRITE,
+			vec2(0.f, 0.f),
+			vec2(-10, 48.f / 2.0f + 20) });
 
 	return entity;
 }
@@ -571,7 +543,9 @@ Entity createEnemyBullet(vec2 pos, vec2 size)
 		entity,
 		{ TEXTURE_ASSET_ID::ENEMYBULLET, // TEXTURE_COUNT indicates that no txture is needed
 			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+			GEOMETRY_BUFFER_ID::SPRITE,
+			vec2(0.f, 0.f),
+			vec2(-10, 48.f / 2.0f + 20) });
 
 	return entity;
 }

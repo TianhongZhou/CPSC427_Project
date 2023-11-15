@@ -12,7 +12,7 @@ const float TURTLE_BB_WIDTH = 0.4f * 300.f;
 const float TURTLE_BB_HEIGHT = 0.4f * 202.f;
 
 // the ball
-Entity createBall(RenderSystem* renderer, vec2 pos);
+Entity createBall(RenderSystem* renderer, vec2 pos, float size);
 // the shadow
 Entity createShadow(RenderSystem* renderer, vec2 pos);
 // the polygon
@@ -45,6 +45,8 @@ Entity createPebble(vec2 pos, vec2 size);
 Entity createSpikes(vec2 pos, vec2 size);
 
 Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
+
+Entity createDropBuff(RenderSystem* renderer, vec2 pos, TEXTURE_ASSET_ID id);
 
 // player and enemy bullets
 Entity createPlayerBullet(vec2 pos, vec2 size);
