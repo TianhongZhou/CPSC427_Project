@@ -178,7 +178,7 @@ void RenderSystem::drawShadow(Entity entity, const mat3 &projection, const float
 
     Transform transform;
     transform.translate(motion.position);
-    transform.translate(vec2(-10, height / 2.0f + 20));
+    transform.translate(render_request.translationOffest);
     transform.rotate(angleRadians);
     texture_size = vec2(1.0f, 3.0f) * texture_size;
     //texture_size = scale * texture_size;
@@ -546,7 +546,7 @@ void RenderSystem::draw_world(bool &tutorial_open) {
             //{
             //	scale.y = 0.31;
             //}
-            if (!registry.spikes.has(entity)) {
+            if (!(registry.spikes.has(entity))) {
                 drawShadow(entity, projection_2D, M_PI / 2 - angle, scale);
             }
         }

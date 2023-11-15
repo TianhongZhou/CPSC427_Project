@@ -64,6 +64,13 @@
 	    - createPinBallEnemyHealth in world_init.cpp
 	    - createPinBallEnemy in world_init.cpp
 	    - step in ai_system.cpp
+    - #### Drop (buff) system
+        - struct PinBall in components.hpp (store current size and damage, add to player of dungeon)
+        - struct DropBuff in components.hpp
+        - DropBuffAdd in world_system.hpp
+        - GenerateDropBuff in world_system.hpp
+        - createDropBuff in world_init.cpp
+        - random generate drop in createRoom in world_init.cpp
 
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:
