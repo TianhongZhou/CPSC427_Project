@@ -267,8 +267,9 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_K)
     {
-        Entity projectile_ball = createBall(renderer, { 400, 400 });
-        createNewRectangleTiedToEntity(projectile_ball, 30.f, 30.f, registry.motions.get(projectile_ball).position, true, 1);
+        PinBall& pinBall = registry.pinBalls.components[0];
+        Entity projectile_ball = createBall(renderer, { 400, 400 }, pinBall.pinBallSize);
+        createNewRectangleTiedToEntity(projectile_ball, pinBall.pinBallSize, pinBall.pinBallSize, registry.motions.get(projectile_ball).position, true, 1);
 
         TemporaryProjectile temp;
         temp.hitsLeft = 2;
@@ -276,7 +277,7 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
         DamageToPlayer d;
         d.damage = 20.0f;
         DamageToEnemy d2;
-        d2.damage = 40.0f;
+        d2.damage = registry.pinBalls.components[0].pinBallDamage * 2.0f;
 
         registry.attackPower.emplace(projectile_ball, d2);
         registry.damages.emplace(projectile_ball, d);
@@ -296,8 +297,9 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
             vec2 spawnPos = vec2(registry.physObjs.get(registry.playerFlippers.entities[0]).center.x,
                 registry.physObjs.get(registry.playerFlippers.entities[0]).center.y - 50.0f);
 
-            Entity projectile_ball = createBall(renderer, spawnPos);
-            createNewRectangleTiedToEntity(projectile_ball, 30.f, 30.f, registry.motions.get(projectile_ball).position, true, 1);
+            PinBall& pinBall = registry.pinBalls.components[0];
+            Entity projectile_ball = createBall(renderer, spawnPos, pinBall.pinBallSize);
+            createNewRectangleTiedToEntity(projectile_ball, pinBall.pinBallSize, pinBall.pinBallSize, registry.motions.get(projectile_ball).position, true, 1);
 
             TemporaryProjectile temp;
             temp.hitsLeft = 1;
@@ -305,7 +307,7 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
             DamageToPlayer d;
             d.damage = 5.0f;
             DamageToEnemy d2;
-            d2.damage = PLAYER_BASE_ATTACK * 0.5;
+            d2.damage = registry.pinBalls.components[0].pinBallDamage * 0.5;
 
             registry.attackPower.emplace(projectile_ball, d2);
             registry.damages.emplace(projectile_ball, d);
@@ -399,9 +401,9 @@ void PinballSystem::restart() {
     playerFlipper pf;
     registry.playerFlippers.insert(flipper, pf);
  
-
-    Entity player_ball = createBall(renderer, { 400, 400 });
-    createNewRectangleTiedToEntity(player_ball, 30.f, 30.f, registry.motions.get(player_ball).position, true, 1);
+    PinBall& pinBall = registry.pinBalls.components[0];
+    Entity player_ball = createBall(renderer, { 400, 400 }, pinBall.pinBallSize);
+    createNewRectangleTiedToEntity(player_ball, pinBall.pinBallSize, pinBall.pinBallSize, registry.motions.get(player_ball).position, true, 1);
 
 
     // setting up player status for pinball
@@ -417,7 +419,7 @@ void PinballSystem::restart() {
     playerballDamage.damage = 20.0f;
 
     DamageToEnemy playerballAttack;
-    playerballAttack.damage = PLAYER_BASE_ATTACK;
+    playerballAttack.damage = registry.pinBalls.components[0].pinBallDamage;
 
     registry.pinballPlayerStatus.emplace(player_ball, status);
     registry.damages.emplace(player_ball, playerballDamage);

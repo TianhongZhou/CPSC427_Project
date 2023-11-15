@@ -39,6 +39,8 @@ public:
 	ComponentContainer<DamageToPlayer> damages;
 	ComponentContainer<DamageToEnemy> attackPower;
 	ComponentContainer<TemporaryProjectile> temporaryProjectiles;
+	ComponentContainer<PinBall> pinBalls;
+	ComponentContainer<DropBuff> dropBuffs;
 	
 	// World assets
 	ComponentContainer<PlayerBullet> playerBullets;
@@ -76,6 +78,8 @@ public:
 		registry_list.push_back(&damages);
 		registry_list.push_back(&attackPower);
 		registry_list.push_back(&temporaryProjectiles);
+		registry_list.push_back(&pinBalls);
+		registry_list.push_back(&dropBuffs);
 
 		// World assets
 		registry_list.push_back(&playerBullets);

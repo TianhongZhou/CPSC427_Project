@@ -245,6 +245,19 @@ struct TemporaryProjectile {
 	bool bonusBall;
 };
 
+struct PinBall {
+	float pinBallSize = 10.f;
+	float pinBallDamage = 5.f;
+	float maxPinBallSize = 60.f;
+	float maxPinBallDamage = 50.f;
+};
+
+struct DropBuff {
+	// 0 - pinball size, 1 - pinball damage
+	int id;
+	float increaseValue;
+};
+
 
 /**
  * The following enumerators represent global identifiers refering to graphic
@@ -277,13 +290,16 @@ enum class TEXTURE_ASSET_ID {
 	PLAYERATTACK = PLAYER + 1,
 	GROUND = PLAYERATTACK + 1,
 	PLAYERATTACKSPRITESHEET = GROUND + 1,
-	PLAYERWALKSPRITESHEET = PLAYERATTACKSPRITESHEET + 1,
+	PLAYERDEATHSPRITESHEET = PLAYERATTACKSPRITESHEET + 1,
+	PLAYERWALKSPRITESHEET = PLAYERDEATHSPRITESHEET + 1,
 	ENEMYATTACKSPRITESHEET = PLAYERWALKSPRITESHEET + 1,
 	ENEMYWALKSPRITESHEET = ENEMYATTACKSPRITESHEET + 1,
 	SHADOW = ENEMYWALKSPRITESHEET + 1,
 	PLAYERBULLET = SHADOW + 1,
 	ENEMYBULLET = PLAYERBULLET + 1,
-	TEXTURE_COUNT = ENEMYBULLET + 1
+	DROPBALLSIZE = ENEMYBULLET + 1,
+	DROPBALLDAMAGE = DROPBALLSIZE + 1,
+	TEXTURE_COUNT = DROPBALLDAMAGE + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -322,6 +338,7 @@ struct RenderRequest {
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 	vec2 textureOffset = vec2(0.0, 0.0);
+	vec2 translationOffest = vec2(0.0, 0.0);
 };
 
 struct SpriteSheet {

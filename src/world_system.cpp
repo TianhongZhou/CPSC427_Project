@@ -507,11 +507,15 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 // Enter next room
 void WorldSystem::enter_next_room()
 {	
+	PinBall temp = registry.pinBalls.get(player);
 	// Remove all entities that we created
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
 	rooms[0] = createRoom(renderer, { 600, 400 });
 	player = createPlayer(renderer, { 350, 200 });
+	PinBall& pinBall = registry.pinBalls.get(player);
+	pinBall.pinBallSize = temp.pinBallSize;
+	pinBall.pinBallDamage = temp.pinBallDamage;
 	registry.lights.emplace(player);
 
 }
@@ -638,6 +642,7 @@ void WorldSystem::handle_collisions_world()
 			registry.mainWorldEnemies.has(entity_other) && registry.playerBullets.has(entity)) {
 			// remove enemy upon collision
 			if (!registry.positionKeyFrames.has(entity) && !registry.positionKeyFrames.has(entity_other)) {
+				GenerateDropBuff(entity);
 				registry.remove_all_components_of(entity);
 				registry.remove_all_components_of(entity_other);
 			}
@@ -661,8 +666,63 @@ void WorldSystem::handle_collisions_world()
 			// handle damage interaction (nothing for now)
 			restart_game();
 		}
+
+		// drop buff vs player collision
+		if (registry.dropBuffs.has(entity) && registry.players.has(entity_other) ||
+			registry.dropBuffs.has(entity_other) && registry.players.has(entity)) {
+			if (registry.dropBuffs.has(entity)) {
+				DropBuffAdd(registry.dropBuffs.get(entity));
+				registry.remove_all_components_of(entity);
+			}
+			else if (registry.dropBuffs.has(entity_other)) {
+				DropBuffAdd(registry.dropBuffs.get(entity_other));
+				registry.remove_all_components_of(entity_other);
+			}
+		}
 	}
 
 	// Remove all collisions from this simulation step
 	registry.collisions.clear();
+}
+
+// generate random drop after kill enemy
+void WorldSystem::GenerateDropBuff(Entity entity)
+{
+	Motion& motion = registry.motions.get(entity);
+
+	srand(time(NULL));
+	int randomValue = rand() % 2;
+	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::DROPBALLSIZE;
+
+	if (randomValue == 1) {
+		id = TEXTURE_ASSET_ID::DROPBALLDAMAGE;
+	}
+	Entity drop = createDropBuff(renderer, motion.position, id);
+	DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
+	dropBuff.id = randomValue;
+	dropBuff.increaseValue = rand() % 7 + 2;
+}
+
+// handle value add when collision
+void WorldSystem::DropBuffAdd(DropBuff& drop)
+{
+	PinBall& pinBall = registry.pinBalls.get(player);
+	switch (drop.id) {
+		case 0:
+			pinBall.pinBallSize += drop.increaseValue;
+			if (pinBall.pinBallSize > pinBall.maxPinBallSize) {
+				pinBall.pinBallSize = pinBall.maxPinBallSize;
+			}
+			break;
+
+		case 1:
+			pinBall.pinBallDamage += drop.increaseValue;
+			if (pinBall.pinBallDamage > pinBall.maxPinBallDamage) {
+				pinBall.pinBallDamage = pinBall.maxPinBallDamage;
+			}
+			break;
+
+		default:
+			break;
+	}
 }

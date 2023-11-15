@@ -44,12 +44,15 @@ class RenderSystem {
 			textures_path("player_attack.png"),
 			textures_path("ground1.png"),
 			sprite_sheet_path("main_character_attack.png"),
+			sprite_sheet_path("main_character_death.png"),
 			sprite_sheet_path("main_character_walk.png"),
 			sprite_sheet_path("enemy_attack.png"),
 			sprite_sheet_path("enemy_walk.png"),
 			textures_path("shadow.png"),
 			textures_path("playerbullet.png"),
 			textures_path("enemybullet.png"),
+			textures_path("drop_ball_size.png"),
+			textures_path("drop_ball_damage.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;
