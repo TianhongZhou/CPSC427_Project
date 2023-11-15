@@ -204,21 +204,21 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	Motion& motion = registry.motions.get(player);
 //	bool inCombat = GameSceneState || registry.enterCombatTimer.has(player);;
 
-	bool conflictUpAndDown = pressedKeys.count(GLFW_KEY_UP) && pressedKeys.count(GLFW_KEY_DOWN);
-	bool conflictLeftAndRight = pressedKeys.count(GLFW_KEY_LEFT) && pressedKeys.count(GLFW_KEY_RIGHT);
+	bool conflictUpAndDown = pressedKeys.count(GLFW_KEY_W) && pressedKeys.count(GLFW_KEY_S);
+	bool conflictLeftAndRight = pressedKeys.count(GLFW_KEY_A) && pressedKeys.count(GLFW_KEY_D);
 
-	if (!conflictUpAndDown && (key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) && (action == GLFW_PRESS || action == GLFW_REPEAT) && GameSceneState == 0)
+	if (!conflictUpAndDown && (key == GLFW_KEY_W || key == GLFW_KEY_S) && (action == GLFW_PRESS || action == GLFW_REPEAT) && GameSceneState == 0)
 	{
-		motion.velocity.y = (key == GLFW_KEY_UP) ? -200.f : 200.f;
+		motion.velocity.y = (key == GLFW_KEY_W) ? -200.f : 200.f;
 	}
 	else if (conflictUpAndDown)
 	{
 		motion.velocity.y = 0.f;
 	}
 
-	if (!conflictLeftAndRight && (key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) && (action == GLFW_PRESS || action == GLFW_REPEAT) && GameSceneState == 0)
+	if (!conflictLeftAndRight && (key == GLFW_KEY_A || key == GLFW_KEY_D) && (action == GLFW_PRESS || action == GLFW_REPEAT) && GameSceneState == 0)
 	{
-		motion.velocity.x = (key == GLFW_KEY_LEFT) ? -200.f : 200.f;
+		motion.velocity.x = (key == GLFW_KEY_A) ? -200.f : 200.f;
 	}
 	else if (conflictLeftAndRight)
 	{
@@ -227,13 +227,13 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 	if (action == GLFW_RELEASE)
 	{
-		if ((key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) && !conflictUpAndDown)
+		if ((key == GLFW_KEY_W || key == GLFW_KEY_S) && !conflictUpAndDown)
 		{
-			if (pressedKeys.count(GLFW_KEY_UP) && GameSceneState == 0)
+			if (pressedKeys.count(GLFW_KEY_W) && GameSceneState == 0)
 			{
 				motion.velocity.y = -200.f;
 			}
-			else if (pressedKeys.count(GLFW_KEY_DOWN) && GameSceneState == 0)
+			else if (pressedKeys.count(GLFW_KEY_S) && GameSceneState == 0)
 			{
 				motion.velocity.y = 200.f;
 			}
@@ -243,13 +243,13 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			}
 		}
 
-		if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) && !conflictLeftAndRight)
+		if ((key == GLFW_KEY_A || key == GLFW_KEY_D) && !conflictLeftAndRight)
 		{
-			if (pressedKeys.count(GLFW_KEY_LEFT) && GameSceneState == 0)
+			if (pressedKeys.count(GLFW_KEY_A) && GameSceneState == 0)
 			{
 				motion.velocity.x = -200.f;
 			}
-			else if (pressedKeys.count(GLFW_KEY_RIGHT) && GameSceneState == 0)
+			else if (pressedKeys.count(GLFW_KEY_D) && GameSceneState == 0)
 			{
 				motion.velocity.x = 200.f;
 			}
@@ -392,20 +392,10 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 		motion.scale = { radius, radius };
 
 		vec2 player_v = registry.motions.get(player).velocity;
-		float angle = atan(player_v.y / player_v.x);
-
-		// Set bullet angle and save last angle
-		if (player_v.x == 0.f && player_v.y == 0.f) {
-			angle = last_angle;
-		}
-		else {
-			// CHECK: This is to fix flipping of the axis
-			if (player_v.x < 0) {
-				angle += atan(1) * 4;
-			}
-			last_angle = angle;
-		}
-		motion.angle = angle;
+		vec2 mouse_position = registry.mousePosArray.components[0].pos;
+		float dy = mouse_position.y - motion.position.y;
+		float dx = mouse_position.x - motion.position.x;
+		motion.angle = atan2(dy, dx);
 
 
 		//motion.velocity = vec2(200.f + uniform_dist(rng)*200, 100.f - uniform_dist(rng)*200);
