@@ -372,7 +372,7 @@ Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos)
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = pos;
 	motion.angle = 0.f;
-	motion.velocity = { 80.f, 0.f };
+	motion.velocity = { 0.f, 0.f };
 	motion.scale = vec2(mesh.original_size.x * xScale , mesh.original_size.y) * 50.f;
 		
 
@@ -398,7 +398,7 @@ Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos)
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			EFFECT_ASSET_ID::SALMON,
 			GEOMETRY_BUFFER_ID::OCT });
-	createNewRectangleTiedToEntity(entity, 120.f* xScale, 50.f, registry.motions.get(entity).position, false, 1.0);
+	createNewRectangleTiedToEntity(entity, mesh.original_size.x * xScale*50.f, mesh.original_size.y*50.f, registry.motions.get(entity).position, false, 1.0);
 
 	return entity;
 }
