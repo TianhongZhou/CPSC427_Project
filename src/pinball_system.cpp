@@ -232,6 +232,23 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
 
 // On key callback
 void PinballSystem::on_key(int key, int, int action, int mod) {
+
+    // Debugging
+    if (key == GLFW_KEY_D)
+    {
+        if (action == GLFW_RELEASE)
+            debugging.in_debug_mode = false;
+        else
+            debugging.in_debug_mode = true;
+    }
+
+    // Resetting game
+    if (action == GLFW_RELEASE && key == GLFW_KEY_R)
+    {
+        exit_combat();
+        world->restart_game();
+    }
+
     if (action == GLFW_RELEASE && key == GLFW_KEY_X)
     {
         exit_combat();
@@ -372,8 +389,6 @@ void PinballSystem::restart() {
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> distribution1(boundary.x, boundary.y);
     std::uniform_real_distribution<float> distribution2(0.f, 1.f);
-
-
 
     //flipper
     Entity flipper = createPolygonByVertex(renderer, { {480, 600},
