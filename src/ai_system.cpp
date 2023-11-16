@@ -18,22 +18,35 @@ void AISystem::step(float elapsed_ms)
 		{
 			Motion &enemyMotion = motion_container.components[i];
 			PinBallEnemy &enemy = registry.pinballEnemies.get(motion_container.entities[i]);
+        	physObj& enemyPhys = registry.physObjs.get(motion_container.entities[i]);
+
+			// Periodically veritical move
+			// for (int j=0; j<enemyPhys.VertexCount; j++) {
+            // 	enemyPhys.Vertices[j].pos.y += 10.f*sin(step_seconds);
+            // 	enemyPhys.Vertices[j].oldPos.y += 10.f*sin(step_seconds);
+			// }
 
 			// Turn to another direction if near the boundary
 			if (enemyMotion.position.x < enemy.boundary.x)
 			{
-				enemyMotion.velocity.x = abs(enemyMotion.velocity.x);
+				for (int j=0; j<enemyPhys.VertexCount; j++) {
+					enemyPhys.Vertices[j].accel.x = 0.01f;
+				}
 			}
 			else if (enemyMotion.position.x > enemy.boundary.y)
 			{
-				enemyMotion.velocity.x = -abs(enemyMotion.velocity.x);
+				for (int j=0; j<enemyPhys.VertexCount; j++) {
+					enemyPhys.Vertices[j].accel.x = -0.01f;
+				}
 			}
 
 			// Random horizontally move in combat scene
 			if (enemy.randomMoveTimer <= 0.0f)
 			{
 				int ran = rand() % 2;
-				enemyMotion.velocity.x = 80.f * (ran == 0 ? -1 : 1);
+				for (int j=0; j<enemyPhys.VertexCount; j++) {
+					enemyPhys.Vertices[j].accel.x = 0.01f*(ran == 0 ? -1 : 1);
+				}
 				enemy.randomMoveTimer = 3.f + rand() % 3;
 			}
 			else

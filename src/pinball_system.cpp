@@ -347,22 +347,13 @@ void PinballSystem::on_mouse_move(vec2 mouse_position) {
 
     if ((mouse_position.x + width / 2) < MAX_X_COORD2  && (mouse_position.x - width / 2) > MIN_X_COORD2) {
         physObj& flipper = registry.physObjs.get(registry.playerFlippers.entities[0]);
-        flipper.Vertices[0].pos =
-            vec2(mouse_position.x - width / 2, flipper.Vertices[0].pos.y);
-        flipper.Vertices[0].oldPos = vec2(mouse_position.x - width / 2, flipper.Vertices[0].oldPos.y);
-
-        flipper.Vertices[1].pos =
-            vec2(mouse_position.x + width / 2, flipper.Vertices[1].pos.y);
-        flipper.Vertices[1].oldPos = vec2(mouse_position.x + width / 2, flipper.Vertices[1].oldPos.y);
-
-        flipper.Vertices[2].pos =
-            vec2(mouse_position.x + width / 2, flipper.Vertices[2].pos.y);
-        flipper.Vertices[2].oldPos = vec2(mouse_position.x + width / 2, flipper.Vertices[2].oldPos.y);
-
-        flipper.Vertices[3].pos =
-            vec2(mouse_position.x - width / 2, flipper.Vertices[3].pos.y);
-        flipper.Vertices[3].oldPos = vec2(mouse_position.x - width / 2, flipper.Vertices[3].oldPos.y);
-
+        float xPos = 0;
+        for (int i=0; i<flipper.VertexCount; i++) {
+            if (i==0 || i==3) xPos = mouse_position.x - width / 2;
+            else xPos = mouse_position.x + width / 2;
+            flipper.Vertices[i].pos.x = xPos;
+            flipper.Vertices[i].oldPos.x = xPos;
+        }
     }
 
 }
@@ -376,7 +367,7 @@ void PinballSystem::on_mouse_click(int button, int action, int mods) {
 void PinballSystem::restart() {
     // int w, h;
     // glfwGetWindowSize(window, &w, &h);
-    vec2 boundary = {260 + 50, 800 - 50};
+    vec2 boundary = {260 + 70, 800 - 70};
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> distribution1(boundary.x, boundary.y);
@@ -428,14 +419,14 @@ void PinballSystem::restart() {
     //
 
 
-    Entity pinballenemyMain = createPinBallEnemy(renderer, vec2(525,30), boundary,4.0f);
+    Entity pinballenemyMain = createPinBallEnemy(renderer, vec2(525,180), boundary,2.0f);
     registry.colors.insert(pinballenemyMain, { distribution2(gen), distribution2(gen), distribution2(gen) });
 
 
-    for (int i=0; i<NUM_ENEMIES; i++) {
-    Entity pinballenemy = createPinBallEnemy(renderer, {distribution1(gen), 180 * (2)}, boundary,1.0f);
-    registry.colors.insert(pinballenemy, {distribution2(gen), distribution2(gen), distribution2(gen)});
-    }
+    // for (int i=0; i<NUM_ENEMIES; i++) {
+    // Entity pinballenemy = createPinBallEnemy(renderer, {distribution1(gen), 180 * (2)}, boundary,1.0f);
+    // registry.colors.insert(pinballenemy, {distribution2(gen), distribution2(gen), distribution2(gen)});
+    // }
 
 
 
