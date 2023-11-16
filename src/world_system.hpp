@@ -49,15 +49,15 @@ public:
     // redirect keyboard/mouse inputs back into world callback functions
     void redirect_inputs_world();
 
+    // restart level
+    void restart_game();
+
 
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
 	void on_mouse_click(int button, int action, int mods);
-
-	// restart level
-	void restart_game();
 
 	void enter_next_room();
 	void spawn_room_enemies(float elapsed_ms_since_last_update);
