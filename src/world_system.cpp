@@ -99,7 +99,7 @@ GLFWwindow *WorldSystem::create_window()
 	printf("This is monitor width and height: %d, %d\n", MonitorWidth, MonitorHeight);
 
 	// Create the main window (for rendering, keyboard, and mouse input)
-	window = glfwCreateWindow(MonitorWidth, MonitorHeight, "Pinball Luminary", nullptr, nullptr);
+	window = glfwCreateWindow(MonitorWidth, MonitorHeight, "Pinball Luminary", primaryMonitor, nullptr);
 	//window = glfwCreateWindow(window_width_px, window_height_px, "Salmon Game Assignment", nullptr, nullptr);
 	if (window == nullptr)
 	{

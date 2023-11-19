@@ -493,11 +493,8 @@ void RenderSystem::draw_world(bool &tutorial_open) {
         if ((renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYER) ||
             (renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET) ||
             (renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET)) {
-            light.screenPosition = vec2(motion.position.x / w, (h - motion.position.y) / h);
-            /*printf("%d, %d\n", w, h);
-            printf("%.2f, %.2f\n", motion.position.x, motion.position.y);
-            printf("%.2f, %.2f\n", light.screenPosition.x, light.screenPosition.y);*/
-            light.haloRadius = 0.15f; //1.2f;
+            light.screenPosition = vec2(motion.position.x / window_width_px, (window_height_px - motion.position.y) / window_height_px);
+            light.haloRadius = 0.15f; //
             light.lightColor = vec3(1.0f, 1.0f, 1.0f);
             light.haloSoftness = 0.05f;
             light.priority = 2;
@@ -531,7 +528,7 @@ void RenderSystem::draw_world(bool &tutorial_open) {
 
         for (Light light: lights) {
             glm::vec2 lightPosition = light.screenPosition;
-            glm::vec2 entityPosition = vec2(motion.position.x / w, (h - motion.position.y) / h);
+            glm::vec2 entityPosition = vec2(motion.position.x / window_width_px, (window_height_px - motion.position.y) / window_height_px);
 
             if (entityPosition == lightPosition) {
                 continue;
