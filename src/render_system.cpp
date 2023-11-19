@@ -492,7 +492,10 @@ void RenderSystem::draw_world(bool &tutorial_open) {
             (renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET) ||
             (renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET)) {
             light.screenPosition = vec2(motion.position.x / w, (h - motion.position.y) / h);
-            light.haloRadius = 0.2f; //1.2f;
+            /*printf("%d, %d\n", w, h);
+            printf("%.2f, %.2f\n", motion.position.x, motion.position.y);
+            printf("%.2f, %.2f\n", light.screenPosition.x, light.screenPosition.y);*/
+            light.haloRadius = 0.15f; //1.2f;
             light.lightColor = vec3(1.0f, 1.0f, 1.0f);
             light.haloSoftness = 0.05f;
             light.priority = 2;

@@ -19,6 +19,9 @@ const size_t FISH_DELAY_MS = 5000 * 3;
 // Game state global variables
 int GameSceneState = 0;
 int InitCombat = 0;
+int MonitorWidth;
+int MonitorHeight;
+float MonitorScreenRatio;
 
 // Create the fish world
 WorldSystem::WorldSystem()
@@ -81,8 +84,23 @@ GLFWwindow *WorldSystem::create_window()
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
+	// Obtain monitor full screen size
+	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+	MonitorWidth = mode->width;
+	MonitorHeight = mode->height;
+
+	// Calculate monitor screen Ratio
+	float ratioX = static_cast<float>(MonitorWidth) / window_width_px;
+	float ratioY = static_cast<float>(MonitorHeight) / window_height_px;
+	MonitorScreenRatio = (ratioX + ratioY) / 2;
+	//vec2 MonitorScreenRatio = { average, average };
+	printf("This is MonitorScreenRatio: %f\n", MonitorScreenRatio);
+	printf("This is monitor width and height: %d, %d\n", MonitorWidth, MonitorHeight);
+
 	// Create the main window (for rendering, keyboard, and mouse input)
-	window = glfwCreateWindow(window_width_px, window_height_px, "Salmon Game Assignment", nullptr, nullptr);
+	window = glfwCreateWindow(MonitorWidth, MonitorHeight, "Pinball Luminary", nullptr, nullptr);
+	//window = glfwCreateWindow(window_width_px, window_height_px, "Salmon Game Assignment", nullptr, nullptr);
 	if (window == nullptr)
 	{
 		fprintf(stderr, "Failed to glfwCreateWindow");
@@ -171,7 +189,7 @@ void WorldSystem::restart_game()
 
 	// Create a new salmon
 	rooms[0] = createStartingRoom(renderer, { 600, 400 }, window);
-	player = createPlayer(renderer, { w/2, h * 4 / 5 }); // spawn at the bottom of room for now
+	player = createPlayer(renderer, { w/2, h/2 }); // spawn at the bottom of room for now
 	registry.lights.emplace(player);
 }
 
@@ -559,21 +577,21 @@ void WorldSystem::check_room_boundary()
 		if (registry.players.has(motion_container.entities[i]) || registry.mainWorldEnemies.has(motion_container.entities[i]))
 		{
 			Motion& motion = motion_container.components[i];
-			if (roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f + 30 > motion.position.x)
+			if (roomMotion.position.x - (roomMotion.scale.x / 2) + 65.f > motion.position.x)
 			{
-				motion.position.x = roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f + 30;
+				motion.position.x = roomMotion.position.x - (roomMotion.scale.x / 2) + 65.f;
 			}
-			else if (roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f - 10 < motion.position.x)
+			else if (roomMotion.position.x + (roomMotion.scale.x / 2) - 45.f < motion.position.x)
 			{
-				motion.position.x = roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f - 10;
+				motion.position.x = roomMotion.position.x + (roomMotion.scale.x / 2) - 45.f;
 			}
-			if (roomMotion.position.y - (roomMotion.scale.y / 2) + 25.f > motion.position.y)
+			if (roomMotion.position.y - (roomMotion.scale.y / 2) + 70.f > motion.position.y)
 			{
-				motion.position.y = roomMotion.position.y - (roomMotion.scale.y / 2) + 25.f;
+				motion.position.y = roomMotion.position.y - (roomMotion.scale.y / 2) + 70.f;
 			}
-			else if (roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f - 70 < motion.position.y)
+			else if (roomMotion.position.y + (roomMotion.scale.y / 2) - 95.f < motion.position.y)
 			{
-				motion.position.y = roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f - 70;
+				motion.position.y = roomMotion.position.y + (roomMotion.scale.y / 2) - 95.f;
 			}
 		}
 	}
