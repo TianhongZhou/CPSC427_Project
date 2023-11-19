@@ -210,7 +210,7 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 	int w, h;
 	glfwGetWindowSize(window, &w, &h);
 	// Add door
-	Entity door = createPebble({ 0,0 }, { 0,0 }); //intialized below, TODO: change from createpebble
+	Entity door = createDoor({ 0,0 }, { 0,0 }); //intialized below
 	Motion& door_motion = registry.motions.get(door);
 	float door_width = 50;
 	float door_height = 60;
@@ -221,8 +221,8 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 	registry.colors.insert(door, { 0, 0, 0 });
 
 	// Add spikes
-	Entity road = createSpikes({ 100, 100 }, { 80, 80 });
-	registry.colors.insert(road, { 0.5, 0.5, 0.5 });
+	Entity spikes = createSpikes({ 100, 100 }, { 80, 80 });
+	registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -480,10 +480,27 @@ Entity createPebble(vec2 pos, vec2 size)
 	return entity;
 }
 
-//Entity createDoor(RenderSystem* renderer, vec2 pos)
-//{
-//
-//}
+Entity createDoor(vec2 pos, vec2 size)
+{
+	auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = size;
+
+	registry.doors.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::GROUND, // TODO: Using blacked out ground for now, change this
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
 
 Entity createSpikes(vec2 pos, vec2 size)
 {
