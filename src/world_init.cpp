@@ -207,11 +207,12 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_real_distribution<float> distribution1(100.0f, w - 100.f);
-	std::uniform_real_distribution<float> distribution2(200.0f, h - 200.f);
+	std::uniform_real_distribution<float> distribution1(100.0f, w / 2 + 150.f);
+	std::uniform_real_distribution<float> distribution2(200.0f, h / 2 + 150.f);
 	srand(time(NULL));
 	for (int i = 0; i < 4; i++) {
-		Entity spikes = createSpikes({ 100 * i, distribution2(gen) }, {80, 80});
+		Entity spikes = createSpikes({ distribution2(gen), distribution2(gen) }, {80, 80});
+		//Entity spikes = createSpikes({ 100 * i, distribution2(gen) }, {80, 80});
 		registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
 		
 		int randomValue = rand() % 2;
@@ -372,7 +373,8 @@ Entity createBall(RenderSystem* renderer, vec2 pos, float size)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * size * 0.8f * vec2{1.f, 1.2f};
+	motion.scale = mesh.original_size * size * 0.8f;
+	//motion.scale = mesh.original_size * size * 0.8f * vec2{1.f, 1.2f};
 
 	// registry.players.emplace(entity);
 	registry.renderRequests.insert(
