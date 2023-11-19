@@ -19,6 +19,8 @@ float MIN_X_COORD2 = 220.0f;
 
 float PLAYER_BASE_ATTACK = 20.0f;
 
+RenderSystem* r;
+
 
 float DASH_STRENTH = 0.2f;
 
@@ -153,31 +155,31 @@ void PinballSystem::stepEnemyAttack() {
             if (registry.pinballEnemies.components[i].attackType == 0) {
 
 
-               
-                
+
+
                 printf(" attackType0 ");
 
-                //PinBall& pinball = registry.pinBalls.components[0];
+                PinBall& pinball = registry.pinBalls.components[0];
 
-                //physObj enemyObj = registry.physObjs.get(registry.pinballEnemies.entities[i]);
-                //vec2 spawnPos = vec2(enemyObj.center.x, enemyObj.center.y + 50.0f);
+                physObj enemyObj = registry.physObjs.get(registry.pinballEnemies.entities[i]);
+                vec2 spawnPos = vec2(enemyObj.center.x, enemyObj.center.y + 50.0f);
 
-                //Entity projectile_ball = createBall(renderer,{450,450}, pinball.pinBallSize);
-                //createNewRectangleTiedToEntity(projectile_ball, pinball.pinBallSize, pinball.pinBallSize, registry.motions.get(projectile_ball).position, true, 1);
+                Entity projectile_ball = createBall(r, spawnPos, pinball.pinBallSize);
+                createNewRectangleTiedToEntity(projectile_ball, pinball.pinBallSize, pinball.pinBallSize, registry.motions.get(projectile_ball).position, true, 1);
 
-                //TemporaryProjectile temp;
-                //temp.hitsLeft = 1;
-                //temp.bonusBall = false;
-                //DamageToPlayer d;
-                //d.damage = 20.0f;
-                //DamageToEnemy d2;
-                //d2.damage = 20.0f;
+                TemporaryProjectile temp;
+                temp.hitsLeft = 1;
+                temp.bonusBall = false;
+                DamageToPlayer d;
+                d.damage = 20.0f;
+                DamageToEnemy d2;
+                d2.damage = 20.0f;
 
-                //registry.attackPower.emplace(projectile_ball, d2);
-                //registry.damages.emplace(projectile_ball, d);
-                //registry.temporaryProjectiles.emplace(projectile_ball, temp);
+                registry.attackPower.emplace(projectile_ball, d2);
+                registry.damages.emplace(projectile_ball, d);
+                registry.temporaryProjectiles.emplace(projectile_ball, temp);
 
-                
+
             }
             else {
                 registry.pinballPlayerStatus.components[0].highGravityTimer += 500.0f;
@@ -188,6 +190,7 @@ void PinballSystem::stepEnemyAttack() {
         }
     }
 }
+
 
 // Update our game world
 bool PinballSystem::step(float elapsed_ms_since_last_update) {
@@ -211,6 +214,7 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
             }
         }
     }
+
 
     updateTimers(elapsed_ms_since_last_update);
     stepEnemyAttack();
@@ -365,6 +369,9 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
     }
 }
 
+
+
+
 void PinballSystem::on_mouse_move(vec2 mouse_position) {
     (vec2) mouse_position;
 
@@ -394,6 +401,7 @@ void PinballSystem::on_mouse_click(int button, int action, int mods) {
 void PinballSystem::restart() {
     // int w, h;
     // glfwGetWindowSize(window, &w, &h);
+    r = renderer;
     vec2 boundary = {260 + 70, 800 - 70};
     //boundary * MonitorScreenRatio;
     std::random_device rd;
