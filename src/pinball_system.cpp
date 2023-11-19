@@ -86,11 +86,11 @@ void pinballDash() {
         
 
         // this would not behave correctly before adding the main enemy
-        if (registry.pinballEnemies.components.size() <= 1) {
-            printf("no target ");
-            accelerateObj2(vec2(0.0f, -DASH_STRENTH), pinballPhys);
-            return;
-        }
+        //if (registry.pinballEnemies.components.size() <= 1) {
+        //    printf("no target ");
+        //    accelerateObj2(vec2(0.0f, -DASH_STRENTH), pinballPhys);
+        //    return;
+        //}
 
 
 
@@ -490,6 +490,11 @@ void PinballSystem::restart() {
     Entity pinballenemyMain = createPinBallEnemy(renderer, vec2(525,180), boundary,2.0f, 0, 3000.0f);
 
     registry.colors.insert(pinballenemyMain, { distribution2(gen), distribution2(gen), distribution2(gen) });
+
+
+    Entity pinballenemy = createPinBallEnemy(renderer, vec2(525, 90), boundary, 2.0f, 1, 5000.0f);
+
+    registry.colors.insert(pinballenemy, { distribution2(gen), distribution2(gen), distribution2(gen) });
 
 
     // for (int i=0; i<NUM_ENEMIES; i++) {
