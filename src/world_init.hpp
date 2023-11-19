@@ -20,7 +20,7 @@ Entity createPolygonByVertex(RenderSystem* renderer, const std::vector<vec2>& ve
 // the pin ball enemy blood
 Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos);
 // the pin ball enemy
-Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos, vec2 boundary, float xScale);
+Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos, vec2 boundary, float xScale, int attackType, float attackCd);
 // the room
 Entity createRoom(RenderSystem* renderer, vec2 pos);
 // the player

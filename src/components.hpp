@@ -68,6 +68,9 @@ struct PinBallEnemy
 	float maxHealth = 100.f;
 	float currentHealth = 100.f;
 	float invincibilityTimer;
+	float attackTimer;
+	float attackCooldown;
+	int attackType;
 };
 
 // A timer that will highlight a room enemy
