@@ -360,7 +360,7 @@ Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
- Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos, vec2 boundary, float xScale)
+ Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos, vec2 boundary, float xScale, int attackType, float attackCd)
 {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PINBALLENEMY);
@@ -393,6 +393,11 @@ Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos)
 	enemy.healthBar[0] = healthBar;
 	enemy.healthBar[1] = health;
 	enemy.healthBar[2] = healthAmortized;
+
+	enemy.attackType = attackType;
+	enemy.attackCooldown = attackCd;
+	enemy.attackTimer = attackCd;
+
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,

@@ -161,6 +161,7 @@ void updateTimers(float ms) {
 
         for (int i = 0; i < registry.pinballEnemies.components.size(); i++) {
             countdown(registry.pinballEnemies.components[i].invincibilityTimer, ms);
+            countdown(registry.pinballEnemies.components[i].attackTimer, ms);
         }
 
     }
@@ -168,7 +169,47 @@ void updateTimers(float ms) {
 }
 
 
+void PinballSystem::stepEnemyAttack() {
+    for (int i = 0; i < registry.pinballEnemies.components.size(); i++) {
+        if (registry.pinballEnemies.components[i].attackTimer == 0.0f) {
+            if (registry.pinballEnemies.components[i].attackType == 0) {
 
+
+               
+                
+                printf(" attackType0 ");
+
+                //PinBall& pinball = registry.pinBalls.components[0];
+
+                //physObj enemyObj = registry.physObjs.get(registry.pinballEnemies.entities[i]);
+                //vec2 spawnPos = vec2(enemyObj.center.x, enemyObj.center.y + 50.0f);
+
+                //Entity projectile_ball = createBall(renderer,{450,450}, pinball.pinBallSize);
+                //createNewRectangleTiedToEntity(projectile_ball, pinball.pinBallSize, pinball.pinBallSize, registry.motions.get(projectile_ball).position, true, 1);
+
+                //TemporaryProjectile temp;
+                //temp.hitsLeft = 1;
+                //temp.bonusBall = false;
+                //DamageToPlayer d;
+                //d.damage = 20.0f;
+                //DamageToEnemy d2;
+                //d2.damage = 20.0f;
+
+                //registry.attackPower.emplace(projectile_ball, d2);
+                //registry.damages.emplace(projectile_ball, d);
+                //registry.temporaryProjectiles.emplace(projectile_ball, temp);
+
+                
+            }
+            else {
+                registry.pinballPlayerStatus.components[0].highGravityTimer += 500.0f;
+                printf(" attackType1 ");
+            }
+
+            registry.pinballEnemies.components[i].attackTimer += registry.pinballEnemies.components[i].attackCooldown;
+        }
+    }
+}
 
 // Update our game world
 bool PinballSystem::step(float elapsed_ms_since_last_update) {
@@ -194,6 +235,8 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
     }
 
     updateTimers(elapsed_ms_since_last_update);
+
+    stepEnemyAttack();
 
 
     return true;
@@ -434,7 +477,8 @@ void PinballSystem::restart() {
     //
 
 
-    Entity pinballenemyMain = createPinBallEnemy(renderer, vec2(525,180), boundary,2.0f);
+    Entity pinballenemyMain = createPinBallEnemy(renderer, vec2(525,180), boundary,2.0f, 0, 3000.0f);
+
     registry.colors.insert(pinballenemyMain, { distribution2(gen), distribution2(gen), distribution2(gen) });
 
 
