@@ -19,6 +19,8 @@ float MIN_X_COORD2 = 220.0f;
 
 float PLAYER_BASE_ATTACK = 20.0f;
 
+RenderSystem* r;
+
 
 float DASH_STRENTH = 0.2f;
 
@@ -84,11 +86,11 @@ void pinballDash() {
         
 
         // this would not behave correctly before adding the main enemy
-        if (registry.pinballEnemies.components.size() <= 1) {
-            printf("no target ");
-            accelerateObj2(vec2(0.0f, -DASH_STRENTH), pinballPhys);
-            return;
-        }
+        //if (registry.pinballEnemies.components.size() <= 1) {
+        //    printf("no target ");
+        //    accelerateObj2(vec2(0.0f, -DASH_STRENTH), pinballPhys);
+        //    return;
+        //}
 
 
 
@@ -131,6 +133,8 @@ void countdown(float& timer, float ms) {
 
 
 
+
+
 void updateTimers(float ms) {
 
     if (registry.pinballPlayerStatus.components.size() != 0) {
@@ -161,6 +165,7 @@ void updateTimers(float ms) {
 
         for (int i = 0; i < registry.pinballEnemies.components.size(); i++) {
             countdown(registry.pinballEnemies.components[i].invincibilityTimer, ms);
+            countdown(registry.pinballEnemies.components[i].attackTimer, ms);
         }
 
     }
@@ -168,6 +173,47 @@ void updateTimers(float ms) {
 }
 
 
+void PinballSystem::stepEnemyAttack() {
+    for (int i = 0; i < registry.pinballEnemies.components.size(); i++) {
+        if (registry.pinballEnemies.components[i].attackTimer == 0.0f) {
+            if (registry.pinballEnemies.components[i].attackType == 0) {
+
+
+
+
+                printf(" attackType0 ");
+
+                PinBall& pinball = registry.pinBalls.components[0];
+
+                physObj enemyObj = registry.physObjs.get(registry.pinballEnemies.entities[i]);
+                vec2 spawnPos = vec2(enemyObj.center.x, enemyObj.center.y + 50.0f);
+
+                Entity projectile_ball = createBall(r, spawnPos, pinball.pinBallSize);
+                createNewRectangleTiedToEntity(projectile_ball, pinball.pinBallSize, pinball.pinBallSize, registry.motions.get(projectile_ball).position, true, 1);
+
+                TemporaryProjectile temp;
+                temp.hitsLeft = 1;
+                temp.bonusBall = false;
+                DamageToPlayer d;
+                d.damage = 20.0f;
+                DamageToEnemy d2;
+                d2.damage = 20.0f;
+
+                registry.attackPower.emplace(projectile_ball, d2);
+                registry.damages.emplace(projectile_ball, d);
+                registry.temporaryProjectiles.emplace(projectile_ball, temp);
+
+
+            }
+            else {
+                registry.pinballPlayerStatus.components[0].highGravityTimer += 500.0f;
+                printf(" attackType1 ");
+            }
+
+            registry.pinballEnemies.components[i].attackTimer += registry.pinballEnemies.components[i].attackCooldown;
+        }
+    }
+}
 
 
 // Update our game world
@@ -213,7 +259,10 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
         }
     }
 
+
     updateTimers(elapsed_ms_since_last_update);
+
+    stepEnemyAttack();
 
 
     return true;
@@ -252,6 +301,23 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
 
 // On key callback
 void PinballSystem::on_key(int key, int, int action, int mod) {
+
+    // Debugging
+    if (key == GLFW_KEY_D)
+    {
+        if (action == GLFW_RELEASE)
+            debugging.in_debug_mode = false;
+        else
+            debugging.in_debug_mode = true;
+    }
+
+    // Resetting game
+    if (action == GLFW_RELEASE && key == GLFW_KEY_R)
+    {
+        exit_combat();
+        world->restart_game();
+    }
+
     if (action == GLFW_RELEASE && key == GLFW_KEY_X)
     {
         exit_combat();
@@ -358,6 +424,9 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
     }
 }
 
+
+
+
 void PinballSystem::on_mouse_move(vec2 mouse_position) {
     (vec2) mouse_position;
 
@@ -387,13 +456,12 @@ void PinballSystem::on_mouse_click(int button, int action, int mods) {
 void PinballSystem::restart() {
     // int w, h;
     // glfwGetWindowSize(window, &w, &h);
+    r = renderer;
     vec2 boundary = {260 + 70, 800 - 70};
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> distribution1(boundary.x, boundary.y);
     std::uniform_real_distribution<float> distribution2(0.f, 1.f);
-
-
 
     //flipper
     Entity flipper = createPolygonByVertex(renderer, { {480, 600},
@@ -439,10 +507,16 @@ void PinballSystem::restart() {
     //
 
 
-    Entity pinballenemyMain = createPinBallEnemy(renderer, vec2(525,180), boundary,2.0f);
+    Entity pinballenemyMain = createPinBallEnemy(renderer, vec2(525,180), boundary,2.0f, 0, 3000.0f);
+
     registry.colors.insert(pinballenemyMain, { distribution2(gen), distribution2(gen), distribution2(gen) });
 
     createParticle(renderer, {500.f, 200.f}, 1.1f, {0.f,0.f}, {1.f,0.f,0.f}, 5.f);
+
+
+    Entity pinballenemy = createPinBallEnemy(renderer, vec2(525, 90), boundary, 2.0f, 1, 5000.0f);
+
+    registry.colors.insert(pinballenemy, { distribution2(gen), distribution2(gen), distribution2(gen) });
 
 
     // for (int i=0; i<NUM_ENEMIES; i++) {

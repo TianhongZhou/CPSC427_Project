@@ -48,6 +48,7 @@ public:
 	ComponentContainer<EnemyBullet> enemyBullets;
 	ComponentContainer<Ball> balls;
 	ComponentContainer<Spikes> spikes;
+	ComponentContainer<Door> doors;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -88,6 +89,7 @@ public:
 		registry_list.push_back(&enemyBullets);
 		registry_list.push_back(&balls);
 		registry_list.push_back(&spikes);
+		registry_list.push_back(&doors);
 	}
 
 	void clear_all_components() {

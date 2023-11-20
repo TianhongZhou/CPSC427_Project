@@ -5,6 +5,11 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
+struct Door
+{
+
+};
+
 struct Spikes
 {
 
@@ -75,6 +80,9 @@ struct PinBallEnemy
 	float maxHealth = 100.f;
 	float currentHealth = 100.f;
 	float invincibilityTimer;
+	float attackTimer;
+	float attackCooldown;
+	int attackType;
 };
 
 // A timer that will highlight a room enemy
