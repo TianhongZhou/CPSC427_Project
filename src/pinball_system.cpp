@@ -305,8 +305,8 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
     if (action == GLFW_RELEASE && key == GLFW_KEY_K)
     {
         PinBall& pinBall = registry.pinBalls.components[0];
-        Entity projectile_ball = createBall(renderer, { 400, 400 }, pinBall.pinBallSize * MonitorScreenRatio);
-        createNewRectangleTiedToEntity(projectile_ball, pinBall.pinBallSize * MonitorScreenRatio, pinBall.pinBallSize * MonitorScreenRatio, registry.motions.get(projectile_ball).position, true, 1);
+        Entity projectile_ball = createBall(renderer, { 400, 400 }, pinBall.pinBallSize);
+        createNewRectangleTiedToEntity(projectile_ball, pinBall.pinBallSize, pinBall.pinBallSize, registry.motions.get(projectile_ball).position, true, 1);
 
         TemporaryProjectile temp;
         temp.hitsLeft = 2;
@@ -333,8 +333,8 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
                 registry.physObjs.get(registry.playerFlippers.entities[0]).center.y - 50.0f);
 
             PinBall& pinBall = registry.pinBalls.components[0];
-            Entity projectile_ball = createBall(renderer, spawnPos, pinBall.pinBallSize * MonitorScreenRatio);
-            createNewRectangleTiedToEntity(projectile_ball, pinBall.pinBallSize * MonitorScreenRatio, pinBall.pinBallSize * MonitorScreenRatio, registry.motions.get(projectile_ball).position, true, 1);
+            Entity projectile_ball = createBall(renderer, spawnPos, pinBall.pinBallSize);
+            createNewRectangleTiedToEntity(projectile_ball, pinBall.pinBallSize, pinBall.pinBallSize, registry.motions.get(projectile_ball).position, true, 1);
 
             TemporaryProjectile temp;
             temp.hitsLeft = 1;
@@ -401,9 +401,9 @@ void PinballSystem::on_mouse_click(int button, int action, int mods) {
 void PinballSystem::restart() {
     // int w, h;
     // glfwGetWindowSize(window, &w, &h);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
     r = renderer;
     vec2 boundary = {260 + 70, 800 - 70};
-    //boundary * MonitorScreenRatio;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> distribution1(boundary.x, boundary.y);

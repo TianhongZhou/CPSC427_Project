@@ -22,6 +22,10 @@ int InitCombat = 0;
 int MonitorWidth;
 int MonitorHeight;
 float MonitorScreenRatio;
+int offsetX;
+int offsetY;
+int scaledWidth;
+int scaledHeight;
 
 // Create the fish world
 WorldSystem::WorldSystem()
@@ -90,22 +94,35 @@ GLFWwindow *WorldSystem::create_window()
 	MonitorWidth = mode->width;
 	MonitorHeight = mode->height;
 
-	// Calculate monitor screen Ratio
-	float ratioX = static_cast<float>(MonitorWidth) / window_width_px;
-	float ratioY = static_cast<float>(MonitorHeight) / window_height_px;
-	MonitorScreenRatio = (ratioX + ratioY) / 2;
-	//vec2 MonitorScreenRatio = { average, average };
-	printf("This is MonitorScreenRatio: %f\n", MonitorScreenRatio);
-	printf("This is monitor width and height: %d, %d\n", MonitorWidth, MonitorHeight);
+	float windowAspectRatio = static_cast<float>(window_width_px) / window_height_px;
+	float monitorAspectRatio = static_cast<float>(MonitorWidth) / MonitorHeight;
+	offsetX = 0;
+	offsetY = 0; // Offsets for letterboxing
+	
+	if (windowAspectRatio > monitorAspectRatio) {
+		// Window is wider relative to its height than the monitor is
+		// Scale based on width
+		scaledWidth = MonitorWidth;
+		scaledHeight = static_cast<int>(MonitorWidth / windowAspectRatio);
+		offsetY = (MonitorHeight - scaledHeight) / 2;
+	}
+	else {
+		// Window is taller relative to its width than the monitor is
+		// Scale based on height
+		scaledWidth = static_cast<int>((float)MonitorHeight * windowAspectRatio * 1.09f);
+		scaledHeight = MonitorHeight;
+		offsetX = (MonitorWidth - scaledWidth) / 2 ;
+	}
 
 	// Create the main window (for rendering, keyboard, and mouse input)
-	window = glfwCreateWindow(MonitorWidth, MonitorHeight, "Pinball Luminary", primaryMonitor, nullptr);
+	window = glfwCreateWindow(MonitorWidth, MonitorHeight, "Pinball Luminary", nullptr, nullptr);
 	//window = glfwCreateWindow(window_width_px, window_height_px, "Salmon Game Assignment", nullptr, nullptr);
 	if (window == nullptr)
 	{
 		fprintf(stderr, "Failed to glfwCreateWindow");
 		return nullptr;
 	}
+
     redirect_inputs_world();
 
     //////////////////////////////////////
@@ -167,6 +184,8 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 // Reset the world state to its initial state
 void WorldSystem::restart_game()
 {
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 	printf("Restarting\n");
@@ -585,9 +604,10 @@ void WorldSystem::check_room_boundary()
 			{
 				motion.position.x = roomMotion.position.x + (roomMotion.scale.x / 2) - 45.f;
 			}
-			if (roomMotion.position.y - (roomMotion.scale.y / 2) + 70.f > motion.position.y)
+			if (roomMotion.position.y - (roomMotion.scale.y / 2) + 40.f > motion.position.y)
 			{
-				motion.position.y = roomMotion.position.y - (roomMotion.scale.y / 2) + 70.f;
+				// should be + 70.f
+				motion.position.y = roomMotion.position.y - (roomMotion.scale.y / 2) + 40.f;
 			}
 			else if (roomMotion.position.y + (roomMotion.scale.y / 2) - 95.f < motion.position.y)
 			{

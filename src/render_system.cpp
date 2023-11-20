@@ -312,11 +312,13 @@ void RenderSystem::drawToScreen() {
     glfwGetFramebufferSize(window, &w,
                            &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, w, h);
+    //printf("Draw to screen: This is offsetX: %d, offsetY: %d, scaledWidth: %d, scaledHeight: %d\n", offsetX, offsetY, scaledWidth, scaledHeight);
+    glViewport(0, 0, MonitorWidth, MonitorHeight);
     glDepthRange(0, 10);
-    glClearColor(1.f, 0, 0, 1.0);
+    glClearColor(0, 0, 0, 1.0);
     glClearDepth(1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(offsetX, offsetY, scaledWidth, scaledHeight);
     gl_has_errors();
     // Enabling alpha channel for textures
     glDisable(GL_BLEND);
@@ -378,11 +380,13 @@ void RenderSystem::draw_combat_scene() {
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
     gl_has_errors();
     // Clearing backbuffer
-    glViewport(0, 0, w, h);
+    //printf("Draw combat scene: This is offsetX: %d, offsetY: %d, scaledWidth: %d, scaledHeight: %d\n", offsetX, offsetY, scaledWidth, scaledHeight);
+    glViewport(0, 0, MonitorWidth, MonitorHeight);
     glDepthRange(0.00001, 10);
     glClearColor(0.5, 0.5, 0.5, 1.0);
     glClearDepth(10.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(offsetX, offsetY, scaledWidth, scaledHeight);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST); // native OpenGL does not work with a depth buffer
@@ -468,11 +472,13 @@ void RenderSystem::draw_world(bool &tutorial_open) {
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
     gl_has_errors();
     // Clearing backbuffer
-    glViewport(0, 0, w, h);
+    //printf("Draw world: This is offsetX: %d, offsetY: %d, scaledWidth: %d, scaledHeight: %d\n", offsetX, offsetY, scaledWidth, scaledHeight);
+    glViewport(0, 0, MonitorWidth, MonitorHeight);
     glDepthRange(0.00001, 10);
     glClearColor(0, 0, 0, 1.0);
     glClearDepth(10.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(offsetX, offsetY, scaledWidth, scaledHeight);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST); // native OpenGL does not work with a depth buffer

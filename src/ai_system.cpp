@@ -117,7 +117,7 @@ void AISystem::step_world(float elapsed_ms)
 				motion.position = enemyMotion.position;
 
 				float radius = 30; //* (uniform_dist(rng) + 0.3f);
-				motion.scale = { radius * 0.5f * MonitorScreenRatio, radius * 0.5f * MonitorScreenRatio };
+				motion.scale = { radius, radius };
 				motion.angle = angleToPlayer; 
 				motion.velocity = vec2(200.f, 0.f);
 				registry.colors.insert(entity, { 1, 1, 1 });

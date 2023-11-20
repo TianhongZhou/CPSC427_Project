@@ -17,8 +17,7 @@ Entity createDropBuff(RenderSystem* renderer, vec2 pos, TEXTURE_ASSET_ID id)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 30.f * MonitorScreenRatio;
-	motion.scale.y *= 1.2f;
+	motion.scale = mesh.original_size * 50.f;
 	registry.renderRequests.insert(
 		entity,
 		{ id,
@@ -41,7 +40,7 @@ Entity createShadow(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 300.f * MonitorScreenRatio;
+	motion.scale = mesh.original_size * 300.f;
 
 	registry.renderRequests.insert(
 		entity,
@@ -100,7 +99,7 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 50.f * MonitorScreenRatio;
+	motion.scale = mesh.original_size * 75.f;
 
 	registry.players.emplace(entity);
 	registry.renderRequests.insert(
@@ -124,7 +123,7 @@ Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPostion, float
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = vec2(50.f,0.f);
-	motion.scale = mesh.original_size * 50.f * MonitorScreenRatio;
+	motion.scale = mesh.original_size * 65.f;
 
 	// registry.players.emplace(entity);
 	registry.mainWorldEnemies.emplace(entity);
@@ -208,10 +207,10 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<float> distribution1(100.0f, w / 2 + 150.f);
-	std::uniform_real_distribution<float> distribution2(200.0f, h / 2 + 150.f);
+	std::uniform_real_distribution<float> distribution2(100.0f, h / 2 + 150.f);
 	srand(time(NULL));
 	for (int i = 0; i < 4; i++) {
-		Entity spikes = createSpikes({ distribution2(gen), distribution2(gen) }, {80, 80});
+		Entity spikes = createSpikes({ distribution1(gen), distribution2(gen)}, {80, 80});
 		//Entity spikes = createSpikes({ 100 * i, distribution2(gen) }, {80, 80});
 		registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
 		
@@ -379,7 +378,6 @@ Entity createBall(RenderSystem* renderer, vec2 pos, float size)
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * size * 0.8f;
-	//motion.scale = mesh.original_size * size * 0.8f * vec2{1.f, 1.2f};
 
 	// registry.players.emplace(entity);
 	registry.renderRequests.insert(
@@ -426,7 +424,7 @@ Entity createSpikes(vec2 pos, vec2 size)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = size * 0.5f * MonitorScreenRatio;
+	motion.scale = size * 0.75f;
 
 	registry.spikes.emplace(entity);
 
@@ -448,7 +446,7 @@ Entity createPlayerBullet(vec2 pos, vec2 size)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = size * 0.6f * MonitorScreenRatio;
+	motion.scale = size * 0.7f;
 
 	registry.playerBullets.emplace(entity);
 
@@ -472,7 +470,7 @@ Entity createEnemyBullet(vec2 pos, vec2 size)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = size * 0.6f * MonitorScreenRatio;
+	motion.scale = size * 0.7f;
 
 	registry.enemyBullets.emplace(entity);
 
