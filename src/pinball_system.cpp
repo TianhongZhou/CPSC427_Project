@@ -453,7 +453,7 @@ void PinballSystem::restart() {
     std::uniform_real_distribution<float> distribution2(0.f, 1.f);
 
     //flipper
-    Entity flipper = createPolygonByVertex(renderer, { {480, 600},
+    Entity flipper = createPinballFlipper(renderer, { {480, 600},
                                                       {480, 580},
                                                       {580, 580},
                                                       {580, 600} }, GEOMETRY_BUFFER_ID::RECT);
@@ -511,13 +511,13 @@ void PinballSystem::restart() {
 
 
     //wall
-    Entity leftwall = createPolygonByVertex(renderer, {{220, 749},
+    Entity leftwall = createPinballWall(renderer, {{220, 749},
                                                        {220, 1},
                                                        {240, 1},
                                                        {240, 749}}, GEOMETRY_BUFFER_ID::OCT);
     createNewRectangleTiedToEntity(leftwall, 20.f, 748.f, registry.motions.get(leftwall).position, false, 1.0);
 
-    Entity rightwall = createPolygonByVertex(renderer, {{820, 749},
+    Entity rightwall = createPinballWall(renderer, {{820, 749},
                                                         {820, 1},
                                                         {840, 1},
                                                         {840, 749}}, GEOMETRY_BUFFER_ID::OCT);

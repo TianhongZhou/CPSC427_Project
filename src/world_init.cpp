@@ -51,13 +51,13 @@ Entity createShadow(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
-Entity createPolygonByVertex(RenderSystem* renderer, const std::vector<vec2>& vertices, GEOMETRY_BUFFER_ID id)
+Entity createPinballWall(RenderSystem* renderer, const std::vector<vec2>& vertices, GEOMETRY_BUFFER_ID id)
 {
 	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
     registry.combat.emplace(entity);
 
     // Generate a custom mesh based on the provided vertices
-	Mesh& mesh = renderer->getMesh(id);
 	mesh.fromVertices(vertices,
 		mesh.vertices,
 		mesh.vertex_indices,
@@ -79,9 +79,44 @@ Entity createPolygonByVertex(RenderSystem* renderer, const std::vector<vec2>& ve
 	// registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
-		  EFFECT_ASSET_ID::SALMON,
-		  id });
+		{ TEXTURE_ASSET_ID::WALL,
+		  EFFECT_ASSET_ID::TEXTURED,
+		  GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity createPinballFlipper(RenderSystem* renderer, const std::vector<vec2>& vertices, GEOMETRY_BUFFER_ID id)
+{
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.combat.emplace(entity);
+
+	// Generate a custom mesh based on the provided vertices
+	mesh.fromVertices(vertices,
+		mesh.vertices,
+		mesh.vertex_indices,
+		mesh.original_size);
+
+	renderer->bindVBOandIBO(id,
+		mesh.vertices,
+		mesh.vertex_indices);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Assuming the position to be the centroid of the polygon for motion purposes
+	vec2 centroid = std::accumulate(vertices.begin(), vertices.end(), vec2(0, 0)) / float(vertices.size());
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = centroid;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = mesh.original_size;
+
+	// registry.players.emplace(entity);
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::FLIPPER,
+		  EFFECT_ASSET_ID::TEXTURED,
+		  GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }
