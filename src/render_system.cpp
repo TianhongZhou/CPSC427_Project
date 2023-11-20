@@ -499,7 +499,7 @@ void RenderSystem::draw_world(bool &tutorial_open) {
         if ((renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYER) ||
             (renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET) ||
             (renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET)) {
-            light.screenPosition = vec2(motion.position.x / window_width_px, (window_height_px - motion.position.y) / window_height_px);
+            light.screenPosition = vec2(motion.position.x / (window_width_px + offsetX - 20), (window_height_px + offsetY - motion.position.y) / (window_height_px + offsetY));
             /*printf("%d, %d\n", w, h);
             printf("%.2f, %.2f\n", motion.position.x, motion.position.y);
             printf("%.2f, %.2f\n", light.screenPosition.x, light.screenPosition.y);*/
@@ -537,7 +537,7 @@ void RenderSystem::draw_world(bool &tutorial_open) {
 
         for (Light light: lights) {
             glm::vec2 lightPosition = light.screenPosition;
-            glm::vec2 entityPosition = vec2(motion.position.x / window_width_px, (window_height_px - motion.position.y) / window_height_px);
+            glm::vec2 entityPosition = vec2(motion.position.x / (window_width_px + offsetX - 20), (window_height_px + offsetY - motion.position.y) / (window_height_px + offsetY));
 
             if (entityPosition == lightPosition) {
                 continue;

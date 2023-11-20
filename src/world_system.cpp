@@ -208,7 +208,7 @@ void WorldSystem::restart_game()
 
 	// Create a new salmon
 	rooms[0] = createStartingRoom(renderer, { 600, 400 }, window);
-	player = createPlayer(renderer, { w/2, h/2 }); // spawn at the bottom of room for now
+	player = createPlayer(renderer, { (window_width_px)/2, (window_height_px)/2 }); // spawn at the bottom of room for now
 	registry.lights.emplace(player);
 }
 
