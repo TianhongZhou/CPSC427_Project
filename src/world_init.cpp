@@ -190,7 +190,7 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 	printf("This is window size in starting room: %d, %d\n", w, h);
 
 	// Add door
-	Entity door = createDoor({ 0,0 }, { 0,0 }); //intialized below, TODO: change from createpebble
+	Entity door = createDoor({ 0,0 }, { 0,0 }); //intialized below
 	Motion& door_motion = registry.motions.get(door);
 	float door_width = 50;
 	float door_height = 60;
@@ -201,8 +201,8 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 	registry.colors.insert(door, { 0, 0, 0 });
 
 	// Add spikes
-	Entity road = createSpikes({ 100, 100 }, { 80, 80 });
-	registry.colors.insert(road, { 0.5, 0.5, 0.5 });
+	Entity spikes = createSpikes({ 100, 100 }, { 80, 80 });
+	registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -379,6 +379,8 @@ Entity createBall(RenderSystem* renderer, vec2 pos, float size)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * size * 0.8f;
 
+	Ball ball = registry.balls.emplace(entity);
+
 	// registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
@@ -388,6 +390,7 @@ Entity createBall(RenderSystem* renderer, vec2 pos, float size)
 
 	return entity;
 }
+
 
 Entity createDoor(vec2 pos, vec2 size)
 {
@@ -400,20 +403,16 @@ Entity createDoor(vec2 pos, vec2 size)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = size;
 
-	// Create and (empty) Salmon component to be able to refer to all turtles
-	registry.rooms.emplace(entity); //?
-
-	registry.balls.emplace(entity);
+	registry.doors.emplace(entity);
 
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::GROUND, // TEXTURE_COUNT indicates that no txture is needed
+		{ TEXTURE_ASSET_ID::GROUND, // TODO: Using blacked out ground for now, change this
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }
-
 
 Entity createSpikes(vec2 pos, vec2 size)
 {
@@ -485,6 +484,35 @@ Entity createEnemyBullet(vec2 pos, vec2 size)
 	return entity;
 }
 
+
+Entity createParticle(RenderSystem* renderer, vec2 pos, float size, vec2 vel, vec3 color, float lifespan)
+{
+	auto entity = Entity();
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::BALL);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+    registry.combat.emplace(entity);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.velocity = vel;
+	motion.scale = mesh.original_size * size;
+
+	Particle& particle = registry.particles.emplace(entity);
+	particle.color = color;
+	particle.lifespan = lifespan;
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
+			EFFECT_ASSET_ID::SALMON,
+			GEOMETRY_BUFFER_ID::BALL });
+	registry.colors.insert(entity, color);
+
+	return entity;
+}
 
 
 void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos, bool moveable, float knockbackCoef) {

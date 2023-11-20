@@ -83,11 +83,11 @@ void pinballDash() {
         }
         
         // this would not behave correctly before adding the main enemy
-        if (registry.pinballEnemies.components.size() <= 1) {
-            printf("no target ");
-            accelerateObj2(vec2(0.0f, -DASH_STRENTH), pinballPhys);
-            return;
-        }
+        //if (registry.pinballEnemies.components.size() <= 1) {
+        //    printf("no target ");
+        //    accelerateObj2(vec2(0.0f, -DASH_STRENTH), pinballPhys);
+        //    return;
+        //}
 
         float minDist = 1000.0f;
         vec2 direction = vec2(0.0f, 1.0f);
@@ -200,10 +200,50 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
     // {
     // 	GameSceneState = 0;
     // }
+    float step_seconds = elapsed_ms_since_last_update / 1000.f;
     if (registry.pinballEnemies.entities.size() == 0) {
         // exit_combat();
         // GameSceneState = 0;
     } else {
+        if (particleSpawnTimer > 0.2f) {
+            float pinballRadius = registry.pinBalls.components[0].pinBallSize;
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_real_distribution<> distRadius(0, pinballRadius);
+            std::uniform_real_distribution<> distAngle(0.f, 2.f * M_PI);
+            std::normal_distribution<> distLifeSpan(1.0f, 0.2f);
+            std::normal_distribution<> distVel(0.f, 1.f);
+            int numParticles = registry.pinBalls.components[0].pinBallSize*registry.pinBalls.components[0].pinBallSize/10;
+            for (Entity entity: registry.balls.entities) {
+                physObj ball = registry.physObjs.get(entity);
+                vec2 center = {0.f, 0.f};
+                for (int i=0; i<ball.VertexCount; i++) {
+                    center+=ball.Vertices[i].pos;
+                }
+                center=center/(float) ball.VertexCount;
+                for (int i = 0; i < numParticles; ++i) {
+                    float randomRadius = distRadius(gen);
+                    float randomAngle = distAngle(gen);
+                    vec3 color = {1.f,1.f,0.f};
+                    color *= ((pinballRadius-randomRadius)/pinballRadius+1)/2;
+                    vec2 pos = {center.x + randomRadius * std::cos(randomAngle), center.y + randomRadius * std::sin(randomAngle)};
+                    createParticle(r, pos, 1.5f, {distVel(gen),distVel(gen)}, color, distLifeSpan(gen));
+                }
+                // for (int i=0; i<ball.EdgesCount; i++) {
+                //     vec2 pos1 = ball.Vertices[ball.Edges[i].v1].pos;
+                //     vec2 pos2 = ball.Vertices[ball.Edges[i].v2].pos;
+                //     vec2 diff = pos1-pos2;
+                //     for (int j=0; j<ball.Edges[i].len; j+=5) {
+                //         vec2 pos = pos2+(diff/ball.Edges[i].len* (float)j);
+                //         createParticle(r, pos, 1.f, {0.f,0.f}, {1.f,0.f,0.f}, 2.f);
+                //     }
+                // }
+            }
+            particleSpawnTimer=0.f;
+        } else {
+            particleSpawnTimer+=elapsed_ms_since_last_update;
+        }
+
         for (Entity entity: registry.pinballEnemies.entities) {
             PinBallEnemy &enemy = registry.pinballEnemies.get(entity);
             if (enemy.currentHealth <= 0) {
@@ -454,6 +494,11 @@ void PinballSystem::restart() {
     Entity pinballenemyMain = createPinBallEnemy(renderer, vec2(525,180), boundary,2.0f, 0, 3000.0f);
 
     registry.colors.insert(pinballenemyMain, { distribution2(gen), distribution2(gen), distribution2(gen) });
+
+
+    Entity pinballenemy = createPinBallEnemy(renderer, vec2(525, 90), boundary, 2.0f, 1, 5000.0f);
+
+    registry.colors.insert(pinballenemy, { distribution2(gen), distribution2(gen), distribution2(gen) });
 
 
     // for (int i=0; i<NUM_ENEMIES; i++) {

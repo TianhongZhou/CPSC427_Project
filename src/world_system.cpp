@@ -10,6 +10,11 @@
 #include "physics_system.hpp"
 #include "pinball_system.hpp"
 
+// For saving/loading game state
+#include <../ext/nlohmann/json.hpp>
+#include <fstream>
+#include <iostream>
+
 // Game configuration
 const size_t MAX_TURTLES = 15;
 const size_t MAX_FISH = 5;
@@ -179,6 +184,9 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 
 	// Set all states to default
 	restart_game();
+
+	// Load saved game state
+	load_game(PROJECT_SOURCE_DIR + std::string("gameState.json"));
 }
 
 // Reset the world state to its initial state
@@ -211,6 +219,49 @@ void WorldSystem::restart_game()
 	player = createPlayer(renderer, { (window_width_px)/2, (window_height_px)/2 }); // spawn at the bottom of room for now
 	registry.lights.emplace(player);
 }
+
+
+// Save game
+using json = nlohmann::json;
+void WorldSystem::save_game(const std::string& filename)
+{
+	json j;
+
+	Motion& motion = registry.motions.get(player);
+	j["player"]["position"]["x"] = motion.position.x;
+	j["player"]["position"]["y"] = motion.position.y;
+
+	std::ofstream file(filename);
+	if (file.is_open()) {
+		file << j.dump(4); // '4' is for pretty printing
+		file.close();
+		std::cout << "Position saved successfully." << std::endl;
+	}
+	else {
+		std::cerr << "Unable to open file for writing." << std::endl;
+	}
+}
+
+void WorldSystem::load_game(const std::string& filename)
+{
+	std::ifstream file(filename);
+	if (file.is_open()) {
+		json j;
+		file >> j;
+
+		Motion& motion = registry.motions.get(player);
+		motion.position.x = j["player"]["position"]["x"].get<int>();
+		motion.position.y = j["player"]["position"]["y"].get<int>();
+		file.close();
+		std::cout << "Position loaded successfully." << std::endl;
+	}
+	else {
+		std::cerr << "Unable to open file for reading." << std::endl;
+	}
+}
+
+
+
 
 //// MOVED TO PinballSystem::restart
 void WorldSystem::init_combat(PinballSystem pinballSystem)
@@ -373,6 +424,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && GameSceneState == 0) {
 		on_mouse_click(GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0);
 	}
+
+	// save game
+	if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && GameSceneState == 0) {
+		save_game(PROJECT_SOURCE_DIR + std::string("gameState.json")); // NOTE: assumes backslash at the end of PROJECT_SOURCE_DIR
+	}
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
@@ -456,6 +512,7 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 	std::stringstream title_ss;
 	title_ss << "Points: " << points;
 	glfwSetWindowTitle(window, title_ss.str().c_str());
+	float step_seconds = elapsed_ms_since_last_update / 1000.f;
 
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
@@ -463,19 +520,7 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 
 	// Removing out of screen entities
 	auto &motion_container = registry.motions;
-
-	// Remove entities that leave the screen on the left side
-	// Iterate backwards to be able to remove without unterfering with the next object to visit
-	// (the containers exchange the last element with the current)
-	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i)
-	{
-		Motion &motion = motion_container.components[i];
-		if (motion.position.x + abs(motion.scale.x) < 0.f)
-		{
-			if (!registry.players.has(motion_container.entities[i])) // don't remove the player
-				registry.remove_all_components_of(motion_container.entities[i]);
-		}
-	}
+	
 	save_player_last_direction();
 
 	// handling entering combat state
@@ -525,18 +570,18 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 
 	//spawn_room_enemies(elapsed_ms_since_last_update);
 
-	// TODO: move this to the top later
-	int w, h;
-	glfwGetWindowSize(window, &w, &h);
+	//// TODO: move this to the top later
+	//int w, h;
+	//glfwGetWindowSize(window, &w, &h);
 
 	// Enter next room
-	Motion& player_motion = registry.motions.get(player);
-	if (player_motion.position.y < 60.f && player_motion.position.x > w/2 - 40 && player_motion.position.x < w / 2 + 40)
-		//&& registry.mainWorldEnemies.size()) 
-	{
-		enter_next_room();
-		player_motion.position = { w/2, h * 4/ 5};
-	}
+	//Motion& player_motion = registry.motions.get(player);
+	//if (player_motion.position.y < 60.f && player_motion.position.x > w/2 - 40 && player_motion.position.x < w / 2 + 40)
+	//	//&& registry.mainWorldEnemies.size()) 
+	//{
+	//	enter_next_room();
+	//	player_motion.position = { w/2, h * 4/ 5};
+	//}
 
 	return true;
 }
@@ -544,12 +589,16 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 // Enter next room
 void WorldSystem::enter_next_room()
 {	
+	// TODO: move this to the top later
+	int w, h;
+	glfwGetWindowSize(window, &w, &h);
+
 	PinBall temp = registry.pinBalls.get(player);
 	// Remove all entities that we created
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
-	rooms[0] = createRoom(renderer, { 600, 400 });
-	player = createPlayer(renderer, { 350, 200 });
+	rooms[0] = createRoom(renderer, {600, 400});
+	player = createPlayer(renderer, {w/2, h*4/5});
 	PinBall& pinBall = registry.pinBalls.get(player);
 	pinBall.pinBallSize = temp.pinBallSize;
 	pinBall.pinBallDamage = temp.pinBallDamage;
@@ -703,6 +752,12 @@ void WorldSystem::handle_collisions_world()
 		if (registry.spikes.has(entity) && registry.players.has(entity_other)) {
 			// handle damage interaction (nothing for now)
 			restart_game();
+		}
+
+		// player vs door collision
+		if (registry.doors.has(entity) && registry.players.has(entity_other)) {
+			// handle damage interaction (nothing for now)
+			enter_next_room();
 		}
 
 		// drop buff vs player collision

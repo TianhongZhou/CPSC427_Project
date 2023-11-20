@@ -5,6 +5,11 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
+struct Door
+{
+
+};
+
 struct Spikes
 {
 
@@ -35,6 +40,13 @@ struct Player
 struct Combat
 {
 
+};
+
+//Particle
+struct Particle
+{
+	vec3 color;
+    float lifespan = 1.f;
 };
 
 // Main world room

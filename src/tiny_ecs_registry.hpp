@@ -41,12 +41,14 @@ public:
 	ComponentContainer<TemporaryProjectile> temporaryProjectiles;
 	ComponentContainer<PinBall> pinBalls;
 	ComponentContainer<DropBuff> dropBuffs;
+	ComponentContainer<Particle> particles;
 	
 	// World assets
 	ComponentContainer<PlayerBullet> playerBullets;
 	ComponentContainer<EnemyBullet> enemyBullets;
 	ComponentContainer<Ball> balls;
 	ComponentContainer<Spikes> spikes;
+	ComponentContainer<Door> doors;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -80,12 +82,14 @@ public:
 		registry_list.push_back(&temporaryProjectiles);
 		registry_list.push_back(&pinBalls);
 		registry_list.push_back(&dropBuffs);
+		registry_list.push_back(&particles);
 
 		// World assets
 		registry_list.push_back(&playerBullets);
 		registry_list.push_back(&enemyBullets);
 		registry_list.push_back(&balls);
 		registry_list.push_back(&spikes);
+		registry_list.push_back(&doors);
 	}
 
 	void clear_all_components() {

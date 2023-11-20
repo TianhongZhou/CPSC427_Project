@@ -59,6 +59,9 @@ public:
     // restart level
     void restart_game();
 
+	void save_game(const std::string& filename);
+	void load_game(const std::string& filename);
+
 
 private:
 	// Input callback functions
