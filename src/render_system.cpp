@@ -4,6 +4,7 @@
 
 #include "tiny_ecs_registry.hpp"
 #include "world_init.hpp"
+#include "world_system.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
 // imgui
@@ -311,11 +312,13 @@ void RenderSystem::drawToScreen() {
     glfwGetFramebufferSize(window, &w,
                            &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, w, h);
+    //printf("Draw to screen: This is offsetX: %d, offsetY: %d, scaledWidth: %d, scaledHeight: %d\n", offsetX, offsetY, scaledWidth, scaledHeight);
+    glViewport(0, 0, MonitorWidth, MonitorHeight);
     glDepthRange(0, 10);
-    glClearColor(1.f, 0, 0, 1.0);
+    glClearColor(0, 0, 0, 1.0);
     glClearDepth(1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(offsetX, offsetY, scaledWidth, scaledHeight);
     gl_has_errors();
     // Enabling alpha channel for textures
     glDisable(GL_BLEND);
@@ -377,11 +380,13 @@ void RenderSystem::draw_combat_scene() {
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
     gl_has_errors();
     // Clearing backbuffer
-    glViewport(0, 0, w, h);
+    //printf("Draw combat scene: This is offsetX: %d, offsetY: %d, scaledWidth: %d, scaledHeight: %d\n", offsetX, offsetY, scaledWidth, scaledHeight);
+    glViewport(0, 0, MonitorWidth, MonitorHeight);
     glDepthRange(0.00001, 10);
     glClearColor(0.5, 0.5, 0.5, 1.0);
     glClearDepth(10.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(offsetX, offsetY, scaledWidth, scaledHeight);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST); // native OpenGL does not work with a depth buffer
@@ -425,6 +430,7 @@ mat3 RenderSystem::createProjectionMatrix() {
             {tx,  ty,  1.f}};
 }
 
+
 // ================================= WORLD ==========================
 
 // Render our game world
@@ -466,11 +472,13 @@ void RenderSystem::draw_world(bool &tutorial_open) {
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
     gl_has_errors();
     // Clearing backbuffer
-    glViewport(0, 0, w, h);
+    //printf("Draw world: This is offsetX: %d, offsetY: %d, scaledWidth: %d, scaledHeight: %d\n", offsetX, offsetY, scaledWidth, scaledHeight);
+    glViewport(0, 0, MonitorWidth, MonitorHeight);
     glDepthRange(0.00001, 10);
     glClearColor(0, 0, 0, 1.0);
     glClearDepth(10.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(offsetX, offsetY, scaledWidth, scaledHeight);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST); // native OpenGL does not work with a depth buffer
@@ -491,8 +499,11 @@ void RenderSystem::draw_world(bool &tutorial_open) {
         if ((renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYER) ||
             (renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYERATTACKSPRITESHEET) ||
             (renderRequest.used_texture == TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET)) {
-            light.screenPosition = vec2(motion.position.x / w, (h - motion.position.y) / h);
-            light.haloRadius = 0.2f; //1.2f;
+            light.screenPosition = vec2(motion.position.x / (window_width_px + offsetX - 20), (window_height_px + offsetY - motion.position.y) / (window_height_px + offsetY));
+            /*printf("%d, %d\n", w, h);
+            printf("%.2f, %.2f\n", motion.position.x, motion.position.y);
+            printf("%.2f, %.2f\n", light.screenPosition.x, light.screenPosition.y);*/
+            light.haloRadius = 0.15f; //1.2f;
             light.lightColor = vec3(1.0f, 1.0f, 1.0f);
             light.haloSoftness = 0.05f;
             light.priority = 2;
@@ -526,7 +537,7 @@ void RenderSystem::draw_world(bool &tutorial_open) {
 
         for (Light light: lights) {
             glm::vec2 lightPosition = light.screenPosition;
-            glm::vec2 entityPosition = vec2(motion.position.x / w, (h - motion.position.y) / h);
+            glm::vec2 entityPosition = vec2(motion.position.x / (window_width_px + offsetX - 20), (window_height_px + offsetY - motion.position.y) / (window_height_px + offsetY));
 
             if (entityPosition == lightPosition) {
                 continue;
