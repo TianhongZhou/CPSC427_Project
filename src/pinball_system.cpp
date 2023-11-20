@@ -224,7 +224,9 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
                 for (int i = 0; i < numParticles; ++i) {
                     float randomRadius = distRadius(gen);
                     float randomAngle = distAngle(gen);
-                    vec3 color = {1.f,1.f,0.f};
+                    vec3 color = {0.f,0.f,1.f};
+                    vec3 grey = { 0.5f, 0.5f, 0.5f };
+                    color = (color + grey) * 0.5f;
                     color *= ((pinballRadius-randomRadius)/pinballRadius+1)/2;
                     vec2 pos = {center.x + randomRadius * std::cos(randomAngle), center.y + randomRadius * std::sin(randomAngle)};
                     createParticle(r, pos, 1.5f, {distVel(gen),distVel(gen)}, color, distLifeSpan(gen));
@@ -337,7 +339,7 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
         registry.pinballPlayerStatus.components[0].highGravityTimer += 5000.0f;
     }
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT_SHIFT)
+    if (action == GLFW_RELEASE && key == GLFW_KEY_F)
     {
         pinballDash();
     }
@@ -442,6 +444,7 @@ void PinballSystem::restart() {
     // int w, h;
     // glfwGetWindowSize(window, &w, &h);
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    createPinballRoom(renderer, { 600, 400 }, window);
     r = renderer;
     vec2 boundary = {260 + 70, 800 - 70};
     std::random_device rd;
@@ -539,8 +542,6 @@ void PinballSystem::restart() {
     //                                                     {840, 750},
     //                                                     {840, 730}}, GEOMETRY_BUFFER_ID::RECT);
     //createNewRectangleTiedToEntity(rightslide, 180.f, 20.f, registry.motions.get(rightslide).position, false, 1.0);
-
-
 
 }
 

@@ -23,6 +23,8 @@ Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos);
 Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos, vec2 boundary, float xScale, int attackType, float attackCd);
 // the room
 Entity createRoom(RenderSystem* renderer, vec2 pos);
+// the pinball room
+Entity createPinballRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
 // the player
 Entity createPlayer(RenderSystem* renderer, vec2 pos);
 // the room enemy
