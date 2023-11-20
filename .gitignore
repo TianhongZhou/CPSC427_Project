@@ -367,5 +367,8 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-
+# Project Directory
 ext/project_path.hpp
+
+# Game State
+*.json

@@ -49,6 +49,8 @@ private:
     void on_mouse_move(vec2 pos);
     void on_mouse_click(int button, int action, int mods);
 
+    void stepEnemyAttack();
+
     // Sets game states to default and spawns pinball entities
     void restart();
 
