@@ -133,7 +133,7 @@ Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPostion, float
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE,
 			vec2(0.2, -0.5),
-			vec2(-10, 48.f / 2.0f + 20) });
+			vec2(-10, 48.f / 2.0f + 8) });
 	Enemy& ene = registry.mainWorldEnemies.get(entity);
 	ene.roomPositon = roomPostion;
 	ene.roomScale = roomScale;
@@ -289,6 +289,33 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
+Entity createPinballRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
+{
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+	registry.combat.emplace(entity);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+
+	/*int w, h;
+	glfwGetWindowSize(window, &w, &h);*/
+	//printf("This is Starting Room size: %d, %d\n", )
+	motion.scale = { window_width_px, window_height_px };
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::PINBALLBACKGROUND,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
 Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
@@ -374,16 +401,16 @@ Entity createBall(RenderSystem* renderer, vec2 pos, float size)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * size * 0.8f;
+	motion.scale = mesh.original_size * size * 0.7f;
 
 	Ball ball = registry.balls.emplace(entity);
 
 	// registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
-			EFFECT_ASSET_ID::SALMON,
-			GEOMETRY_BUFFER_ID::BALL });
+		{ TEXTURE_ASSET_ID::PINBALL,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }
