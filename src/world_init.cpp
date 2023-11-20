@@ -423,6 +423,8 @@ Entity createBall(RenderSystem* renderer, vec2 pos, float size)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * size * 0.8f;
 
+	Ball ball = registry.balls.emplace(entity);
+
 	// registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
@@ -573,7 +575,34 @@ Entity createEnemyBullet(vec2 pos, vec2 size)
 }
 
 
+Entity createParticle(RenderSystem* renderer, vec2 pos, float size, vec2 vel, vec3 color, float lifespan)
+{
+	auto entity = Entity();
 
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::BALL);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+    registry.combat.emplace(entity);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.velocity = vel;
+	motion.scale = mesh.original_size * size;
+
+	Particle& particle = registry.particles.emplace(entity);
+	particle.color = color;
+	particle.lifespan = lifespan;
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
+			EFFECT_ASSET_ID::SALMON,
+			GEOMETRY_BUFFER_ID::BALL });
+	registry.colors.insert(entity, color);
+
+	return entity;
+}
 
 
 
