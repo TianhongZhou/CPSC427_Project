@@ -24,7 +24,7 @@ Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos, vec2 boundary, float
 // the enemy wave
 Entity createEnemyWave(RenderSystem* renderer, vec2 pos);
 // the room
-Entity createRoom(RenderSystem* renderer, vec2 pos);
+Entity createRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window, int room_num);
 // the road
 Entity createRoad(RenderSystem* renderer, vec2 pos);
 // the player
@@ -47,6 +47,8 @@ Entity createDoor(vec2 pos, vec2 size);
 Entity createSpikes(vec2 pos, vec2 size);
 
 Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
+Entity createRoom1(RenderSystem* renderer, vec2 pos);
+Entity createEmptyRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
 
 Entity createDropBuff(RenderSystem* renderer, vec2 pos, TEXTURE_ASSET_ID id);
 
