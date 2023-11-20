@@ -54,7 +54,7 @@ Entity createShadow(RenderSystem* renderer, vec2 pos)
 Entity createPinballWall(RenderSystem* renderer, const std::vector<vec2>& vertices, GEOMETRY_BUFFER_ID id)
 {
 	auto entity = Entity();
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECT);
     registry.combat.emplace(entity);
 
     // Generate a custom mesh based on the provided vertices
@@ -89,7 +89,7 @@ Entity createPinballWall(RenderSystem* renderer, const std::vector<vec2>& vertic
 Entity createPinballFlipper(RenderSystem* renderer, const std::vector<vec2>& vertices, GEOMETRY_BUFFER_ID id)
 {
 	auto entity = Entity();
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECT);
 	registry.combat.emplace(entity);
 
 	// Generate a custom mesh based on the provided vertices
