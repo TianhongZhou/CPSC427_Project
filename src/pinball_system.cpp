@@ -178,10 +178,30 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
     // {
     // 	GameSceneState = 0;
     // }
+    float step_seconds = elapsed_ms_since_last_update / 1000.f;
     if (registry.pinballEnemies.entities.size() == 0) {
         // exit_combat();
         // GameSceneState = 0;
     } else {
+        if (particleSpawnTimer > 1.f) {
+            for (Entity entity: registry.pinBalls.entities) {
+                Motion motion = registry.motions.get(entity);
+                createParticle(renderer, motion.position, 1.1f, {0.f,0.f}, {1.f,0.f,0.f}, 10.f);
+            }
+            particleSpawnTimer=0.f;
+        } else {
+            particleSpawnTimer+=step_seconds;
+        }
+
+        for (Entity entity: registry.particles.entities) {
+            Particle& particle = registry.particles.get(entity);
+            if (particle.lifespan>0.f) {
+                particle.lifespan -= step_seconds;
+            } else {
+                registry.remove_all_components_of(entity);
+            }
+        }
+
         for (Entity entity: registry.pinballEnemies.entities) {
             PinBallEnemy &enemy = registry.pinballEnemies.get(entity);
             if (enemy.currentHealth <= 0) {
@@ -421,6 +441,8 @@ void PinballSystem::restart() {
 
     Entity pinballenemyMain = createPinBallEnemy(renderer, vec2(525,180), boundary,2.0f);
     registry.colors.insert(pinballenemyMain, { distribution2(gen), distribution2(gen), distribution2(gen) });
+
+    createParticle(renderer, {500.f, 200.f}, 1.1f, {0.f,0.f}, {1.f,0.f,0.f}, 5.f);
 
 
     // for (int i=0; i<NUM_ENEMIES; i++) {

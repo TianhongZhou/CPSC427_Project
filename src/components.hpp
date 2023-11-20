@@ -37,6 +37,13 @@ struct Combat
 
 };
 
+//Particle
+struct Particle
+{
+	vec3 color;
+    float lifespan = 1.f;
+};
+
 // Main world room
 // Entity is part of main world
 struct MainWorld{};

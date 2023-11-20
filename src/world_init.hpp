@@ -48,6 +48,8 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
 
 Entity createDropBuff(RenderSystem* renderer, vec2 pos, TEXTURE_ASSET_ID id);
 
+Entity createParticle(RenderSystem* renderer, vec2 pos, float size, vec2 vel, vec3 color, float lifespan);
+
 // player and enemy bullets
 Entity createPlayerBullet(vec2 pos, vec2 size);
 Entity createEnemyBullet(vec2 pos, vec2 size);

@@ -419,6 +419,7 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 	std::stringstream title_ss;
 	title_ss << "Points: " << points;
 	glfwSetWindowTitle(window, title_ss.str().c_str());
+	float step_seconds = elapsed_ms_since_last_update / 1000.f;
 
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
@@ -426,19 +427,7 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 
 	// Removing out of screen entities
 	auto &motion_container = registry.motions;
-
-	// Remove entities that leave the screen on the left side
-	// Iterate backwards to be able to remove without unterfering with the next object to visit
-	// (the containers exchange the last element with the current)
-	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i)
-	{
-		Motion &motion = motion_container.components[i];
-		if (motion.position.x + abs(motion.scale.x) < 0.f)
-		{
-			if (!registry.players.has(motion_container.entities[i])) // don't remove the player
-				registry.remove_all_components_of(motion_container.entities[i]);
-		}
-	}
+	
 	save_player_last_direction();
 
 	// handling entering combat state

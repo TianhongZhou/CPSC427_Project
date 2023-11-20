@@ -52,6 +52,8 @@ private:
     // Sets game states to default and spawns pinball entities
     void restart();
 
+    float particleSpawnTimer = 0.f;
+
     // OpenGL window handle
     GLFWwindow* window;
 
