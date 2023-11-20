@@ -419,12 +419,12 @@ void PinballSystem::on_mouse_move(vec2 mouse_position) {
     float height = 20.0f;
 
 
-    if ((mouse_position.x + width / 2) < MAX_X_COORD2  && (mouse_position.x - width / 2) > MIN_X_COORD2) {
+    if ((mouse_position.x * (float)window_width_px / (float)MonitorWidth + width / 2) < MAX_X_COORD2  && (mouse_position.x * (float)window_width_px / (float)MonitorWidth - width / 2) > MIN_X_COORD2) {
         physObj& flipper = registry.physObjs.get(registry.playerFlippers.entities[0]);
         float xPos = 0;
         for (int i=0; i<flipper.VertexCount; i++) {
-            if (i==0 || i==3) xPos = mouse_position.x - width / 2;
-            else xPos = mouse_position.x + width / 2;
+            if (i==0 || i==3) xPos = mouse_position.x * (float)window_width_px / (float)MonitorWidth - width / 2;
+            else xPos = mouse_position.x * (float)window_width_px / (float)MonitorWidth + width / 2;
             flipper.Vertices[i].pos.x = xPos;
             flipper.Vertices[i].oldPos.x = xPos;
         }
@@ -441,7 +441,7 @@ void PinballSystem::on_mouse_click(int button, int action, int mods) {
 void PinballSystem::restart() {
     // int w, h;
     // glfwGetWindowSize(window, &w, &h);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
     r = renderer;
     vec2 boundary = {260 + 70, 800 - 70};
     std::random_device rd;

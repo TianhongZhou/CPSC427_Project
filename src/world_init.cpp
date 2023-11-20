@@ -201,9 +201,6 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 	registry.colors.insert(door, { 0, 0, 0 });
 
 	// Add spikes
-	Entity spikes = createSpikes({ 100, 100 }, { 80, 80 });
-	registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
-
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<float> distribution1(100.0f, w / 2 + 150.f);

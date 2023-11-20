@@ -192,7 +192,7 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 // Reset the world state to its initial state
 void WorldSystem::restart_game()
 {
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
 	// Debugging for memory/component leaks
 	registry.list_all_components();
@@ -486,10 +486,13 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 
 		vec2 player_v = registry.motions.get(player).velocity;
 		vec2 mouse_position = registry.mousePosArray.components[0].pos;
-		float dy = mouse_position.y - motion.position.y;
-		float dx = mouse_position.x - motion.position.x;
+		float dy = mouse_position.y * (float)window_height_px / (float)MonitorHeight - motion.position.y;
+		float dx = mouse_position.x * (float)window_width_px / (float)MonitorWidth - motion.position.x;
 		motion.angle = atan2(dy, dx);
 
+
+		//printf("This is mouse_position: %f, %f\n", mouse_position.x, mouse_position.y);
+		//printf("This is player_position: %f, %f\n", motion.position.x, motion.position.y);
 
 		//motion.velocity = vec2(200.f + uniform_dist(rng)*200, 100.f - uniform_dist(rng)*200);
 		//float angle = registry.motions.get(player).angle;
