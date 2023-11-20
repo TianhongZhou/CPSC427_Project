@@ -653,10 +653,9 @@ void WorldSystem::check_room_boundary()
 			{
 				motion.position.x = roomMotion.position.x + (roomMotion.scale.x / 2) - 45.f;
 			}
-			if (roomMotion.position.y - (roomMotion.scale.y / 2) + 40.f > motion.position.y)
+			if (roomMotion.position.y - (roomMotion.scale.y / 2) + 70.f > motion.position.y)
 			{
-				// should be + 70.f
-				motion.position.y = roomMotion.position.y - (roomMotion.scale.y / 2) + 40.f;
+				motion.position.y = roomMotion.position.y - (roomMotion.scale.y / 2) + 70.f;
 			}
 			else if (roomMotion.position.y + (roomMotion.scale.y / 2) - 95.f < motion.position.y)
 			{
