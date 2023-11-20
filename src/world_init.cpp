@@ -423,6 +423,8 @@ Entity createBall(RenderSystem* renderer, vec2 pos, float size)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * size * 0.8f;
 
+	Ball ball = registry.balls.emplace(entity);
+
 	// registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
