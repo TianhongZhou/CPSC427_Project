@@ -71,6 +71,11 @@
         - GenerateDropBuff in world_system.hpp
         - createDropBuff in world_init.cpp
         - random generate drop in createRoom in world_init.cpp
+- ### Consistent game resolution
+    - create_window in world_system.cpp
+    - drawToScreen in render_system.cpp
+    - draw_combat_scene in render_system.cpp
+    - draw_world in render_system.cpp
 
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:
