@@ -474,7 +474,7 @@ Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
-Entity createBall(RenderSystem* renderer, vec2 pos, float size) 
+Entity createBall(RenderSystem* renderer, vec2 pos, float size, float trail) 
 {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::BALL);
@@ -489,7 +489,8 @@ Entity createBall(RenderSystem* renderer, vec2 pos, float size)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * size * 0.7f;
 
-	Ball ball = registry.balls.emplace(entity);
+	Ball& ball = registry.balls.emplace(entity);
+	ball.trail = trail;
 
 	// registry.players.emplace(entity);
 	registry.renderRequests.insert(
@@ -611,7 +612,6 @@ Entity createParticle(RenderSystem* renderer, vec2 pos, float size, vec2 vel, ve
 	motion.scale = mesh.original_size * size;
 
 	Particle& particle = registry.particles.emplace(entity);
-	particle.color = color;
 	particle.lifespan = lifespan;
 
 	registry.renderRequests.insert(

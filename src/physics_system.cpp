@@ -653,7 +653,7 @@ void PhysicsSystem::step(float elapsed_ms)
 		if (particle.lifespan > 0.f)
 		{
 			Motion& motion = registry.motions.get(entity);
-			float floatage = 9.81f *2.f;
+			float floatage = 9.81f *3.f;
 			motion.velocity.y -= step_seconds*floatage;
 			motion.position += step_seconds*motion.velocity;
 			particle.lifespan -= step_seconds;
