@@ -24,9 +24,10 @@ Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos);
 // the pin ball enemy
 Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos, vec2 boundary, float xScale, int attackType, float attackCd);
 // the room
-Entity createRoom(RenderSystem* renderer, vec2 pos);
+Entity createRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window, int room_num);
 // the pinball room
 Entity createPinballRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
+
 // the player
 Entity createPlayer(RenderSystem* renderer, vec2 pos);
 // the room enemy
@@ -45,6 +46,8 @@ Entity createDoor(vec2 pos, vec2 size);
 Entity createSpikes(vec2 pos, vec2 size);
 
 Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
+Entity createRoom1(RenderSystem* renderer, vec2 pos);
+Entity createEmptyRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
 
 Entity createDropBuff(RenderSystem* renderer, vec2 pos, TEXTURE_ASSET_ID id);
 
