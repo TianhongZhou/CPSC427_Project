@@ -166,6 +166,9 @@ void WorldSystem::restart_game()
 	// Reset the game speed
 	current_speed = 1.f;
 
+	// Reset room number
+	curr_room = 0;
+
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
 	while (registry.motions.entities.size() > 0)
@@ -242,10 +245,12 @@ void WorldSystem::load_game(const std::string& filename)
 		json j;
 		file >> j;
 
-		if (j.contains("inCombat")) {
-
+		if (j.contains("level")) {
 			// Restore room level
 			curr_room = j["level"].get<int>();
+		}
+
+		if (j.contains("inCombat")) {
 
 			// Restore power up stats
 			if (j.contains("pinball")) {
@@ -254,6 +259,12 @@ void WorldSystem::load_game(const std::string& filename)
 				pinball.pinBallDamage = j["pinball"]["damage"].get<float>();
 			}
 
+			auto& dropBuffsRegistry = registry.dropBuffs;
+			// Remove current first, TODO: Maybe change this
+			while (dropBuffsRegistry.entities.size() > 0)
+				registry.remove_all_components_of(dropBuffsRegistry.entities.back());
+
+
 			if (j.contains("player") && j["inCombat"].get<int>() == 0) {
 				// Restore position
 				Motion& motion = registry.motions.get(player);
@@ -261,11 +272,11 @@ void WorldSystem::load_game(const std::string& filename)
 				motion.position.y = j["player"]["position"]["y"].get<float>();
 
 				// Restore buff drops
-				auto& dropBuffsRegistry = registry.dropBuffs;
+				//auto& dropBuffsRegistry = registry.dropBuffs;
 
-				// Remove current first, TODO: Maybe change this
-				while (dropBuffsRegistry.entities.size() > 0)
-					registry.remove_all_components_of(dropBuffsRegistry.entities.back());
+				//// Remove current first, TODO: Maybe change this
+				//while (dropBuffsRegistry.entities.size() > 0)
+				//	registry.remove_all_components_of(dropBuffsRegistry.entities.back());
 
 				int buff_size = j["buffSize"].get<int>();
 				for (uint i = 0; i < buff_size; i++)
