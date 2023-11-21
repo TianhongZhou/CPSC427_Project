@@ -72,17 +72,17 @@
         - createDropBuff in world_init.cpp
         - random generate drop in createRoom in world_init.cpp
     - #### Dash mechanic
-    		- pinballDash() in pinball_system.cpp
+    	- pinballDash() in pinball_system.cpp
     - #### Various timers (invincibility, attack, effects)
-    		- countdown in pinball_system.cpp
-		- updateTimers in pinball_system.cpp
-		- timer fields in various components
+	    - countdown in pinball_system.cpp
+	    - updateTimers in pinball_system.cpp
+	    - timer fields in various components
     - #### Enemy attack
-    		- stepEnemyAttack in in pinball_system.cpp
-		- temporary projectile component
+	    - stepEnemyAttack in in pinball_system.cpp
+	    - temporary projectile component
     - #### Combo meter and bonus ball system
-    		- PinballPlayerStatus component
-		- related code in on_key in pinball_system.cpp
+	    - PinballPlayerStatus component
+	    - related code in on_key in pinball_system.cpp
     
     
 - ### Consistent game resolution
