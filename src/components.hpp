@@ -70,6 +70,25 @@ struct Enemy
 	bool keyFrame;
 };
 
+// Swarm enemy
+struct SwarmEnemy
+{
+//    float randomMoveTimer = 0.1f;
+//    vec2 boundary;
+//    bool keyFrame;
+//    std::array<Entity,3> healthBar;
+    float maxHealth = 1.f;
+    float currentHealth = 1.f;
+    float invincibilityTimer;
+//    float attackTimer;
+//    float attackCooldown;
+//    int attackType;
+};
+
+// Swarm King
+struct SwarmKing
+{};
+
 // PinBall enemy
 struct PinBallEnemy
 {
@@ -346,7 +365,8 @@ enum class GEOMETRY_BUFFER_ID {
 	OCT = RECT + 1,
 	DEBUG_LINE = OCT + 1,
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
-	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
+    SWARMENEMY = SCREEN_TRIANGLE + 1,
+    GEOMETRY_COUNT = SWARMENEMY + 1,
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 

@@ -373,6 +373,10 @@ void detectAndSolveAllCollisions()
 						}
 					}
 				}
+//                if (registry.swarmEnemies.has(entity_a) && !registry.swarmEnemies.has(entity_b) && !registry.swarmKing.has(entity_b))
+//                {
+//                    registry.remove_all_components_of(entity_a);
+//                }
 			}
 		}
 	}

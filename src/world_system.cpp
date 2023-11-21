@@ -94,12 +94,22 @@ GLFWwindow *WorldSystem::create_window()
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
 	// Obtain monitor full screen size
-	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
-	const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
-	MonitorWidth = mode->width;
-	MonitorHeight = mode->height;
 
-	float windowAspectRatio = static_cast<float>(window_width_px) / window_height_px;
+	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+
+    // using secondary monitor for testing purposes
+//    int count;
+//    GLFWmonitor** monitors = glfwGetMonitors(&count);
+//    printf("count: %d\n", count);
+//    GLFWmonitor* primaryMonitor = monitors[0];
+
+	const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+	MonitorWidth = static_cast<int>(mode->width * 0.75);
+	MonitorHeight = static_cast<int>(mode->height * 0.75);
+//    printf("monitor width: %d\n", MonitorWidth);
+//    printf("monitor height: %d\n", MonitorHeight);
+
+    float windowAspectRatio = static_cast<float>(window_width_px) / window_height_px;
 	float monitorAspectRatio = static_cast<float>(MonitorWidth) / MonitorHeight;
 	offsetX = 0;
 	offsetY = 0; // Offsets for letterboxing
@@ -179,7 +189,8 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 {
 	this->renderer = renderer_arg;
 	// Playing background music indefinitely
-	Mix_PlayMusic(background_music, -1);
+    // TODO: change this back
+//	Mix_PlayMusic(background_music, -1);
 	fprintf(stderr, "Loaded music\n");
 
 	// Set all states to default

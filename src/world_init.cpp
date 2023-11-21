@@ -340,7 +340,36 @@ Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
- Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos, vec2 boundary, float xScale, int attackType, float attackCd)
+Entity createSwarmEnemy(RenderSystem* renderer, vec2 pos)
+{
+    float scale = 8.f;
+    auto entity = Entity();
+    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SWARMENEMY);
+    registry.meshPtrs.emplace(entity, &mesh);
+
+    registry.combat.emplace(entity);
+
+    // Setting initial motion values
+    Motion& motion = registry.motions.emplace(entity);
+    motion.position = pos;
+    motion.angle = 0.f;
+    motion.velocity = { 0.f, 0.f };
+    motion.scale = vec2(mesh.original_size.x, mesh.original_size.y) * scale;
+
+    SwarmEnemy& enemy = registry.swarmEnemies.emplace(entity);
+    enemy.invincibilityTimer = 0.0f;
+
+    registry.renderRequests.insert(
+            entity,
+            { TEXTURE_ASSET_ID::TEXTURE_COUNT,
+              EFFECT_ASSET_ID::SALMON,
+              GEOMETRY_BUFFER_ID::SWARMENEMY});
+    return entity;
+}
+
+
+ Entity createPinBallEnemy(RenderSystem *renderer, vec2 pos, vec2 boundary, float xScale, int attackType, float attackCd,
+                    float yScale)
 {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PINBALLENEMY);
@@ -353,7 +382,7 @@ Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = vec2(mesh.original_size.x * xScale , mesh.original_size.y) * 50.f;
+	motion.scale = vec2(mesh.original_size.x * xScale , mesh.original_size.y * yScale) * 50.f;
 		
 
 	PinBallEnemy& enemy = registry.pinballEnemies.emplace(entity);
