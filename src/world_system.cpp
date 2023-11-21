@@ -24,6 +24,13 @@ const size_t FISH_DELAY_MS = 5000 * 3;
 // Game state global variables
 int GameSceneState = 0;
 int InitCombat = 0;
+int MonitorWidth;
+int MonitorHeight;
+float MonitorScreenRatio;
+int offsetX;
+int offsetY;
+int scaledWidth;
+int scaledHeight;
 
 // Create the fish world
 WorldSystem::WorldSystem()
@@ -86,13 +93,41 @@ GLFWwindow *WorldSystem::create_window()
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
+	// Obtain monitor full screen size
+	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+	MonitorWidth = mode->width;
+	MonitorHeight = mode->height;
+
+	float windowAspectRatio = static_cast<float>(window_width_px) / window_height_px;
+	float monitorAspectRatio = static_cast<float>(MonitorWidth) / MonitorHeight;
+	offsetX = 0;
+	offsetY = 0; // Offsets for letterboxing
+	
+	if (windowAspectRatio > monitorAspectRatio) {
+		// Window is wider relative to its height than the monitor is
+		// Scale based on width
+		scaledWidth = MonitorWidth;
+		scaledHeight = static_cast<int>(MonitorWidth / windowAspectRatio);
+		offsetY = (MonitorHeight - scaledHeight) / 2;
+	}
+	else {
+		// Window is taller relative to its width than the monitor is
+		// Scale based on height
+		scaledWidth = static_cast<int>((float)MonitorHeight * windowAspectRatio * 1.09f);
+		scaledHeight = MonitorHeight;
+		offsetX = (MonitorWidth - scaledWidth) / 2 ;
+	}
+
 	// Create the main window (for rendering, keyboard, and mouse input)
-	window = glfwCreateWindow(window_width_px, window_height_px, "Salmon Game Assignment", nullptr, nullptr);
+	window = glfwCreateWindow(MonitorWidth, MonitorHeight, "Pinball Luminary", primaryMonitor, nullptr);
+	//window = glfwCreateWindow(window_width_px, window_height_px, "Salmon Game Assignment", nullptr, nullptr);
 	if (window == nullptr)
 	{
 		fprintf(stderr, "Failed to glfwCreateWindow");
 		return nullptr;
 	}
+
     redirect_inputs_world();
 
     //////////////////////////////////////
@@ -157,6 +192,8 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 // Reset the world state to its initial state
 void WorldSystem::restart_game()
 {
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 	printf("Restarting\n");
@@ -165,6 +202,9 @@ void WorldSystem::restart_game()
 
 	// Reset the game speed
 	current_speed = 1.f;
+
+	// Reset room number
+	curr_room = 0;
 
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
@@ -177,9 +217,10 @@ void WorldSystem::restart_game()
 	int w, h;
 	glfwGetWindowSize(window, &w, &h);
 
-	// Create a new salmon
-	rooms[0] = createStartingRoom(renderer, { 600, 400 }, window);
-	player = createPlayer(renderer, { w/2, h * 4 / 5 }); // spawn at the bottom of room for now
+	// Create room, player, lighting
+	rooms[0] = createRoom(renderer, { 600, 400 }, window, 0);
+	// player = createPlayer(renderer, { (window_width_px)/2, (window_height_px)/2 }); 
+	player = createPlayer(renderer, { (window_width_px) / 2, 4 * (window_height_px) / 5 }); // spawn at the bottom of room for now  
 	registry.lights.emplace(player);
 }
 
@@ -190,9 +231,39 @@ void WorldSystem::save_game(const std::string& filename)
 {
 	json j;
 
-	Motion& motion = registry.motions.get(player);
-	j["player"]["position"]["x"] = motion.position.x;
-	j["player"]["position"]["y"] = motion.position.y;
+	// Save room level
+	j["level"] = curr_room;
+
+	// Check if player is in combat
+	if (registry.mainWorldEnemies.size() > 0) {
+		j["inCombat"] = 1;
+	}
+	else { // Only save game state if not in combat
+		j["inCombat"] = 0;
+
+		// Save power up stats
+		PinBall& pinball = registry.pinBalls.get(player);
+		j["pinball"]["size"] = pinball.pinBallSize;
+		j["pinball"]["damage"] = pinball.pinBallDamage;
+
+		// Save position
+		Motion& motion = registry.motions.get(player);
+		j["player"]["position"]["x"] = motion.position.x;
+		j["player"]["position"]["y"] = motion.position.y;
+
+		// Save buff drops
+		auto& dropBuffsRegistry = registry.dropBuffs;
+		for (uint i = 0; i < dropBuffsRegistry.components.size(); i++)
+		{
+			Entity buff_entity = dropBuffsRegistry.entities[i];
+			Motion& buff_motion = registry.motions.get(buff_entity);
+			j["dropBuffs"][i]["position"]["x"] = buff_motion.position.x;
+			j["dropBuffs"][i]["position"]["y"] = buff_motion.position.y;
+			j["dropBuffs"][i]["id"] = dropBuffsRegistry.components[i].id;
+		}
+		j["buffSize"] = dropBuffsRegistry.components.size();
+		std::cout << "Saved buffs." << std::endl;
+	}
 
 	std::ofstream file(filename);
 	if (file.is_open()) {
@@ -212,9 +283,59 @@ void WorldSystem::load_game(const std::string& filename)
 		json j;
 		file >> j;
 
-		Motion& motion = registry.motions.get(player);
-		motion.position.x = j["player"]["position"]["x"].get<int>();
-		motion.position.y = j["player"]["position"]["y"].get<int>();
+		if (j.contains("level")) {
+			// Restore room level
+			curr_room = j["level"].get<int>();
+		}
+
+		if (j.contains("inCombat")) {
+
+			// Restore power up stats
+			if (j.contains("pinball")) {
+				PinBall& pinball = registry.pinBalls.get(player);
+				pinball.pinBallSize = j["pinball"]["size"].get<float>();
+				pinball.pinBallDamage = j["pinball"]["damage"].get<float>();
+			}
+
+			auto& dropBuffsRegistry = registry.dropBuffs;
+			// Remove current first, TODO: Maybe change this
+			while (dropBuffsRegistry.entities.size() > 0)
+				registry.remove_all_components_of(dropBuffsRegistry.entities.back());
+
+
+			if (j.contains("player") && j["inCombat"].get<int>() == 0) {
+				// Restore position
+				Motion& motion = registry.motions.get(player);
+				motion.position.x = j["player"]["position"]["x"].get<float>();
+				motion.position.y = j["player"]["position"]["y"].get<float>();
+
+				// Restore buff drops
+				//auto& dropBuffsRegistry = registry.dropBuffs;
+
+				//// Remove current first, TODO: Maybe change this
+				//while (dropBuffsRegistry.entities.size() > 0)
+				//	registry.remove_all_components_of(dropBuffsRegistry.entities.back());
+
+				int buff_size = j["buffSize"].get<int>();
+				for (uint i = 0; i < buff_size; i++)
+				{
+					int buff_id = j["dropBuffs"][i]["id"].get<int>();
+					float buff_px = j["dropBuffs"][i]["position"]["x"].get<float>();
+					float buff_py = j["dropBuffs"][i]["position"]["y"].get<float>();
+
+					TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::DROPBALLSIZE;
+					if (buff_id == 1) {
+						id = TEXTURE_ASSET_ID::DROPBALLDAMAGE;
+					}
+					Entity drop = createDropBuff(renderer, { buff_px, buff_py }, id);
+					DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
+				}
+			}
+			else {
+				rooms[0] = createRoom(renderer, { 600, 400 }, window, curr_room);
+			}
+		}
+
 		file.close();
 		std::cout << "Position loaded successfully." << std::endl;
 	}
@@ -449,10 +570,13 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 
 		vec2 player_v = registry.motions.get(player).velocity;
 		vec2 mouse_position = registry.mousePosArray.components[0].pos;
-		float dy = mouse_position.y - motion.position.y;
-		float dx = mouse_position.x - motion.position.x;
+		float dy = mouse_position.y * (float)window_height_px / (float)MonitorHeight - motion.position.y;
+		float dx = mouse_position.x * (float)window_width_px / (float)MonitorWidth - motion.position.x;
 		motion.angle = atan2(dy, dx);
 
+
+		//printf("This is mouse_position: %f, %f\n", mouse_position.x, mouse_position.y);
+		//printf("This is player_position: %f, %f\n", motion.position.x, motion.position.y);
 
 		//motion.velocity = vec2(200.f + uniform_dist(rng)*200, 100.f - uniform_dist(rng)*200);
 		//float angle = registry.motions.get(player).angle;
@@ -557,11 +681,15 @@ void WorldSystem::enter_next_room()
 	glfwGetWindowSize(window, &w, &h);
 
 	PinBall temp = registry.pinBalls.get(player);
+
 	// Remove all entities that we created
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
-	rooms[0] = createRoom(renderer, {600, 400});
-	player = createPlayer(renderer, {w/2, h*4/5});
+
+	curr_room += 1; 
+	rooms[0] = createRoom(renderer, {600, 400}, window, curr_room);
+	player = createPlayer(renderer, { (window_width_px) / 2, 4 * (window_height_px) / 5 });
+
 	PinBall& pinBall = registry.pinBalls.get(player);
 	pinBall.pinBallSize = temp.pinBallSize;
 	pinBall.pinBallDamage = temp.pinBallDamage;
@@ -608,21 +736,21 @@ void WorldSystem::check_room_boundary()
 		if (registry.players.has(motion_container.entities[i]) || registry.mainWorldEnemies.has(motion_container.entities[i]))
 		{
 			Motion& motion = motion_container.components[i];
-			if (roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f + 30 > motion.position.x)
+			if (roomMotion.position.x - (roomMotion.scale.x / 2) + 65.f > motion.position.x)
 			{
-				motion.position.x = roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f + 30;
+				motion.position.x = roomMotion.position.x - (roomMotion.scale.x / 2) + 65.f;
 			}
-			else if (roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f - 10 < motion.position.x)
+			else if (roomMotion.position.x + (roomMotion.scale.x / 2) - 45.f < motion.position.x)
 			{
-				motion.position.x = roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f - 10;
+				motion.position.x = roomMotion.position.x + (roomMotion.scale.x / 2) - 45.f;
 			}
-			if (roomMotion.position.y - (roomMotion.scale.y / 2) + 25.f > motion.position.y)
+			if (roomMotion.position.y - (roomMotion.scale.y / 2) + 70.f > motion.position.y)
 			{
-				motion.position.y = roomMotion.position.y - (roomMotion.scale.y / 2) + 25.f;
+				motion.position.y = roomMotion.position.y - (roomMotion.scale.y / 2) + 70.f;
 			}
-			else if (roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f - 70 < motion.position.y)
+			else if (roomMotion.position.y + (roomMotion.scale.y / 2) - 95.f < motion.position.y)
 			{
-				motion.position.y = roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f - 70;
+				motion.position.y = roomMotion.position.y + (roomMotion.scale.y / 2) - 95.f;
 			}
 		}
 	}

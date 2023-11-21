@@ -71,6 +71,25 @@
         - GenerateDropBuff in world_system.hpp
         - createDropBuff in world_init.cpp
         - random generate drop in createRoom in world_init.cpp
+    - #### Dash mechanic
+    	- pinballDash() in pinball_system.cpp
+    - #### Various timers (invincibility, attack, effects)
+	    - countdown in pinball_system.cpp
+	    - updateTimers in pinball_system.cpp
+	    - timer fields in various components
+    - #### Enemy attack
+	    - stepEnemyAttack in in pinball_system.cpp
+	    - temporary projectile component
+    - #### Combo meter and bonus ball system
+	    - PinballPlayerStatus component
+	    - related code in on_key in pinball_system.cpp
+    
+    
+- ### Consistent game resolution
+    - create_window in world_system.cpp
+    - drawToScreen in render_system.cpp
+    - draw_combat_scene in render_system.cpp
+    - draw_world in render_system.cpp
 
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:
@@ -100,8 +119,24 @@ The original development plan for the week of Sept. 31 and Oct. 8 is as followin
     - Basic randomized dungeon generation logic 
     - Improved dungeon progression system
     - Scale difficulty of combat with dungeon progression
+- Week: Nov 5 - Playability
+    - Procedural generation for dungeon
+    - Advanced physics effects for pinball combat
+    - Integrate all art assets needed for the game
+    - Ensure robustness of game
+- Week: Nov 12
+    - Save/Load feature
+    - More advanced physics effects or complex geometry, possibly more advanced enemies
+    - Particle Effects
+    - Flipper control change
+    - New combat effects (high gravity and anti gravity)
+    - Enemy attacks with temporary projectiles
+    - Combo meter and bonus ball mechanic
+    - Player Heath
+    - Enemy and Player invincibility timer
+    
 
-Basic dungeon logic is done on Oct. 30 instead in the week of Oct. 15. Did not implement basic dungeon progression system. Rendering is done in the week of Oct. 22 instead of Oct. 15. Did not implement different types of dungeon rooms. Tutorial design is done in the week of Oct. 29 instead of Oct 22. Except for the ones mentioned above, all other points listed are finished on time. The discrepancies between the development plan and actual development progress is also listed.
+Did not implement different types of dungeon rooms. Art assets are integrated in the week of Nov. 12 instead of Nov. 5. Did not implement more advanced enemies. Except for the ones mentioned above, all other points listed are finished on time. The discrepancies between the development plan and actual development progress is also listed.
 
 References:
 

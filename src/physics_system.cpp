@@ -624,7 +624,7 @@ void updateWithSubstep(float dt, float steps)
 void PhysicsSystem::step(float elapsed_ms)
 {
 
-	updateWithSubstep(elapsed_ms, 4.0f);
+	updateWithSubstep(elapsed_ms, 6.0f);
 	float step_seconds = elapsed_ms / 1000.f;
 
 	auto &motion_container = registry.motions;

@@ -1,5 +1,6 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
+#include "world_system.hpp"
 #include <iostream>
 #include <random>
 #include <cstdlib>
@@ -16,8 +17,7 @@ Entity createDropBuff(RenderSystem* renderer, vec2 pos, TEXTURE_ASSET_ID id)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 80.f;
-
+	motion.scale = mesh.original_size * 50.f;
 	registry.renderRequests.insert(
 		entity,
 		{ id,
@@ -51,13 +51,13 @@ Entity createShadow(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
-Entity createPolygonByVertex(RenderSystem* renderer, const std::vector<vec2>& vertices, GEOMETRY_BUFFER_ID id)
+Entity createPinballWall(RenderSystem* renderer, const std::vector<vec2>& vertices, GEOMETRY_BUFFER_ID id)
 {
 	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECT);
     registry.combat.emplace(entity);
 
     // Generate a custom mesh based on the provided vertices
-	Mesh& mesh = renderer->getMesh(id);
 	mesh.fromVertices(vertices,
 		mesh.vertices,
 		mesh.vertex_indices,
@@ -79,9 +79,44 @@ Entity createPolygonByVertex(RenderSystem* renderer, const std::vector<vec2>& ve
 	// registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
-		  EFFECT_ASSET_ID::SALMON,
-		  id });
+		{ TEXTURE_ASSET_ID::WALL,
+		  EFFECT_ASSET_ID::TEXTURED,
+		  GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity createPinballFlipper(RenderSystem* renderer, const std::vector<vec2>& vertices, GEOMETRY_BUFFER_ID id)
+{
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECT);
+	registry.combat.emplace(entity);
+
+	// Generate a custom mesh based on the provided vertices
+	mesh.fromVertices(vertices,
+		mesh.vertices,
+		mesh.vertex_indices,
+		mesh.original_size);
+
+	renderer->bindVBOandIBO(id,
+		mesh.vertices,
+		mesh.vertex_indices);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Assuming the position to be the centroid of the polygon for motion purposes
+	vec2 centroid = std::accumulate(vertices.begin(), vertices.end(), vec2(0, 0)) / float(vertices.size());
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = centroid;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = mesh.original_size;
+
+	// registry.players.emplace(entity);
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::FLIPPER,
+		  EFFECT_ASSET_ID::TEXTURED,
+		  GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }
@@ -99,7 +134,7 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 100.f;
+	motion.scale = mesh.original_size * 75.f;
 
 	registry.players.emplace(entity);
 	registry.renderRequests.insert(
@@ -111,19 +146,21 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
+// Room Generation 
+
 Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPostion, float roomScale, bool keyFrame)
 {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
-    registry.mainWorld.emplace(entity);
+	registry.mainWorld.emplace(entity);
 
-    // Setting initial motion values
+	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = vec2(50.f,0.f);
-	motion.scale = mesh.original_size * 100.f;
+	motion.scale = mesh.original_size * 65.f;
 
 	// registry.players.emplace(entity);
 	registry.mainWorldEnemies.emplace(entity);
@@ -133,7 +170,7 @@ Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPostion, float
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE,
 			vec2(0.2, -0.5),
-			vec2(-10, 48.f / 2.0f + 20) });
+			vec2(-10, 48.f / 2.0f + 8) });
 	Enemy& ene = registry.mainWorldEnemies.get(entity);
 	ene.roomPositon = roomPostion;
 	ene.roomScale = roomScale;
@@ -158,30 +195,27 @@ Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPostion, float
 	return entity;
 }
 
-Entity createRoad(RenderSystem* renderer, vec2 pos)
+
+Entity createRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window, int room_num)
 {
 	auto entity = Entity();
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ROAD);
-	registry.meshPtrs.emplace(entity, &mesh);
+	switch (room_num) {
+	case -1:
+		return createEmptyRoom(renderer, pos, window);
+		break;
+	case 0:
+		return createStartingRoom(renderer, pos, window);
+		break;
+	case 1:
+		return createRoom1(renderer, pos);
+		break;
+	}
 
-	// Setting initial motion values
-	Motion& motion = registry.motions.emplace(entity);
-	motion.position = pos;
-	motion.angle = 0.f;
-	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 10.f;
+	return entity; //This should never happen
 
-	// registry.players.emplace(entity);
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
-			EFFECT_ASSET_ID::SALMON,
-			GEOMETRY_BUFFER_ID::ROAD });
-
-	return entity;
 }
 
-Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
+Entity createEmptyRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
@@ -206,40 +240,70 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
+	return entity;
+}
+
+
+Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
+{
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+	registry.mainWorld.emplace(entity);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+
+	/*int w, h;
+	glfwGetWindowSize(window, &w, &h);*/
+	//printf("This is Starting Room size: %d, %d\n", )
+	motion.scale = { window_width_px, window_height_px };
+	registry.rooms.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::GROUND,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
 	// add things
 	int w, h;
 	glfwGetWindowSize(window, &w, &h);
+	printf("This is window size in starting room: %d, %d\n", w, h);
+
 	// Add door
 	Entity door = createDoor({ 0,0 }, { 0,0 }); //intialized below
 	Motion& door_motion = registry.motions.get(door);
 	float door_width = 50;
 	float door_height = 60;
-	door_motion.position = { w / 2.f - door_width / 2.f, door_height / 2.f };
+	door_motion.position = { window_width_px / 2.f - door_width / 2.f, door_height / 2.f };
 	door_motion.scale = { door_width, door_height };
 	door_motion.angle = 0;
 	door_motion.velocity = { 0,0 };
 	registry.colors.insert(door, { 0, 0, 0 });
 
 	// Add spikes
-	Entity spikes = createSpikes({ 100, 100 }, { 80, 80 });
-	registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
-
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_real_distribution<float> distribution1(100.0f, w - 100.f);
-	std::uniform_real_distribution<float> distribution2(200.0f, h - 200.f);
+	std::uniform_real_distribution<float> distribution1(100.0f, w / 2 + 150.f);
+	std::uniform_real_distribution<float> distribution2(100.0f, h / 2 + 150.f);
 	srand(time(NULL));
+
 	for (int i = 0; i < 4; i++) {
-		Entity spikes = createSpikes({ 100 * i, distribution2(gen) }, {80, 80});
+		Entity spikes = createSpikes({ distribution1(gen), distribution2(gen)}, {80, 80});
+		//Entity spikes = createSpikes({ 100 * i, distribution2(gen) }, {80, 80});
 		registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
-		
+
 		int randomValue = rand() % 2;
 		TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::DROPBALLSIZE;
 
 		if (randomValue == 1) {
 			id = TEXTURE_ASSET_ID::DROPBALLDAMAGE;
 		}
-		Entity drop = createDropBuff(renderer, { distribution1(gen), distribution2(gen)}, id);
+		Entity drop = createDropBuff(renderer, { distribution1(gen), distribution2(gen) }, id);
 		DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
 		dropBuff.id = randomValue;
 		dropBuff.increaseValue = rand() % 7 + 2;
@@ -248,14 +312,14 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 	return entity;
 }
 
-Entity createRoom(RenderSystem* renderer, vec2 pos)
+Entity createRoom1(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
-    registry.mainWorld.emplace(entity);
+	registry.mainWorld.emplace(entity);
 
-    // Setting initial motion values
+	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = pos;
 	motion.angle = 0.f;
@@ -263,7 +327,7 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
 
 	/*int w, h;
 	glfwGetWindowSize(window, &w, &h);*/
-	motion.scale = {window_width_px, window_height_px};
+	motion.scale = { window_width_px, window_height_px };
 
 	registry.rooms.emplace(entity);
 
@@ -274,12 +338,12 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
 			GEOMETRY_BUFFER_ID::SPRITE });
 
 	std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> distribution1(-450.0f, 450.0f);
-    std::uniform_real_distribution<float> distribution2(0.0f, 1.0f);
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> distribution1(-450.0f, 450.0f);
+	std::uniform_real_distribution<float> distribution2(0.0f, 1.0f);
 	Room& room = registry.rooms.get(entity);
-	for (int i=0; i<2; i++) {
-		room.enemies[i] = createRoomEnemy(renderer, { pos[0]+distribution1(gen), pos[1]+distribution1(gen), }, pos, 700.f, i == 0);
+	for (int i = 0; i < 2; i++) {
+		room.enemies[i] = createRoomEnemy(renderer, { pos[0] + distribution1(gen), pos[1] + distribution1(gen), }, pos, 700.f, i == 0);
 		registry.colors.insert(room.enemies[i], { distribution2(gen), distribution2(gen), distribution2(gen) });
 	}
 	PositionKeyFrame& positionKeyFrame = registry.positionKeyFrames.emplace(room.enemies[0]);
@@ -295,7 +359,7 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
 
 	srand(time(NULL));
 
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 2; i++) {
 		int randomValue = rand() % 2;
 		TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::DROPBALLSIZE;
 
@@ -311,30 +375,32 @@ Entity createRoom(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
-Entity createEnemyWave(RenderSystem* renderer, vec2 pos)
+Entity createPinballRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 {
 	auto entity = Entity();
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMYWAVE);
-    registry.combat.emplace(entity);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
+	registry.combat.emplace(entity);
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 50.f;
 
-	// registry.players.emplace(entity);
+	/*int w, h;
+	glfwGetWindowSize(window, &w, &h);*/
+	//printf("This is Starting Room size: %d, %d\n", )
+	motion.scale = { window_width_px, window_height_px };
+
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
-			EFFECT_ASSET_ID::SALMON,
-			GEOMETRY_BUFFER_ID::ENEMYWAVE });
+		{ TEXTURE_ASSET_ID::PINBALLBACKGROUND,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }
-
 
 Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos)
 {
@@ -421,66 +487,20 @@ Entity createBall(RenderSystem* renderer, vec2 pos, float size)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * size * 0.8f;
+	motion.scale = mesh.original_size * size * 0.7f;
 
 	Ball ball = registry.balls.emplace(entity);
 
 	// registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
-			EFFECT_ASSET_ID::SALMON,
-			GEOMETRY_BUFFER_ID::BALL });
-
-	return entity;
-}
-
-Entity createLine(vec2 position, vec2 scale)
-{
-	Entity entity = Entity();
-
-	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
-		 EFFECT_ASSET_ID::PEBBLE,
-		 GEOMETRY_BUFFER_ID::DEBUG_LINE });
-
-	// Create motion
-	Motion& motion = registry.motions.emplace(entity);
-	motion.angle = 0.f;
-	motion.velocity = { 0.f, 0.f };
-	motion.position = position;
-	motion.scale = scale;
-
-	registry.debugComponents.emplace(entity);
-	return entity;
-}
-
-Entity createPebble(vec2 pos, vec2 size)
-{
-	auto entity = Entity();
-
-	// Setting initial motion values
-	Motion& motion = registry.motions.emplace(entity);
-	motion.position = pos;
-	motion.angle = 0.f;
-	motion.velocity = { 0.f, 0.f };
-	motion.scale = size;
-
-	// Create and (empty) Salmon component to be able to refer to all turtles
-	registry.rooms.emplace(entity); //?
-
-	registry.balls.emplace(entity);
-
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::GROUND, // TEXTURE_COUNT indicates that no txture is needed
+		{ TEXTURE_ASSET_ID::PINBALL,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }
+
 
 Entity createDoor(vec2 pos, vec2 size)
 {
@@ -513,7 +533,7 @@ Entity createSpikes(vec2 pos, vec2 size)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = size;
+	motion.scale = size * 0.75f;
 
 	registry.spikes.emplace(entity);
 
@@ -535,7 +555,7 @@ Entity createPlayerBullet(vec2 pos, vec2 size)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = size;
+	motion.scale = size * 0.7f;
 
 	registry.playerBullets.emplace(entity);
 
@@ -559,7 +579,7 @@ Entity createEnemyBullet(vec2 pos, vec2 size)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = size;
+	motion.scale = size * 0.7f;
 
 	registry.enemyBullets.emplace(entity);
 
@@ -605,20 +625,14 @@ Entity createParticle(RenderSystem* renderer, vec2 pos, float size, vec2 vel, ve
 }
 
 
-
-
-
 void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos, bool moveable, float knockbackCoef) {
-
 
 
 	//	auto& entity = Entity();
 
 	Vertex_Phys newV{};
 	registry.physObjs.emplace(e);
-
 	physObj test0 = registry.physObjs.components[0];
-
 
 
 	//	0-----1
@@ -633,7 +647,6 @@ void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos, 
 	newV.pos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
 	newV.oldPos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
 	newV.accel = vec2(0.0, 0.0);
-
 
 
 	newObj.Vertices[0] = newV;
@@ -698,5 +711,255 @@ void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos, 
 
 	newObj.center = centerPos;
 
-
 }
+
+
+//}// Room Generation 
+//
+//Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPostion, float roomScale, bool keyFrame)
+//{
+//	auto entity = Entity();
+//	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+//	registry.meshPtrs.emplace(entity, &mesh);
+//	registry.mainWorld.emplace(entity);
+//
+//	// Setting initial motion values
+//	Motion& motion = registry.motions.emplace(entity);
+//	motion.position = pos;
+//	motion.angle = 0.f;
+//	motion.velocity = vec2(50.f, 0.f);
+//	motion.scale = mesh.original_size * 100.f;
+//
+//	// registry.players.emplace(entity);
+//	registry.mainWorldEnemies.emplace(entity);
+//	registry.renderRequests.insert(
+//		entity,
+//		{ TEXTURE_ASSET_ID::ENEMYWALKSPRITESHEET,
+//			EFFECT_ASSET_ID::TEXTURED,
+//			GEOMETRY_BUFFER_ID::SPRITE,
+//			vec2(0.2, -0.5),
+//			vec2(-10, 48.f / 2.0f + 20) });
+//	Enemy& ene = registry.mainWorldEnemies.get(entity);
+//	ene.roomPositon = roomPostion;
+//	ene.roomScale = roomScale;
+//	ene.keyFrame = keyFrame;
+//
+//	SpriteSheet& spriteSheet = registry.spriteSheets.emplace(entity);
+//	spriteSheet.next_sprite = TEXTURE_ASSET_ID::ENEMYWALKSPRITESHEET;
+//	spriteSheet.frameIncrement = 0.04f;
+//	spriteSheet.frameAccumulator = 0.0f;
+//	spriteSheet.spriteSheetHeight = 1;
+//	spriteSheet.spriteSheetWidth = 6;
+//	spriteSheet.totalFrames = 6;
+//	spriteSheet.origin = TEXTURE_ASSET_ID::ENEMYWALKSPRITESHEET;
+//	spriteSheet.loop = true;
+//	if (motion.velocity.x < 0.f)
+//	{
+//		spriteSheet.xFlip = true;
+//	}
+//	/*RenderRequest& renderRequest = registry.renderRequests.get(player);
+//	renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;*/
+//
+//	return entity;
+//}
+//
+////Entity createRoad(RenderSystem* renderer, vec2 pos)
+////{
+////	auto entity = Entity();
+////	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ROAD);
+////	registry.meshPtrs.emplace(entity, &mesh);
+////
+////	// Setting initial motion values
+////	Motion& motion = registry.motions.emplace(entity);
+////	motion.position = pos;
+////	motion.angle = 0.f;
+////	motion.velocity = { 0.f, 0.f };
+////	motion.scale = mesh.original_size * 10.f;
+////
+////	// registry.players.emplace(entity);
+////	registry.renderRequests.insert(
+////		entity,
+////		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
+////			EFFECT_ASSET_ID::SALMON,
+////			GEOMETRY_BUFFER_ID::ROAD });
+////
+////	return entity;
+////}
+//
+//Entity createRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window, int room_num)
+//{	
+//	auto entity = Entity();
+//	switch (room_num) {
+//	case -1:
+//		return createEmptyRoom(renderer, pos, window);
+//		break;
+//	case 0:
+//		return createStartingRoom(renderer, pos, window);
+//		break;
+//	case 1:
+//		return createRoom1(renderer, pos);
+//		break;
+//	}
+//
+//	return entity; //This should never happen
+//		
+//}
+//
+//Entity createEmptyRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
+//{
+//	auto entity = Entity();
+//	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+//	registry.meshPtrs.emplace(entity, &mesh);
+//	registry.mainWorld.emplace(entity);
+//
+//	// Setting initial motion values
+//	Motion& motion = registry.motions.emplace(entity);
+//	motion.position = pos;
+//	motion.angle = 0.f;
+//	motion.velocity = { 0.f, 0.f };
+//
+//	/*int w, h;
+//	glfwGetWindowSize(window, &w, &h);*/
+//	motion.scale = { window_width_px, window_height_px };
+//
+//	registry.rooms.emplace(entity);
+//
+//	registry.renderRequests.insert(
+//		entity,
+//		{ TEXTURE_ASSET_ID::GROUND,
+//			EFFECT_ASSET_ID::TEXTURED,
+//			GEOMETRY_BUFFER_ID::SPRITE });
+//
+//	return entity;
+//}
+//
+//
+//Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
+//{
+//	auto entity = Entity();
+//	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+//	registry.meshPtrs.emplace(entity, &mesh);
+//	registry.mainWorld.emplace(entity);
+//
+//	// Setting initial motion values
+//	Motion& motion = registry.motions.emplace(entity);
+//	motion.position = pos;
+//	motion.angle = 0.f;
+//	motion.velocity = { 0.f, 0.f };
+//
+//	/*int w, h;
+//	glfwGetWindowSize(window, &w, &h);*/
+//	motion.scale = { window_width_px, window_height_px };
+//
+//	registry.rooms.emplace(entity);
+//
+//	registry.renderRequests.insert(
+//		entity,
+//		{ TEXTURE_ASSET_ID::GROUND,
+//			EFFECT_ASSET_ID::TEXTURED,
+//			GEOMETRY_BUFFER_ID::SPRITE });
+//
+//	// add things
+//	int w, h;
+//	glfwGetWindowSize(window, &w, &h);
+//	// Add door
+//	Entity door = createDoor({ 0,0 }, { 0,0 }); //intialized below
+//	Motion& door_motion = registry.motions.get(door);
+//	float door_width = 50;
+//	float door_height = 60;
+//	door_motion.position = { w / 2.f - door_width / 2.f, door_height / 2.f };
+//	door_motion.scale = { door_width, door_height };
+//	door_motion.angle = 0;
+//	door_motion.velocity = { 0,0 };
+//	registry.colors.insert(door, { 0, 0, 0 });
+//
+//	// Add spikes
+//	Entity spikes = createSpikes({ 100, 100 }, { 80, 80 });
+//	registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
+//
+//	std::random_device rd;
+//	std::mt19937 gen(rd());
+//	std::uniform_real_distribution<float> distribution1(100.0f, w - 100.f);
+//	std::uniform_real_distribution<float> distribution2(200.0f, h - 200.f);
+//	srand(time(NULL));
+//	for (int i = 0; i < 3; i++) {
+//		Entity spikes = createSpikes({ 100 * i, distribution2(gen) }, { 80, 80 });
+//		registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
+//
+//		int randomValue = rand() % 2;
+//		TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::DROPBALLSIZE;
+//
+//		if (randomValue == 1) {
+//			id = TEXTURE_ASSET_ID::DROPBALLDAMAGE;
+//		}
+//		Entity drop = createDropBuff(renderer, { distribution1(gen), distribution2(gen) }, id);
+//		DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
+//		dropBuff.id = randomValue;
+//		dropBuff.increaseValue = rand() % 7 + 2;
+//	}
+//
+//	return entity;
+//}
+//
+//Entity createRoom1(RenderSystem* renderer, vec2 pos)
+//{
+//	auto entity = Entity();
+//	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+//	registry.meshPtrs.emplace(entity, &mesh);
+//	registry.mainWorld.emplace(entity);
+//
+//	// Setting initial motion values
+//	Motion& motion = registry.motions.emplace(entity);
+//	motion.position = pos;
+//	motion.angle = 0.f;
+//	motion.velocity = { 0.f, 0.f };
+//
+//	/*int w, h;
+//	glfwGetWindowSize(window, &w, &h);*/
+//	motion.scale = { window_width_px, window_height_px };
+//
+//	registry.rooms.emplace(entity);
+//
+//	registry.renderRequests.insert(
+//		entity,
+//		{ TEXTURE_ASSET_ID::GROUND,
+//			EFFECT_ASSET_ID::TEXTURED,
+//			GEOMETRY_BUFFER_ID::SPRITE });
+//
+//	std::random_device rd;
+//	std::mt19937 gen(rd());
+//	std::uniform_real_distribution<float> distribution1(-450.0f, 450.0f);
+//	std::uniform_real_distribution<float> distribution2(0.0f, 1.0f);
+//	Room& room = registry.rooms.get(entity);
+//	for (int i = 0; i < 2; i++) {
+//		room.enemies[i] = createRoomEnemy(renderer, { pos[0] + distribution1(gen), pos[1] + distribution1(gen), }, pos, 700.f, i == 0);
+//		registry.colors.insert(room.enemies[i], { distribution2(gen), distribution2(gen), distribution2(gen) });
+//	}
+//	PositionKeyFrame& positionKeyFrame = registry.positionKeyFrames.emplace(room.enemies[0]);
+//	positionKeyFrame.timeIncrement = 0.0f;
+//	positionKeyFrame.timeAccumulator = 0.1f;
+//	std::vector<vec3> keyFrames = {};
+//	keyFrames.push_back({ 0.0f, 600, 400 });
+//	keyFrames.push_back({ 10.0f, 600, 600 });
+//	keyFrames.push_back({ 20.0f, 400, 600 });
+//	keyFrames.push_back({ 30.0f, 400, 400 });
+//	keyFrames.push_back({ 40.0f, 600, 400 });
+//	positionKeyFrame.keyFrames = keyFrames;
+//
+//	srand(time(NULL));
+//
+//	for (int i = 0; i < 2; i++) {
+//		int randomValue = rand() % 2;
+//		TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::DROPBALLSIZE;
+//
+//		if (randomValue == 1) {
+//			id = TEXTURE_ASSET_ID::DROPBALLDAMAGE;
+//		}
+//		Entity drop = createDropBuff(renderer, { pos[0] + distribution1(gen), pos[1] + distribution2(gen) }, id);
+//		DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
+//		dropBuff.id = randomValue;
+//		dropBuff.increaseValue = rand() % 7 + 2;
+//	}
+//
+//	return entity;
+//}
