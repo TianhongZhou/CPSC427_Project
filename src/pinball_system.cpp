@@ -209,7 +209,6 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
         // exit_combat();
         // GameSceneState = 0;
     } else {
-        //TODO: uncomment this
 //        if (particleSpawnTimer > 0.2f) {
 //            float pinballRadius = registry.pinBalls.components[0].pinBallSize;
 //            std::random_device rd;
@@ -263,7 +262,7 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
 
     }
 
-     update_swarm_positions();
+    update_swarm_motion();
 
     updateTimers(elapsed_ms_since_last_update);
     stepEnemyAttack();
@@ -476,15 +475,15 @@ void PinballSystem::spawn_swarm(vec2 boundary) {
 }
 
 
-void PinballSystem::update_swarm_positions() {
+void PinballSystem::update_swarm_motion() {
 
     Entity swarmKing = registry.swarmKing.entities[0];
 
     for (Entity entity: registry.swarmEnemies.entities) {
         Motion& motion = registry.motions.get(entity);
 
-        vec2 rule_sum = rule1(entity, 50) + rule2(entity, 30) + rule3(entity, 8)
-                + rule4(swarmKing, entity, 5);
+        vec2 rule_sum = rule1(entity, 50) + rule2(entity, 10) + rule3(entity, 14)
+                + rule4(swarmKing, entity, 30);
         // scaling so that it doesn't go too fast
         float scaling = 0.01;
         rule_sum = {scaling * rule_sum.x, scaling * rule_sum.y};

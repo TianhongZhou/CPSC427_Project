@@ -74,7 +74,7 @@ private:
     // boids algorithm
     // https://eater.net/boids
     // http://www.kfish.org/boids/pseudocode.html
-    void update_swarm_positions();
+    void update_swarm_motion();
 
     // boids try to fly towards the centre of mass of neighbouring boids
     // coherence determines by how much

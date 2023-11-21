@@ -364,7 +364,12 @@ Entity createSwarmEnemy(RenderSystem* renderer, vec2 pos)
             { TEXTURE_ASSET_ID::TEXTURE_COUNT,
               EFFECT_ASSET_ID::SALMON,
               GEOMETRY_BUFFER_ID::SWARMENEMY});
+//    createNewRectangleTiedToEntity(entity, mesh.original_size.x * scale, mesh.original_size.y*scale, registry.motions.get(entity).position, true, 1.0);
+//
+//    physObj& physObj = registry.physObjs.get(entity);
+//    physObj.hasGravity = false;
     return entity;
+
 }
 
 

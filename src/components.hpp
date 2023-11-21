@@ -221,6 +221,8 @@ struct physObj {
 
 	bool moveable;
 
+    bool hasGravity = true;
+
 	float knockbackCoef;
 };
 
