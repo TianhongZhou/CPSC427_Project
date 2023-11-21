@@ -39,6 +39,7 @@
     - drawTexturedMesh in render_system.cpp
     - textured.vs.glsl
     - textured.fs.glsl
+    - Physics-Based Animation: trailing effect using particles, particles have random diffusional motion like real life particles, and will float up due to buoyant.
 - ### Assets: Introduce new sprite and background assets (background music & attacking sound)
     - create_window in world_system.cpp
     - on_mouse_click in world_system.cpp
