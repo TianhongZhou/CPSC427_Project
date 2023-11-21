@@ -105,8 +105,17 @@ The original development plan for the week of Sept. 31 and Oct. 8 is as followin
     - Basic randomized dungeon generation logic 
     - Improved dungeon progression system
     - Scale difficulty of combat with dungeon progression
+- Week: Nov 5 - Playability
+    - Procedural generation for dungeon
+    - Advanced physics effects for pinball combat
+    - Integrate all art assets needed for the game
+    - Ensure robustness of game
+- Week: Nov 12
+    - Save/Load feature
+    - More advanced physics effects or complex geometry, possibly more advanced enemies
+    - Particle Effects
 
-Basic dungeon logic is done on Oct. 30 instead in the week of Oct. 15. Did not implement basic dungeon progression system. Rendering is done in the week of Oct. 22 instead of Oct. 15. Did not implement different types of dungeon rooms. Tutorial design is done in the week of Oct. 29 instead of Oct 22. Except for the ones mentioned above, all other points listed are finished on time. The discrepancies between the development plan and actual development progress is also listed.
+Did not implement different types of dungeon rooms. Art assets are integrated in the week of Nov. 12 instead of Nov. 5. Did not implement more advanced enemies. Except for the ones mentioned above, all other points listed are finished on time. The discrepancies between the development plan and actual development progress is also listed.
 
 References:
 

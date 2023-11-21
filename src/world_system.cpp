@@ -130,7 +130,7 @@ GLFWwindow *WorldSystem::create_window()
 	}
 
 	// Create the main window (for rendering, keyboard, and mouse input)
-	window = glfwCreateWindow(MonitorWidth, MonitorHeight, "Pinball Luminary", nullptr, nullptr);
+	window = glfwCreateWindow(MonitorWidth, MonitorHeight, "Pinball Luminary", primaryMonitor, nullptr);
 	//window = glfwCreateWindow(window_width_px, window_height_px, "Salmon Game Assignment", nullptr, nullptr);
 	if (window == nullptr)
 	{
@@ -612,7 +612,7 @@ void WorldSystem::enter_next_room()
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
 	rooms[0] = createRoom(renderer, {600, 400});
-	player = createPlayer(renderer, {w/2, h*4/5});
+	player = createPlayer(renderer, { (window_width_px) / 2, 4 * (window_height_px) / 5 });
 	PinBall& pinBall = registry.pinBalls.get(player);
 	pinBall.pinBallSize = temp.pinBallSize;
 	pinBall.pinBallDamage = temp.pinBallDamage;
