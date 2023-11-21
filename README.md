@@ -71,6 +71,23 @@
         - GenerateDropBuff in world_system.hpp
         - createDropBuff in world_init.cpp
         - random generate drop in createRoom in world_init.cpp
+    - #### Dash mechanic
+    	- pinballDash() in pinball_system.cpp
+    - #### Various timers (invincibility, attack, effects)
+	    - countdown in pinball_system.cpp
+	    - updateTimers in pinball_system.cpp
+	    - timer fields in various components
+    - #### Enemy attack
+	    - stepEnemyAttack in in pinball_system.cpp
+	    - temporary projectile component
+    - #### Combo meter and bonus ball system
+	    - PinballPlayerStatus component
+	    - related code in on_key in pinball_system.cpp
+    - #### Swarm Enemy Type
+   	    - SwarmKing and SwarmEnemy components
+    	    - spawn_swarm, update_swarm_motion and other functions in pinball_system.cpp
+    
+    
 - ### Consistent game resolution
     - create_window in world_system.cpp
     - drawToScreen in render_system.cpp
@@ -114,6 +131,13 @@ The original development plan for the week of Sept. 31 and Oct. 8 is as followin
     - Save/Load feature
     - More advanced physics effects or complex geometry, possibly more advanced enemies
     - Particle Effects
+    - Flipper control change
+    - New combat effects (high gravity and anti gravity)
+    - Enemy attacks with temporary projectiles
+    - Combo meter and bonus ball mechanic
+    - Player Heath
+    - Enemy and Player invincibility timer
+    
 
 Did not implement different types of dungeon rooms. Art assets are integrated in the week of Nov. 12 instead of Nov. 5. Did not implement more advanced enemies. Except for the ones mentioned above, all other points listed are finished on time. The discrepancies between the development plan and actual development progress is also listed.
 
