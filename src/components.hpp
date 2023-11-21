@@ -5,6 +5,16 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
+struct Zombie
+{
+
+};
+
+struct Sniper
+{
+
+};
+
 struct Door
 {
 
@@ -17,7 +27,7 @@ struct Spikes
 
 struct Ball
 {
-
+	float trail;
 };
 
 struct PlayerBullet
@@ -45,7 +55,6 @@ struct Combat
 //Particle
 struct Particle
 {
-	vec3 color;
     float lifespan = 1.f;
 };
 

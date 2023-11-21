@@ -164,7 +164,7 @@ void PinballSystem::stepEnemyAttack() {
                 physObj enemyObj = registry.physObjs.get(registry.pinballEnemies.entities[i]);
                 vec2 spawnPos = vec2(enemyObj.center.x, enemyObj.center.y + 50.0f);
 
-                Entity projectile_ball = createBall(r, spawnPos, pinball.pinBallSize);
+                Entity projectile_ball = createBall(r, spawnPos, pinball.pinBallSize, 0.f);
                 createNewRectangleTiedToEntity(projectile_ball, pinball.pinBallSize, pinball.pinBallSize, registry.motions.get(projectile_ball).position, true, 1);
 
                 TemporaryProjectile temp;
@@ -205,7 +205,7 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
         // exit_combat();
         // GameSceneState = 0;
     } else {
-        if (particleSpawnTimer > 0.2f) {
+        if (particleSpawnTimer > 0.01f) {
             float pinballRadius = registry.pinBalls.components[0].pinBallSize;
             std::random_device rd;
             std::mt19937 gen(rd());
@@ -215,6 +215,7 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
             std::normal_distribution<> distVel(0.f, 1.f);
             int numParticles = registry.pinBalls.components[0].pinBallSize*registry.pinBalls.components[0].pinBallSize/10;
             for (Entity entity: registry.balls.entities) {
+                if (registry.balls.get(entity).trail>0.f) {
                 physObj ball = registry.physObjs.get(entity);
                 vec2 center = {0.f, 0.f};
                 for (int i=0; i<ball.VertexCount; i++) {
@@ -240,10 +241,11 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
                 //         createParticle(r, pos, 1.f, {0.f,0.f}, {1.f,0.f,0.f}, 2.f);
                 //     }
                 // }
+                }
             }
             particleSpawnTimer=0.f;
         } else {
-            particleSpawnTimer+=elapsed_ms_since_last_update;
+            particleSpawnTimer+=step_seconds;
         }
 
         for (Entity entity: registry.pinballEnemies.entities) {
@@ -347,7 +349,7 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
     if (action == GLFW_RELEASE && key == GLFW_KEY_K)
     {
         PinBall& pinBall = registry.pinBalls.components[0];
-        Entity projectile_ball = createBall(renderer, { 400, 400 }, pinBall.pinBallSize);
+        Entity projectile_ball = createBall(renderer, { 400, 400 }, pinBall.pinBallSize, 0.f);
         createNewRectangleTiedToEntity(projectile_ball, pinBall.pinBallSize, pinBall.pinBallSize, registry.motions.get(projectile_ball).position, true, 1);
 
         TemporaryProjectile temp;
@@ -375,7 +377,7 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
                 registry.physObjs.get(registry.playerFlippers.entities[0]).center.y - 50.0f);
 
             PinBall& pinBall = registry.pinBalls.components[0];
-            Entity projectile_ball = createBall(renderer, spawnPos, pinBall.pinBallSize);
+            Entity projectile_ball = createBall(renderer, spawnPos, pinBall.pinBallSize, 0.f);
             createNewRectangleTiedToEntity(projectile_ball, pinBall.pinBallSize, pinBall.pinBallSize, registry.motions.get(projectile_ball).position, true, 1);
 
             TemporaryProjectile temp;
@@ -470,7 +472,7 @@ void PinballSystem::restart() {
     registry.playerFlippers.insert(flipper, pf);
  
     PinBall& pinBall = registry.pinBalls.components[0];
-    Entity player_ball = createBall(renderer, { 400, 400 }, pinBall.pinBallSize);
+    Entity player_ball = createBall(renderer, { 400, 400 }, pinBall.pinBallSize, 1.f);
     //createNewRectangleTiedToEntity(player_ball, 50.f * MonitorScreenRatio, 50.f * MonitorScreenRatio * 1.2f, registry.motions.get(player_ball).position, true, 1);
     createNewRectangleTiedToEntity(player_ball, pinBall.pinBallSize, pinBall.pinBallSize, registry.motions.get(player_ball).position, true, 1);
 

@@ -39,6 +39,7 @@
     - drawTexturedMesh in render_system.cpp
     - textured.vs.glsl
     - textured.fs.glsl
+    - Physics-Based Animation: trailing effect using particles, particles have random diffusional motion like real life particles, and will float up due to buoyant.
 - ### Assets: Introduce new sprite and background assets (background music & attacking sound)
     - create_window in world_system.cpp
     - on_mouse_click in world_system.cpp
@@ -83,6 +84,9 @@
     - #### Combo meter and bonus ball system
 	    - PinballPlayerStatus component
 	    - related code in on_key in pinball_system.cpp
+    - #### Swarm Enemy Type
+   	    - SwarmKing and SwarmEnemy components
+    	    - spawn_swarm, update_swarm_motion and other functions in pinball_system.cpp
     
     
 - ### Consistent game resolution

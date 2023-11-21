@@ -235,7 +235,7 @@ void WorldSystem::save_game(const std::string& filename)
 	j["level"] = curr_room;
 
 	// Check if player is in combat
-	if (registry.mainWorldEnemies.size() > 0) {
+	if (registry.mainWorldEnemies.size() > 0 || registry.snipers.size() > 0 || registry.zombies.size() > 0 ) {
 		j["inCombat"] = 1;
 	}
 	else { // Only save game state if not in combat
@@ -286,6 +286,12 @@ void WorldSystem::load_game(const std::string& filename)
 		if (j.contains("level")) {
 			// Restore room level
 			curr_room = j["level"].get<int>();
+
+			// URGENT TODO: temporary fix for spikes created
+			if (curr_room != 0) {
+				while (registry.spikes.entities.size() > 0)
+					registry.remove_all_components_of(registry.spikes.entities.back());
+			}
 		}
 
 		if (j.contains("inCombat")) {
@@ -816,7 +822,8 @@ void WorldSystem::handle_collisions_world()
 
 		// player bullet vs enemy collision
 		if (registry.mainWorldEnemies.has(entity) && registry.playerBullets.has(entity_other) ||
-			registry.mainWorldEnemies.has(entity_other) && registry.playerBullets.has(entity)) {
+			registry.snipers.has(entity) && registry.playerBullets.has(entity_other) || 
+			registry.zombies.has(entity) && registry.playerBullets.has(entity_other) ) {
 			// remove enemy upon collision
 			if (!registry.positionKeyFrames.has(entity) && !registry.positionKeyFrames.has(entity_other)) {
 				GenerateDropBuff(entity);
@@ -827,15 +834,18 @@ void WorldSystem::handle_collisions_world()
 
 		// enemyy bullet vs player collision
 		if (registry.enemyBullets.has(entity) && registry.players.has(entity_other) ||
-			registry.enemyBullets.has(entity_other) && registry.players.has(entity)) {
+			registry.zombies.has(entity) && registry.players.has(entity_other)) {
 			// handle damage interaction (nothing for now)
 			restart_game();
-			if (registry.enemyBullets.has(entity)) {
+			/*if (registry.enemyBullets.has(entity)) {
+				registry.remove_all_components_of(entity);
+			}
+			else if (registry.zombies.has(entity)) {
 				registry.remove_all_components_of(entity);
 			}
 			else {
 				registry.remove_all_components_of(entity_other);
-			}
+			}*/
 		}
 
 		// spike collision

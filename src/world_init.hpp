@@ -12,7 +12,7 @@ const float TURTLE_BB_WIDTH = 0.4f * 300.f;
 const float TURTLE_BB_HEIGHT = 0.4f * 202.f;
 
 // the ball
-Entity createBall(RenderSystem* renderer, vec2 pos, float size);
+Entity createBall(RenderSystem* renderer, vec2 pos, float size, float trail);
 // the shadow
 Entity createShadow(RenderSystem* renderer, vec2 pos);
 // the walls
@@ -47,6 +47,8 @@ Entity createSpikes(vec2 pos, vec2 size);
 
 Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
 Entity createRoom1(RenderSystem* renderer, vec2 pos);
+Entity createRoom2(RenderSystem* renderer, vec2 pos);
+Entity createRoom3(RenderSystem* renderer, vec2 pos);
 Entity createEmptyRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
 
 Entity createDropBuff(RenderSystem* renderer, vec2 pos, TEXTURE_ASSET_ID id);
