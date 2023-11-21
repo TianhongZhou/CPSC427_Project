@@ -104,8 +104,8 @@ GLFWwindow *WorldSystem::create_window()
 //    GLFWmonitor* primaryMonitor = monitors[0];
 
 	const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
-	MonitorWidth = static_cast<int>(mode->width * 0.75);
-	MonitorHeight = static_cast<int>(mode->height * 0.75);
+	MonitorWidth = static_cast<int>(mode->width );
+	MonitorHeight = static_cast<int>(mode->height);
 //    printf("monitor width: %d\n", MonitorWidth);
 //    printf("monitor height: %d\n", MonitorHeight);
 

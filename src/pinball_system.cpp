@@ -256,13 +256,19 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
                 for (int j = 0; j < enemy.healthBar.size(); j++) {
                     registry.remove_all_components_of(enemy.healthBar[j]);
                 }
+                if (registry.swarmKing.has(entity)) {
+                    for (Entity se: registry.swarmEnemies.entities) {
+                        registry.remove_all_components_of(se);
+                    }
+                }
                 registry.remove_all_components_of(entity);
             }
         }
 
     }
-
+if (registry.swarmKing.size() > 0) {
     update_swarm_motion();
+}
 
     updateTimers(elapsed_ms_since_last_update);
     stepEnemyAttack();
