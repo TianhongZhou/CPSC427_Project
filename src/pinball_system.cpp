@@ -12,7 +12,7 @@
 
 const size_t SWARM_SIZE = 50;
 const int S_CENTER_X = 525;
-const int S_CENTER_Y = 200;
+const int S_CENTER_Y = 300;
 const int S_RADIUS = 200;
 const int S_SPEED = 1;
 
@@ -474,7 +474,7 @@ void PinballSystem::spawn_swarm(vec2 boundary) {
 
     }
 
-    Entity swarmKing = createPinBallEnemy(renderer, vec2(525, 200), boundary, 0.5, 1, 5000.0f, 0.5);
+    Entity swarmKing = createPinBallEnemy(renderer, vec2(525, 300), boundary, 0.5, 1, 5000.0f, 0.5);
     registry.swarmKing.insert(swarmKing,{});
 
     registry.colors.insert(swarmKing, { 0, 1, 0 });
@@ -625,9 +625,9 @@ void PinballSystem::restart() {
     registry.damages.emplace(player_ball, playerballDamage);
     registry.attackPower.emplace(player_ball, playerballAttack);
 
-//    Entity pinballenemyMain = createPinBallEnemy(renderer, vec2(525,180), boundary,2.0f, 0, 3000.0f);
+    Entity pinballenemyMain = createPinBallEnemy(renderer, vec2(525,180), boundary,2.0f, 0, 3000.0f, 1.0);
 
-//    registry.colors.insert(pinballenemyMain, { distribution2(gen), distribution2(gen), distribution2(gen) });
+    registry.colors.insert(pinballenemyMain, { distribution2(gen), distribution2(gen), distribution2(gen) });
 
 
     Entity pinballenemy = createPinBallEnemy(renderer, vec2(525, 90), boundary, 2.0f, 1, 5000.0f, 1.f);
