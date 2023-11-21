@@ -17,6 +17,13 @@
 
 extern int GameSceneState;
 extern int InitCombat;
+extern int MonitorWidth;
+extern int MonitorHeight;
+extern float MonitorScreenRatio;
+extern int offsetX;
+extern int offsetY;
+extern int scaledWidth;
+extern int scaledHeight;
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods

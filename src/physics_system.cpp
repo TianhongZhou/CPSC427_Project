@@ -34,10 +34,7 @@ bool collides(const Motion &motion1, const Motion &motion2)
 
 float COMBO_DAMAGE_MULTIPLIER = 0.01f;
 
-
 float MAX_Y_COORD = 810.0f;
-
-
 
 float MIN_Y_COORD = 0.0f;
 
@@ -49,15 +46,9 @@ float FLIPPERHEIGHT = 720.f;
 
 float FLIPPERDELTA = 50.f;
 
-
-
 vec2 GRAV = {0.f, 0.00035f};
 
-
 vec2 BOTTOM_BOUNCE = vec2(0.0f, -0.09f);
-
-
-
 
 // struct Vertex_Phys {
 //	vec2 pos;
@@ -292,10 +283,10 @@ void accelerate(vec2 acc, Vertex_Phys &obj)
 	obj.accel += acc;
 }
 
-
-void accelerateObj(vec2 acc, physObj& obj)
+void accelerateObj(vec2 acc, physObj &obj)
 {
-	for (int i = 0; i < obj.VertexCount; i++) {
+	for (int i = 0; i < obj.VertexCount; i++)
+	{
 		accelerate(acc, obj.Vertices[i]);
 	}
 }
@@ -310,8 +301,6 @@ void updateAllEdges()
 	}
 }
 
-
-
 void detectAndSolveAllCollisions()
 {
 	for (uint i = 0; i < registry.physObjs.size(); i++)
@@ -323,9 +312,9 @@ void detectAndSolveAllCollisions()
 			physObj *b = &registry.physObjs.components[i2];
 			bool collide = false;
 
-			if (a != b) {
+			if (a != b)
+			{
 				collide = detectAndResloveCollision(a, b);
-
 			}
 
 			// Handle Collision
@@ -333,42 +322,51 @@ void detectAndSolveAllCollisions()
 			// If collided with an enemy
 			Entity entity_a = registry.physObjs.entities[i];
 			Entity entity_b = registry.physObjs.entities[i2];
-			if (collide) {
+			if (collide)
+			{
 				if (registry.pinballEnemies.has(entity_a) && !registry.pinballEnemies.has(entity_b) ||
-					registry.pinballEnemies.has(entity_b) && !registry.pinballEnemies.has(entity_a)) {
+					registry.pinballEnemies.has(entity_b) && !registry.pinballEnemies.has(entity_a))
+				{
 					Entity enemy = entity_a;
 					// remove enemy upon collision
 					Entity projectile;
-					if (registry.pinballEnemies.has(entity_a)) {
-						//registry.remove_all_components_of(entity_a);
+					if (registry.pinballEnemies.has(entity_a))
+					{
+						// registry.remove_all_components_of(entity_a);
 						enemy = entity_a;
 						projectile = entity_b;
 					}
-					else {
-						//registry.remove_all_components_of(entity_b);
+					else
+					{
+						// registry.remove_all_components_of(entity_b);
 						enemy = entity_b;
 						projectile = entity_a;
 					}
-					PinBallEnemy& pinballEnemy = registry.pinballEnemies.get(enemy);
-					if (pinballEnemy.invincibilityTimer == 0 && registry.attackPower.has(projectile)) {
-						float damage = 
-							registry.attackPower.get(projectile).damage * (1+ COMBO_DAMAGE_MULTIPLIER * registry.pinballPlayerStatus.components[0].comboCounter);
+					PinBallEnemy &pinballEnemy = registry.pinballEnemies.get(enemy);
+					if (pinballEnemy.invincibilityTimer == 0 && registry.attackPower.has(projectile))
+					{
+						float damage =
+							registry.attackPower.get(projectile).damage * (1 + COMBO_DAMAGE_MULTIPLIER * registry.pinballPlayerStatus.components[0].comboCounter);
 
 						pinballEnemy.currentHealth = pinballEnemy.currentHealth - damage < 0 ? 0 : pinballEnemy.currentHealth - damage;
 
 						pinballEnemy.invincibilityTimer += 200.0f;
 
-						//ticking up combo
+						// ticking up combo
 						registry.pinballPlayerStatus.components[0].comboCounter++;
 						printf("Combo = %i ", registry.pinballPlayerStatus.components[0].comboCounter);
 
 						// deducting hits left for temp projectile
-						if (registry.temporaryProjectiles.has(projectile)) {
-							if (!registry.temporaryProjectiles.get(projectile).bonusBall) {
-								if (registry.temporaryProjectiles.get(projectile).hitsLeft - 1 <= 0) {
+						if (registry.temporaryProjectiles.has(projectile))
+						{
+							if (!registry.temporaryProjectiles.get(projectile).bonusBall)
+							{
+								if (registry.temporaryProjectiles.get(projectile).hitsLeft - 1 <= 0)
+								{
 									registry.remove_all_components_of(projectile);
 								}
-								else {
+								else
+								{
 									registry.temporaryProjectiles.get(projectile).hitsLeft--;
 								}
 							}
@@ -406,15 +404,18 @@ void applyObjGrav()
 
 			for (int i2 = 0; i2 < obj.VertexCount; i2++)
 			{
-				PinballPlayerStatus& status = registry.pinballPlayerStatus.components[0];
+				PinballPlayerStatus &status = registry.pinballPlayerStatus.components[0];
 
-				if (status.antiGravityTimer != 0) {
+				if (status.antiGravityTimer != 0)
+				{
 					accelerate(-GRAV, (obj.Vertices[i2]));
 				}
-				else if (status.highGravityTimer != 0) {
-					accelerate(3.0f*GRAV, (obj.Vertices[i2]));
+				else if (status.highGravityTimer != 0)
+				{
+					accelerate(3.0f * GRAV, (obj.Vertices[i2]));
 				}
-				else {
+				else
+				{
 					accelerate(GRAV, (obj.Vertices[i2]));
 				}
 			}
@@ -435,52 +436,52 @@ void updateAllCenters()
 
 void applyGlobalConstraints()
 {
-	
+
 	for (uint i = 0; i < registry.physObjs.size(); i++)
 	{
 		physObj &obj = registry.physObjs.components[i];
 
-		Entity* toRemove = nullptr;
+		Entity *toRemove = nullptr;
 
 		for (int i2 = 0; i2 < obj.VertexCount; i2++)
 		{
 			if (obj.Vertices[i2].pos.y > MAX_Y_COORD)
 			{
-				
 
-				if (registry.damages.has(registry.physObjs.entities[i])) {
-					PinballPlayerStatus& status = registry.pinballPlayerStatus.components[0];
+				if (registry.damages.has(registry.physObjs.entities[i]))
+				{
+					PinballPlayerStatus &status = registry.pinballPlayerStatus.components[0];
 					accelerateObj(BOTTOM_BOUNCE, obj);
-					
-					if (status.invincibilityTimer == 0.0f) {
+
+					if (status.invincibilityTimer == 0.0f)
+					{
 						status.health -= registry.damages.get(registry.physObjs.entities[i]).damage;
 						status.invincibilityTimer += 500.0f;
-						//printf("PlayerHealth = %f ", status.health);
+						// printf("PlayerHealth = %f ", status.health);
 
 						// reset combo
 						status.comboCounter = 0;
 						printf("Combo = %i ", status.comboCounter);
 
 						// potential bug in this one
-						if (registry.temporaryProjectiles.has(registry.physObjs.entities[i])) {
-							if (registry.temporaryProjectiles.get(registry.physObjs.entities[i]).hitsLeft - 1 <= 0) {
+						if (registry.temporaryProjectiles.has(registry.physObjs.entities[i]))
+						{
+							if (registry.temporaryProjectiles.get(registry.physObjs.entities[i]).hitsLeft - 1 <= 0)
+							{
 								toRemove = &registry.physObjs.entities[i];
-								//printf("ready to remove");
+								// printf("ready to remove");
 							}
-							else {
+							else
+							{
 								registry.temporaryProjectiles.get(registry.physObjs.entities[i]).hitsLeft--;
 								printf("hits = %i ", registry.temporaryProjectiles.get(registry.physObjs.entities[i]).hitsLeft);
 							}
 						}
-
 					}
-
-
-
 				}
-				else {
-					
-					
+				else
+				{
+
 					obj.Vertices[i2].pos.y = MAX_Y_COORD;
 				}
 			}
@@ -500,11 +501,12 @@ void applyGlobalConstraints()
 				obj.Vertices[i2].pos.x = MAX_X_COORD;
 			}
 		}
-		
+
 		// can only remove after all vertex of an obj has been looped through
-		if (toRemove != nullptr) {
-			//printf("removed");
-			
+		if (toRemove != nullptr)
+		{
+			// printf("removed");
+
 			registry.remove_all_components_of(*toRemove);
 		}
 	}
@@ -537,10 +539,10 @@ void flipperConstraints()
 
 		physObj &flipperPhys = registry.physObjs.get(flipper);
 
-		//if (flipperPhys.Vertices[1].pos.y != FLIPPERHEIGHT)
+		// if (flipperPhys.Vertices[1].pos.y != FLIPPERHEIGHT)
 		//{
 		//	flipperPhys.Vertices[1].pos.y = FLIPPERHEIGHT;
-		//}
+		// }
 
 		if (flipperPhys.Vertices[2].pos.y > FLIPPERHEIGHT + FLIPPERDELTA)
 		{
@@ -557,7 +559,7 @@ void flipperConstraints()
 			flipperPhys.Vertices[2].pos.y = FLIPPERHEIGHT;
 		}
 
-		if (flipperPhys.Vertices[3].pos.y < FLIPPERHEIGHT )
+		if (flipperPhys.Vertices[3].pos.y < FLIPPERHEIGHT)
 		{
 			flipperPhys.Vertices[3].pos.y = FLIPPERHEIGHT;
 		}
@@ -609,7 +611,8 @@ void update(float dt)
 
 void updateWithSubstep(float dt, float steps)
 {
-	if (dt > 200.f) {
+	if (dt > 200.f)
+	{
 		dt = 5.f;
 	}
 	for (int i = 0; i < steps; i++)
@@ -621,7 +624,8 @@ void updateWithSubstep(float dt, float steps)
 void PhysicsSystem::step(float elapsed_ms)
 {
 
-	updateWithSubstep(elapsed_ms, 4.0f);
+	updateWithSubstep(elapsed_ms, 6.0f);
+	float step_seconds = elapsed_ms / 1000.f;
 
 	auto &motion_container = registry.motions;
 	for (uint i = 0; i < motion_container.size(); i++)
@@ -640,6 +644,23 @@ void PhysicsSystem::step(float elapsed_ms)
 			float x_position = motion.position.x + (x_velocity * step_seconds);
 			float y_position = motion.position.y + (y_velocity * step_seconds);
 			motion.position = {x_position, y_position};
+		}
+	}
+
+	for (Entity entity : registry.particles.entities)
+	{
+		Particle &particle = registry.particles.get(entity);
+		if (particle.lifespan > 0.f)
+		{
+			Motion& motion = registry.motions.get(entity);
+			float floatage = 9.81f *2.f;
+			motion.velocity.y -= step_seconds*floatage;
+			motion.position += step_seconds*motion.velocity;
+			particle.lifespan -= step_seconds;
+		}
+		else
+		{
+			registry.remove_all_components_of(entity);
 		}
 	}
 }
@@ -663,8 +684,6 @@ void PhysicsSystem::step_world(float elapsed_ms)
 
 		motion.position += velocity * step_seconds;
 
-
-
 		// Boundary check
 		// Now we restrict everything, but we can choose what we want to restrict
 
@@ -685,38 +704,34 @@ void PhysicsSystem::step_world(float elapsed_ms)
 			motion.position.y = window_height_px;
 		}*/
 
-
-
 		//// Bounce of side walls
 
-		//if (motion.position.x < 0) {
+		// if (motion.position.x < 0) {
 		//	vec2 curr_v = motion.velocity;
 		//	motion.position.x = 20;
 		//	motion.velocity = vec2(-curr_v.x, curr_v.y);
-		//}
-		//if (motion.position.y < 0) {
+		// }
+		// if (motion.position.y < 0) {
 		//	vec2 curr_v = motion.velocity;
 		//	motion.position.y = 20;
 		//	motion.velocity = vec2(curr_v.x, -curr_v.y);
-		//}
-		//if (motion.position.x > window_width_px) {
+		// }
+		// if (motion.position.x > window_width_px) {
 		//	vec2 curr_v = motion.velocity;
 		//	motion.position.x = window_width_px - 20;
 		//	motion.velocity = vec2(-curr_v.x, curr_v.y);
-		//}
-		//if (motion.position.y > window_height_px) {
+		// }
+		// if (motion.position.y > window_height_px) {
 		//	vec2 curr_v = motion.velocity;
 		//	motion.position.y = window_height_px - 20;
 		//	motion.velocity = vec2(curr_v.x, -curr_v.y);
-		//}
+		// }
 
 		//// Gravity
-		//if (registry.balls.has(motion_container.entities[i])) {
+		// if (registry.balls.has(motion_container.entities[i])) {
 		//	motion.velocity.y += step_seconds * 200;
-		//}
+		// }
 	}
-
-
 
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// TODO A2: HANDLE PEBBLE UPDATES HERE
@@ -736,11 +751,11 @@ void PhysicsSystem::step_world(float elapsed_ms)
 			{
 				Motion &motion_j = motion_container.components[j];
 				if (collides(motion_i, motion_j))
-				{	
+				{
 					Entity entity_j = motion_container.entities[j];
 
 					//// ball vs player collision
-					//if (registry.balls.has(entity_i) && registry.players.has(entity_j) ||
+					// if (registry.balls.has(entity_i) && registry.players.has(entity_j) ||
 					//	registry.balls.has(entity_j) && registry.players.has(entity_i)) {
 
 					//	// Split them apart first
@@ -766,11 +781,11 @@ void PhysicsSystem::step_world(float elapsed_ms)
 					//	}
 					//}
 
-					//else {
-						// Create a collisions event
-						// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
-						registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-						registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+					// else {
+					//  Create a collisions event
+					//  We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
+					registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+					registry.collisions.emplace_with_duplicates(entity_j, entity_i);
 					//}
 				}
 			}
@@ -782,6 +797,3 @@ void PhysicsSystem::step_world(float elapsed_ms)
 	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
-
-
-

@@ -24,6 +24,13 @@ const size_t FISH_DELAY_MS = 5000 * 3;
 // Game state global variables
 int GameSceneState = 0;
 int InitCombat = 0;
+int MonitorWidth;
+int MonitorHeight;
+float MonitorScreenRatio;
+int offsetX;
+int offsetY;
+int scaledWidth;
+int scaledHeight;
 
 // Create the fish world
 WorldSystem::WorldSystem()
@@ -86,13 +93,41 @@ GLFWwindow *WorldSystem::create_window()
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
+	// Obtain monitor full screen size
+	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+	MonitorWidth = mode->width;
+	MonitorHeight = mode->height;
+
+	float windowAspectRatio = static_cast<float>(window_width_px) / window_height_px;
+	float monitorAspectRatio = static_cast<float>(MonitorWidth) / MonitorHeight;
+	offsetX = 0;
+	offsetY = 0; // Offsets for letterboxing
+	
+	if (windowAspectRatio > monitorAspectRatio) {
+		// Window is wider relative to its height than the monitor is
+		// Scale based on width
+		scaledWidth = MonitorWidth;
+		scaledHeight = static_cast<int>(MonitorWidth / windowAspectRatio);
+		offsetY = (MonitorHeight - scaledHeight) / 2;
+	}
+	else {
+		// Window is taller relative to its width than the monitor is
+		// Scale based on height
+		scaledWidth = static_cast<int>((float)MonitorHeight * windowAspectRatio * 1.09f);
+		scaledHeight = MonitorHeight;
+		offsetX = (MonitorWidth - scaledWidth) / 2 ;
+	}
+
 	// Create the main window (for rendering, keyboard, and mouse input)
-	window = glfwCreateWindow(window_width_px, window_height_px, "Salmon Game Assignment", nullptr, nullptr);
+	window = glfwCreateWindow(MonitorWidth, MonitorHeight, "Pinball Luminary", primaryMonitor, nullptr);
+	//window = glfwCreateWindow(window_width_px, window_height_px, "Salmon Game Assignment", nullptr, nullptr);
 	if (window == nullptr)
 	{
 		fprintf(stderr, "Failed to glfwCreateWindow");
 		return nullptr;
 	}
+
     redirect_inputs_world();
 
     //////////////////////////////////////
@@ -157,6 +192,8 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 // Reset the world state to its initial state
 void WorldSystem::restart_game()
 {
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 	printf("Restarting\n");
@@ -182,7 +219,8 @@ void WorldSystem::restart_game()
 
 	// Create room, player, lighting
 	rooms[0] = createRoom(renderer, { 600, 400 }, window, 0);
-	player = createPlayer(renderer, { w/2, h * 4 / 5 }); // spawn at the bottom of room for now
+	// player = createPlayer(renderer, { (window_width_px)/2, (window_height_px)/2 }); 
+	player = createPlayer(renderer, { (window_width_px) / 2, 4 * (window_height_px) / 5 }); // spawn at the bottom of room for now  
 	registry.lights.emplace(player);
 }
 
@@ -532,10 +570,13 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 
 		vec2 player_v = registry.motions.get(player).velocity;
 		vec2 mouse_position = registry.mousePosArray.components[0].pos;
-		float dy = mouse_position.y - motion.position.y;
-		float dx = mouse_position.x - motion.position.x;
+		float dy = mouse_position.y * (float)window_height_px / (float)MonitorHeight - motion.position.y;
+		float dx = mouse_position.x * (float)window_width_px / (float)MonitorWidth - motion.position.x;
 		motion.angle = atan2(dy, dx);
 
+
+		//printf("This is mouse_position: %f, %f\n", mouse_position.x, mouse_position.y);
+		//printf("This is player_position: %f, %f\n", motion.position.x, motion.position.y);
 
 		//motion.velocity = vec2(200.f + uniform_dist(rng)*200, 100.f - uniform_dist(rng)*200);
 		//float angle = registry.motions.get(player).angle;
@@ -558,6 +599,7 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 	std::stringstream title_ss;
 	title_ss << "Points: " << points;
 	glfwSetWindowTitle(window, title_ss.str().c_str());
+	float step_seconds = elapsed_ms_since_last_update / 1000.f;
 
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
@@ -565,19 +607,7 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 
 	// Removing out of screen entities
 	auto &motion_container = registry.motions;
-
-	// Remove entities that leave the screen on the left side
-	// Iterate backwards to be able to remove without unterfering with the next object to visit
-	// (the containers exchange the last element with the current)
-	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i)
-	{
-		Motion &motion = motion_container.components[i];
-		if (motion.position.x + abs(motion.scale.x) < 0.f)
-		{
-			if (!registry.players.has(motion_container.entities[i])) // don't remove the player
-				registry.remove_all_components_of(motion_container.entities[i]);
-		}
-	}
+	
 	save_player_last_direction();
 
 	// handling entering combat state
@@ -658,7 +688,8 @@ void WorldSystem::enter_next_room()
 
 	curr_room += 1; 
 	rooms[0] = createRoom(renderer, {600, 400}, window, curr_room);
-	player = createPlayer(renderer, {w/2, h*4/5});
+	player = createPlayer(renderer, { (window_width_px) / 2, 4 * (window_height_px) / 5 });
+
 	PinBall& pinBall = registry.pinBalls.get(player);
 	pinBall.pinBallSize = temp.pinBallSize;
 	pinBall.pinBallDamage = temp.pinBallDamage;
@@ -705,21 +736,21 @@ void WorldSystem::check_room_boundary()
 		if (registry.players.has(motion_container.entities[i]) || registry.mainWorldEnemies.has(motion_container.entities[i]))
 		{
 			Motion& motion = motion_container.components[i];
-			if (roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f + 30 > motion.position.x)
+			if (roomMotion.position.x - (roomMotion.scale.x / 2) + 65.f > motion.position.x)
 			{
-				motion.position.x = roomMotion.position.x - (roomMotion.scale.x / 2) + 25.f + 30;
+				motion.position.x = roomMotion.position.x - (roomMotion.scale.x / 2) + 65.f;
 			}
-			else if (roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f - 10 < motion.position.x)
+			else if (roomMotion.position.x + (roomMotion.scale.x / 2) - 45.f < motion.position.x)
 			{
-				motion.position.x = roomMotion.position.x + (roomMotion.scale.x / 2) - 25.f - 10;
+				motion.position.x = roomMotion.position.x + (roomMotion.scale.x / 2) - 45.f;
 			}
-			if (roomMotion.position.y - (roomMotion.scale.y / 2) + 25.f > motion.position.y)
+			if (roomMotion.position.y - (roomMotion.scale.y / 2) + 70.f > motion.position.y)
 			{
-				motion.position.y = roomMotion.position.y - (roomMotion.scale.y / 2) + 25.f;
+				motion.position.y = roomMotion.position.y - (roomMotion.scale.y / 2) + 70.f;
 			}
-			else if (roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f - 70 < motion.position.y)
+			else if (roomMotion.position.y + (roomMotion.scale.y / 2) - 95.f < motion.position.y)
 			{
-				motion.position.y = roomMotion.position.y + (roomMotion.scale.y / 2) - 50.f - 70;
+				motion.position.y = roomMotion.position.y + (roomMotion.scale.y / 2) - 95.f;
 			}
 		}
 	}

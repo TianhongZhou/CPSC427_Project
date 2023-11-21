@@ -15,18 +15,19 @@ const float TURTLE_BB_HEIGHT = 0.4f * 202.f;
 Entity createBall(RenderSystem* renderer, vec2 pos, float size);
 // the shadow
 Entity createShadow(RenderSystem* renderer, vec2 pos);
-// the polygon
-Entity createPolygonByVertex(RenderSystem* renderer, const std::vector<vec2>& vertices, GEOMETRY_BUFFER_ID id);
+// the walls
+Entity createPinballWall(RenderSystem* renderer, const std::vector<vec2>& vertices, GEOMETRY_BUFFER_ID id);
+// the flipper
+Entity createPinballFlipper(RenderSystem* renderer, const std::vector<vec2>& vertices, GEOMETRY_BUFFER_ID id);
 // the pin ball enemy blood
 Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos);
 // the pin ball enemy
 Entity createPinBallEnemy(RenderSystem* renderer, vec2 pos, vec2 boundary, float xScale, int attackType, float attackCd);
-// the enemy wave
-Entity createEnemyWave(RenderSystem* renderer, vec2 pos);
 // the room
 Entity createRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window, int room_num);
-// the road
-Entity createRoad(RenderSystem* renderer, vec2 pos);
+// the pinball room
+Entity createPinballRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
+
 // the player
 Entity createPlayer(RenderSystem* renderer, vec2 pos);
 // the room enemy
@@ -37,10 +38,8 @@ Entity createSalmon(RenderSystem* renderer, vec2 pos);
 Entity createFish(RenderSystem* renderer, vec2 position);
 // the enemy
 Entity createTurtle(RenderSystem* renderer, vec2 position);
-// a red line for debugging purposes
-Entity createLine(vec2 position, vec2 size);
 // a pebble
-Entity createPebble(vec2 pos, vec2 size);
+Entity createDoor(vec2 pos, vec2 size);
 
 Entity createDoor(vec2 pos, vec2 size);
 
@@ -51,6 +50,8 @@ Entity createRoom1(RenderSystem* renderer, vec2 pos);
 Entity createEmptyRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
 
 Entity createDropBuff(RenderSystem* renderer, vec2 pos, TEXTURE_ASSET_ID id);
+
+Entity createParticle(RenderSystem* renderer, vec2 pos, float size, vec2 vel, vec3 color, float lifespan);
 
 // player and enemy bullets
 Entity createPlayerBullet(vec2 pos, vec2 size);

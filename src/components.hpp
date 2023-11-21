@@ -42,6 +42,13 @@ struct Combat
 
 };
 
+//Particle
+struct Particle
+{
+	vec3 color;
+    float lifespan = 1.f;
+};
+
 // Main world room
 // Entity is part of main world
 struct MainWorld{};
@@ -307,7 +314,11 @@ enum class TEXTURE_ASSET_ID {
 	ENEMYBULLET = PLAYERBULLET + 1,
 	DROPBALLSIZE = ENEMYBULLET + 1,
 	DROPBALLDAMAGE = DROPBALLSIZE + 1,
-	TEXTURE_COUNT = DROPBALLDAMAGE + 1
+	PINBALL = DROPBALLDAMAGE + 1,
+	PINBALLBACKGROUND = PINBALL + 1,
+	FLIPPER = PINBALLBACKGROUND + 1,
+	WALL = FLIPPER + 1,
+	TEXTURE_COUNT = WALL + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
