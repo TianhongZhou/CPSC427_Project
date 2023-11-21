@@ -189,7 +189,7 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 {
 	this->renderer = renderer_arg;
 	// Playing background music indefinitely
-    // TODO: change this back
+    // TODO: turn on music
 //	Mix_PlayMusic(background_music, -1);
 	fprintf(stderr, "Loaded music\n");
 
