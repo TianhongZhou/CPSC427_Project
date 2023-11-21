@@ -345,8 +345,8 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 	// Add spikes
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_real_distribution<float> distribution1(100.0f, w / 2 + 150.f);
-	std::uniform_real_distribution<float> distribution2(100.0f, h / 2 + 150.f);
+	std::uniform_real_distribution<float> distribution1(100.0f, 4 * window_width_px / 5);
+	std::uniform_real_distribution<float> distribution2(100.0f, 4 * window_height_px / 5);
 	srand(time(NULL));
 
 	for (int i = 0; i < 4; i++) {
