@@ -47,6 +47,8 @@ Entity createSpikes(vec2 pos, vec2 size);
 
 Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
 Entity createRoom1(RenderSystem* renderer, vec2 pos);
+Entity createRoom2(RenderSystem* renderer, vec2 pos);
+Entity createRoom3(RenderSystem* renderer, vec2 pos);
 Entity createEmptyRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
 
 Entity createDropBuff(RenderSystem* renderer, vec2 pos, TEXTURE_ASSET_ID id);
