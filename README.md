@@ -39,6 +39,7 @@
     - drawTexturedMesh in render_system.cpp
     - textured.vs.glsl
     - textured.fs.glsl
+    - Physics-Based Animation: trailing effect using particles, particles have random diffusional motion like real life particles, and will float up due to buoyant.
 - ### Assets: Introduce new sprite and background assets (background music & attacking sound)
     - create_window in world_system.cpp
     - on_mouse_click in world_system.cpp
@@ -53,6 +54,9 @@
 - ### Help
     - draw_world in render_system.cpp
 - ### Playability
+    - #### MainWorld room generation
+        - createRoom in world_init.cpp
+        - Many other helper functions to generate rooms and its associated assets in world_init.cpp
     - #### MainWorld enemy AI system
    	    - stepWorld in ai_system.cpp
     - #### MainWorld enemy periodic generation
@@ -93,6 +97,10 @@
     - drawToScreen in render_system.cpp
     - draw_combat_scene in render_system.cpp
     - draw_world in render_system.cpp
+
+- ### Reloadability
+    - save_game and load_game in world_system.cpp
+    - Used external library nlohmann/json (https://github.com/nlohmann/json)
 
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:

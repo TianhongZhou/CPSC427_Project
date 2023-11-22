@@ -5,6 +5,16 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
+struct Zombie
+{
+
+};
+
+struct Sniper
+{
+
+};
+
 struct Door
 {
 
