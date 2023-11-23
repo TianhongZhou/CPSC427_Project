@@ -101,6 +101,12 @@
 - ### Reloadability
     - save_game and load_game in world_system.cpp
     - Used external library nlohmann/json (https://github.com/nlohmann/json)
+    
+- ### Basic Integrated Assets
+    - createPinballRoom in world_init.cpp
+    - createBall in world_init.cpp
+    - createPinballWall in world_init.cpp
+    - createPinballFlipper in world_init.cpp
 
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:
