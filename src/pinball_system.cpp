@@ -259,6 +259,10 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
         }
     }
 
+    if (registry.pinballEnemies.entities.size() <= 0) {
+        exit_combat();
+    }
+
 
     updateTimers(elapsed_ms_since_last_update);
     stepEnemyAttack();

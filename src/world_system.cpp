@@ -836,7 +836,7 @@ void WorldSystem::handle_collisions_world()
 		if (registry.enemyBullets.has(entity) && registry.players.has(entity_other) ||
 			registry.zombies.has(entity) && registry.players.has(entity_other)) {
 			// handle damage interaction (nothing for now)
-			restart_game();
+			// restart_game();
 			/*if (registry.enemyBullets.has(entity)) {
 				registry.remove_all_components_of(entity);
 			}
@@ -851,7 +851,7 @@ void WorldSystem::handle_collisions_world()
 		// spike collision
 		if (registry.spikes.has(entity) && registry.players.has(entity_other)) {
 			// handle damage interaction (nothing for now)
-			restart_game();
+			// restart_game();
 		}
 
 		// player vs door collision
