@@ -253,6 +253,8 @@ struct PinballPlayerStatus {
 	float highGravityTimer;
 	float antiGravityTimer;
 	float dashCooldown;
+	float focusTimer;
+	float tractorTimer;
 	int comboCounter;
 };
 

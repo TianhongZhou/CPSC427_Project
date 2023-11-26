@@ -107,6 +107,37 @@ void pinballDash() {
     }
 }
 
+
+void tractorStep() {
+    if (registry.pinballPlayerStatus.components[0].tractorTimer != 0) {
+
+   
+        physObj& pinballPhys = registry.physObjs.get(registry.pinballPlayerStatus.entities[0]);
+
+        physObj flipper = registry.physObjs.get(registry.playerFlippers.entities[0]);
+
+        
+        vec2 direction = vec2(0.0f, 1.0f);
+
+        
+        direction = normalize(vec2(flipper.center.x - pinballPhys.center.x,
+            0.0f));
+
+        accelerateObj2(direction * 0.01f, pinballPhys);
+
+        for (int i = 0; i < registry.temporaryProjectiles.size(); i++){
+            physObj& ball = registry.physObjs.get(registry.temporaryProjectiles.entities[i]);
+            direction = normalize(vec2(flipper.center.x - ball.center.x,
+                0.0f));
+
+            accelerateObj2(direction * 0.01f, ball);
+        }
+
+
+
+    }
+}
+
 void countdown(float& timer, float ms) {
     if (timer != 0.0f) {
         if (timer > ms) {
@@ -138,6 +169,8 @@ void updateTimers(float ms) {
         countdown(registry.pinballPlayerStatus.components[0].antiGravityTimer, ms);
         countdown(registry.pinballPlayerStatus.components[0].highGravityTimer, ms);
         countdown(registry.pinballPlayerStatus.components[0].dashCooldown, ms);
+        countdown(registry.pinballPlayerStatus.components[0].focusTimer, ms);
+        countdown(registry.pinballPlayerStatus.components[0].tractorTimer, ms);
 
         for (int i = 0; i < registry.pinballEnemies.components.size(); i++) {
             countdown(registry.pinballEnemies.components[i].invincibilityTimer, ms);
@@ -262,6 +295,7 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
 
     updateTimers(elapsed_ms_since_last_update);
     stepEnemyAttack();
+    tractorStep();
 
     return true;
 }
@@ -397,6 +431,16 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
         }
     }
 
+    if (action == GLFW_RELEASE && key == GLFW_KEY_W)
+    {
+        registry.pinballPlayerStatus.components[0].focusTimer = 600.0f;
+    }
+
+    if (action == GLFW_RELEASE && key == GLFW_KEY_M)
+    {
+        registry.pinballPlayerStatus.components[0].tractorTimer = 10000.0f;
+    }
+
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
     {
@@ -484,6 +528,8 @@ void PinballSystem::restart() {
     status.antiGravityTimer = 0.0f;
     status.highGravityTimer = 0.0f;
     status.comboCounter = 0;
+    status.focusTimer = 0.0f;
+    status.tractorTimer = 0.0f;
 
     // setting up playerball self damage
     DamageToPlayer playerballDamage;

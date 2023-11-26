@@ -611,13 +611,20 @@ void update(float dt)
 
 void updateWithSubstep(float dt, float steps)
 {
+
+
 	if (dt > 200.f)
 	{
 		dt = 5.f;
 	}
 	for (int i = 0; i < steps; i++)
 	{
-		update(dt / steps);
+		float slowdown = 1.0f;
+
+		if (registry.pinballPlayerStatus.components[0].focusTimer != 0.0f) {
+			slowdown = 0.1f;
+		}
+		update(dt*slowdown / steps);
 	}
 }
 
