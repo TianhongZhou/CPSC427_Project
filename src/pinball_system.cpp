@@ -367,7 +367,14 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_U)
     {
-        registry.pinballPlayerStatus.components[0].antiGravityTimer += 5000.0f;
+        if (registry.pinBalls.components[0].antiGravityCount > 0) {
+            registry.pinBalls.components[0].antiGravityCount--;
+            registry.pinballPlayerStatus.components[0].antiGravityTimer += 5000.0f;
+        }
+        else {
+            printf(" No antiGrav charge ");
+        }
+        
     }
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_I)
@@ -438,7 +445,13 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_M)
     {
-        registry.pinballPlayerStatus.components[0].tractorTimer = 10000.0f;
+        if (registry.pinBalls.components[0].tractorBeamCount > 0) {
+            registry.pinBalls.components[0].tractorBeamCount--;
+            registry.pinballPlayerStatus.components[0].tractorTimer = 10000.0f;
+        }
+        else {
+            printf(" No tractorBeam charge ");
+        }
     }
 
 
