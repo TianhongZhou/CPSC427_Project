@@ -253,6 +253,8 @@ struct PinballPlayerStatus {
 	float highGravityTimer;
 	float antiGravityTimer;
 	float dashCooldown;
+	float focusTimer;
+	float tractorTimer;
 	int comboCounter;
 };
 
@@ -274,10 +276,12 @@ struct PinBall {
 	float pinBallDamage = 5.f;
 	float maxPinBallSize = 60.f;
 	float maxPinBallDamage = 50.f;
+	int antiGravityCount = 0.0f;
+	int tractorBeamCount = 0.0f;
 };
 
 struct DropBuff {
-	// 0 - pinball size, 1 - pinball damage
+	// 0 - pinball size, 1 - pinball damage , 2- antiGravity, 3 - tractorBeam
 	int id;
 	float increaseValue;
 };

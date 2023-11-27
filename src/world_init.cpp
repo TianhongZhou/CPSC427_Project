@@ -354,7 +354,8 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 		//Entity spikes = createSpikes({ 100 * i, distribution2(gen) }, {80, 80});
 		registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
 
-		int randomValue = rand() % 2;
+		int randomValue = rand() % 4;
+		printf("id = %d ", randomValue);
 		TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::DROPBALLSIZE;
 
 		if (randomValue == 1) {
@@ -517,7 +518,7 @@ Entity createRoom3(RenderSystem* renderer, vec2 pos)
 	srand(time(NULL));
 
 	for (int i = 0; i < 2; i++) {
-		int randomValue = rand() % 2;
+		int randomValue = rand() % 4;
 		TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::DROPBALLSIZE;
 
 		if (randomValue == 1) {

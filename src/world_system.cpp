@@ -884,7 +884,7 @@ void WorldSystem::GenerateDropBuff(Entity entity)
 	Motion& motion = registry.motions.get(entity);
 
 	srand(time(NULL));
-	int randomValue = rand() % 2;
+	int randomValue = rand() % 4;
 	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::DROPBALLSIZE;
 
 	if (randomValue == 1) {
@@ -905,16 +905,29 @@ void WorldSystem::DropBuffAdd(DropBuff& drop)
 			pinBall.pinBallSize += drop.increaseValue;
 			if (pinBall.pinBallSize > pinBall.maxPinBallSize) {
 				pinBall.pinBallSize = pinBall.maxPinBallSize;
+				
 			}
+			printf("Picked up size upgrade ");
 			break;
 
 		case 1:
 			pinBall.pinBallDamage += drop.increaseValue;
 			if (pinBall.pinBallDamage > pinBall.maxPinBallDamage) {
 				pinBall.pinBallDamage = pinBall.maxPinBallDamage;
+				
 			}
+			printf("Picked up damage upgrade ");
 			break;
 
+		case 2: 
+			pinBall.antiGravityCount++;
+			printf("Picked up antiGravity ");
+			break;
+
+		case 3:
+			pinBall.tractorBeamCount++;
+			printf("Picked up tractorBeam ");
+			break;
 		default:
 			break;
 	}
