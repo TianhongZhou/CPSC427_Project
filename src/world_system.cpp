@@ -189,7 +189,8 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 {
 	this->renderer = renderer_arg;
 	// Playing background music indefinitely
-	Mix_PlayMusic(background_music, -1);
+    // TODO: uncomment this
+//	Mix_PlayMusic(background_music, -1);
 	fprintf(stderr, "Loaded music\n");
 
 	// Set all states to default
@@ -209,6 +210,10 @@ void WorldSystem::restart_game()
 	printf("Restarting\n");
 
 	GameSceneState = 0; // reset to world scene (we can make a function for combat restart)
+
+    // FIXME: awkward place to put this logic
+    // reset combat level
+    registry.combatLevel.components[0].counter = 1;
 
 	// Reset the game speed
 	current_speed = 1.f;

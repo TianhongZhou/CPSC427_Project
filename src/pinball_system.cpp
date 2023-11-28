@@ -29,6 +29,9 @@ RenderSystem* r;
 float DASH_STRENTH = 0.2f;
 
 PinballSystem::PinballSystem() {
+   auto curr_level = Entity();
+   CombatLevel combatLevel = {1};
+   registry.combatLevel.emplace(curr_level, combatLevel);
 
 }
 
@@ -205,7 +208,7 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
     // 	GameSceneState = 0;
     // }
     float step_seconds = elapsed_ms_since_last_update / 1000.f;
-    if (registry.pinballEnemies.entities.size() == 0) {
+    if (registry.pinballEnemies.entities.size() == 0 && registry.swarmKing.entities.empty()) {
         // exit_combat();
         // GameSceneState = 0;
     } else {
@@ -570,6 +573,89 @@ vec2 PinballSystem::rule4(Entity swarmKing, Entity b_j, float strength) {
 }
 
 void PinballSystem::restart() {
+    Entity c = registry.combatLevel.entities[0];
+    int& curr_level = registry.combatLevel.get(c).counter;
+
+    switch (curr_level) {
+        case -1:
+            start_test_level();
+        case 1:
+            start_level_1();
+            break;
+        case 2:
+            start_level_2();
+            break;
+        case 3:
+            start_level_3();
+            break;
+        default:
+            start_base_level();
+    }
+
+    curr_level += 1;
+}
+
+// initializes the room, ball, and flipper
+void PinballSystem::start_base_level() {
+
+    createPinballRoom(renderer, { 600, 400 }, window);
+    r = renderer;
+    vec2 boundary = {260 + 70, 800 - 70};
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> distribution1(boundary.x, boundary.y);
+    std::uniform_real_distribution<float> distribution2(0.f, 1.f);
+
+    //flipper
+    Entity flipper = createPinballFlipper(renderer, { {480, 600},
+                                                      {480, 580},
+                                                      {580, 580},
+                                                      {580, 600} }, GEOMETRY_BUFFER_ID::RECT);
+    createNewRectangleTiedToEntity(flipper, 100.f, 20.f, registry.motions.get(flipper).position, true, 0.0);
+
+    playerFlipper pf;
+    registry.playerFlippers.insert(flipper, pf);
+
+    PinBall& pinBall = registry.pinBalls.components[0];
+    Entity player_ball = createBall(renderer, { 400, 400 }, pinBall.pinBallSize);
+    //createNewRectangleTiedToEntity(player_ball, 50.f * MonitorScreenRatio, 50.f * MonitorScreenRatio * 1.2f, registry.motions.get(player_ball).position, true, 1);
+    createNewRectangleTiedToEntity(player_ball, pinBall.pinBallSize, pinBall.pinBallSize, registry.motions.get(player_ball).position, true, 1);
+
+    // setting up player status for pinball
+    PinballPlayerStatus status;
+    status.health = 100.0f;
+    status.invincibilityTimer = 0.0f;
+    status.antiGravityTimer = 0.0f;
+    status.highGravityTimer = 0.0f;
+    status.comboCounter = 0;
+
+    // setting up playerball self damage
+    DamageToPlayer playerballDamage;
+    playerballDamage.damage = 20.0f;
+
+    DamageToEnemy playerballAttack;
+    playerballAttack.damage = registry.pinBalls.components[0].pinBallDamage;
+
+    registry.pinballPlayerStatus.emplace(player_ball, status);
+    registry.damages.emplace(player_ball, playerballDamage);
+    registry.attackPower.emplace(player_ball, playerballAttack);
+
+    //wall
+    Entity leftwall = createPinballWall(renderer, {{220, 749},
+                                                   {220, 1},
+                                                   {240, 1},
+                                                   {240, 749}}, GEOMETRY_BUFFER_ID::OCT);
+    createNewRectangleTiedToEntity(leftwall, 20.f, 748.f, registry.motions.get(leftwall).position, false, 1.0);
+
+    Entity rightwall = createPinballWall(renderer, {{820, 749},
+                                                    {820, 1},
+                                                    {840, 1},
+                                                    {840, 749}}, GEOMETRY_BUFFER_ID::OCT);
+    createNewRectangleTiedToEntity(rightwall, 20.f, 748.f, registry.motions.get(rightwall).position, false, 1.0);
+}
+
+// contains the original initialization from M3
+void PinballSystem::start_test_level() {
     // int w, h;
     // glfwGetWindowSize(window, &w, &h);
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
@@ -599,7 +685,7 @@ void PinballSystem::restart() {
 
     playerFlipper pf;
     registry.playerFlippers.insert(flipper, pf);
- 
+
     PinBall& pinBall = registry.pinBalls.components[0];
     Entity player_ball = createBall(renderer, { 400, 400 }, pinBall.pinBallSize);
     //createNewRectangleTiedToEntity(player_ball, 50.f * MonitorScreenRatio, 50.f * MonitorScreenRatio * 1.2f, registry.motions.get(player_ball).position, true, 1);
@@ -643,15 +729,15 @@ void PinballSystem::restart() {
 
     //wall
     Entity leftwall = createPinballWall(renderer, {{220, 749},
-                                                       {220, 1},
-                                                       {240, 1},
-                                                       {240, 749}}, GEOMETRY_BUFFER_ID::OCT);
+                                                   {220, 1},
+                                                   {240, 1},
+                                                   {240, 749}}, GEOMETRY_BUFFER_ID::OCT);
     createNewRectangleTiedToEntity(leftwall, 20.f, 748.f, registry.motions.get(leftwall).position, false, 1.0);
 
     Entity rightwall = createPinballWall(renderer, {{820, 749},
-                                                        {820, 1},
-                                                        {840, 1},
-                                                        {840, 749}}, GEOMETRY_BUFFER_ID::OCT);
+                                                    {820, 1},
+                                                    {840, 1},
+                                                    {840, 749}}, GEOMETRY_BUFFER_ID::OCT);
     createNewRectangleTiedToEntity(rightwall, 20.f, 748.f, registry.motions.get(rightwall).position, false, 1.0);
 
     //Entity flipper = createPolygonByVertex(renderer, {{300, 600}, {300, 580}, {400, 580}, {400, 600}}, GEOMETRY_BUFFER_ID::RECT);
@@ -674,6 +760,43 @@ void PinballSystem::restart() {
     //                                                     {840, 730}}, GEOMETRY_BUFFER_ID::RECT);
     //createNewRectangleTiedToEntity(rightslide, 180.f, 20.f, registry.motions.get(rightslide).position, false, 1.0);
 
+}
+
+void PinballSystem::start_level_1() {
+    start_base_level();
+
+    r = renderer;
+    vec2 boundary = {260 + 70, 800 - 70};
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> distribution1(boundary.x, boundary.y);
+    std::uniform_real_distribution<float> distribution2(0.f, 1.f);
+
+    Entity pinballenemyMain = createPinBallEnemy(renderer, vec2(525,180), boundary,2.0f, 0, 3000.0f, 1.0);
+
+    registry.colors.insert(pinballenemyMain, { distribution2(gen), distribution2(gen), distribution2(gen) });
+}
+
+void PinballSystem::start_level_2() {
+    start_base_level();
+    r = renderer;
+    vec2 boundary = {260 + 70, 800 - 70};
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> distribution2(0.f, 1.f);
+
+    Entity pinballenemyMain = createPinBallEnemy(renderer, vec2(525,180), boundary,2.0f, 0, 3000.0f, 1.0);
+    registry.colors.insert(pinballenemyMain, { distribution2(gen), distribution2(gen), distribution2(gen) });
+
+    Entity pinballenemy = createPinBallEnemy(renderer, vec2(525, 90), boundary, 2.0f, 1, 5000.0f, 1.f);
+    registry.colors.insert(pinballenemy, { distribution2(gen), distribution2(gen), distribution2(gen) });
+
+}
+
+void PinballSystem::start_level_3() {
+    start_base_level();
+    vec2 boundary = {260 + 70, 800 - 70};
+    spawn_swarm(boundary);
 }
 
 // Compute collisions between entities

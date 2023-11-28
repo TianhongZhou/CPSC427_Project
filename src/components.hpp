@@ -30,6 +30,11 @@ struct EnemyBullet
 
 };
 
+struct CombatLevel
+{
+    int counter = 0;
+};
+
 // Player component
 struct Player
 {

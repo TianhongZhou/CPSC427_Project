@@ -11,7 +11,7 @@ class ECSRegistry
 
 public:
 	// Manually created list of all components this game has
-	
+	ComponentContainer<CombatLevel> combatLevel;
     ComponentContainer<EnterCombatTimer> enterCombatTimer;
     ComponentContainer<Combat> combat;
     ComponentContainer<MainWorld> mainWorld;
@@ -56,6 +56,7 @@ public:
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
 	{
+        registry_list.push_back(&combatLevel);
         registry_list.push_back(&combat);
 		registry_list.push_back(&mainWorld);
 		registry_list.push_back(&deathTimers);
