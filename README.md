@@ -39,6 +39,7 @@
     - drawTexturedMesh in render_system.cpp
     - textured.vs.glsl
     - textured.fs.glsl
+    - Physics-Based Animation: trailing effect using particles, particles have random diffusional motion like real life particles, and will float up due to buoyant.
 - ### Assets: Introduce new sprite and background assets (background music & attacking sound)
     - create_window in world_system.cpp
     - on_mouse_click in world_system.cpp
@@ -53,6 +54,9 @@
 - ### Help
     - draw_world in render_system.cpp
 - ### Playability
+    - #### MainWorld room generation
+        - createRoom in world_init.cpp
+        - Many other helper functions to generate rooms and its associated assets in world_init.cpp
     - #### MainWorld enemy AI system
    	    - stepWorld in ai_system.cpp
     - #### MainWorld enemy periodic generation
@@ -71,11 +75,38 @@
         - GenerateDropBuff in world_system.hpp
         - createDropBuff in world_init.cpp
         - random generate drop in createRoom in world_init.cpp
+    - #### Dash mechanic
+    	- pinballDash() in pinball_system.cpp
+    - #### Various timers (invincibility, attack, effects)
+	    - countdown in pinball_system.cpp
+	    - updateTimers in pinball_system.cpp
+	    - timer fields in various components
+    - #### Enemy attack
+	    - stepEnemyAttack in in pinball_system.cpp
+	    - temporary projectile component
+    - #### Combo meter and bonus ball system
+	    - PinballPlayerStatus component
+	    - related code in on_key in pinball_system.cpp
+    - #### Swarm Enemy Type
+   	    - SwarmKing and SwarmEnemy components
+    	    - spawn_swarm, update_swarm_motion and other functions in pinball_system.cpp
+    
+    
 - ### Consistent game resolution
     - create_window in world_system.cpp
     - drawToScreen in render_system.cpp
     - draw_combat_scene in render_system.cpp
     - draw_world in render_system.cpp
+
+- ### Reloadability
+    - save_game and load_game in world_system.cpp
+    - Used external library nlohmann/json (https://github.com/nlohmann/json)
+    
+- ### Basic Integrated Assets
+    - createPinballRoom in world_init.cpp
+    - createBall in world_init.cpp
+    - createPinballWall in world_init.cpp
+    - createPinballFlipper in world_init.cpp
 
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:
@@ -114,6 +145,13 @@ The original development plan for the week of Sept. 31 and Oct. 8 is as followin
     - Save/Load feature
     - More advanced physics effects or complex geometry, possibly more advanced enemies
     - Particle Effects
+    - Flipper control change
+    - New combat effects (high gravity and anti gravity)
+    - Enemy attacks with temporary projectiles
+    - Combo meter and bonus ball mechanic
+    - Player Heath
+    - Enemy and Player invincibility timer
+    
 
 Did not implement different types of dungeon rooms. Art assets are integrated in the week of Nov. 12 instead of Nov. 5. Did not implement more advanced enemies. Except for the ones mentioned above, all other points listed are finished on time. The discrepancies between the development plan and actual development progress is also listed.
 

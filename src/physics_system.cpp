@@ -615,13 +615,20 @@ void update(float dt)
 
 void updateWithSubstep(float dt, float steps)
 {
+
+
 	if (dt > 200.f)
 	{
 		dt = 5.f;
 	}
 	for (int i = 0; i < steps; i++)
 	{
-		update(dt / steps);
+		float slowdown = 1.0f;
+
+		if (registry.pinballPlayerStatus.components[0].focusTimer != 0.0f) {
+			slowdown = 0.1f;
+		}
+		update(dt*slowdown / steps);
 	}
 }
 
@@ -657,7 +664,7 @@ void PhysicsSystem::step(float elapsed_ms)
 		if (particle.lifespan > 0.f)
 		{
 			Motion& motion = registry.motions.get(entity);
-			float floatage = 9.81f *2.f;
+			float floatage = 9.81f *3.f;
 			motion.velocity.y -= step_seconds*floatage;
 			motion.position += step_seconds*motion.velocity;
 			particle.lifespan -= step_seconds;

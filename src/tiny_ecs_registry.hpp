@@ -52,6 +52,9 @@ public:
 	ComponentContainer<Spikes> spikes;
 	ComponentContainer<Door> doors;
 
+	ComponentContainer<Zombie> zombies;
+	ComponentContainer<Sniper> snipers;
+
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
@@ -95,6 +98,9 @@ public:
 		registry_list.push_back(&balls);
 		registry_list.push_back(&spikes);
 		registry_list.push_back(&doors);
+
+		registry_list.push_back(&zombies);
+		registry_list.push_back(&snipers);
 	}
 
 	void clear_all_components() {

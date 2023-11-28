@@ -99,8 +99,41 @@ void AISystem::step_world(float elapsed_ms)
 	bullet_spawn_timer -= elapsed_ms;
 
 	for (int i = (int)motion_container.components.size() - 1; i >= 0; --i)
-	{
-		if (registry.mainWorldEnemies.has(motion_container.entities[i]))
+	{	
+		if (registry.snipers.has(motion_container.entities[i])) {
+
+			Motion& enemyMotion = motion_container.components[i];
+			Sniper& enemy = registry.snipers.get(motion_container.entities[i]);
+			float angleToPlayer = atan2(playerMotion.position.y - enemyMotion.position.y, playerMotion.position.x - enemyMotion.position.x);
+
+			//shoot player
+
+			if (bullet_spawn_timer < 0 && !registry.positionKeyFrames.has(motion_container.entities[i])) {
+
+				// Create enemy bullet
+				Entity entity = createEnemyBullet({ 0,0 }, { 0,0 }); //intialized below
+
+				Motion& motion = registry.motions.get(entity);
+				motion.position = enemyMotion.position;
+
+				float radius = 30; //* (uniform_dist(rng) + 0.3f);
+				motion.scale = { radius, radius };
+				motion.angle = angleToPlayer;
+				motion.velocity = vec2(200.f, 0.f);
+				registry.colors.insert(entity, { 1, 1, 1 });
+			}
+
+		}
+		else if (registry.zombies.has(motion_container.entities[i])) {
+
+			Motion& enemyMotion = motion_container.components[i];
+			Zombie& enemy = registry.zombies.get(motion_container.entities[i]);
+			float angleToPlayer = atan2(playerMotion.position.y - enemyMotion.position.y, playerMotion.position.x - enemyMotion.position.x);
+			// Enemy chasing player
+			enemyMotion.velocity.x = 100.f * cos(angleToPlayer);
+			enemyMotion.velocity.y = 100.f * sin(angleToPlayer);
+		}
+		else if (registry.mainWorldEnemies.has(motion_container.entities[i]))
 		{
 			Motion &enemyMotion = motion_container.components[i];
 			Enemy &enemy = registry.mainWorldEnemies.get(motion_container.entities[i]);
