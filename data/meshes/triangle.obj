@@ -1,0 +1,9 @@
+# Simple Triangle OBJ
+
+# Vertices
+v 0.0 0.0 0.0
+v 1.0 0.0 0.0
+v 0.5 1.0 0.0
+
+# Faces
+f 1 2 3
