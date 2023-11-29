@@ -508,6 +508,13 @@ void RenderSystem::draw_world(bool &tutorial_open) {
             light.haloSoftness = 0.05f;
             light.priority = 2;
         }
+        else {
+            light.screenPosition = vec2(motion.position.x / (window_width_px + offsetX - 20), (window_height_px + offsetY - motion.position.y) / (window_height_px + offsetY));
+            light.haloRadius = 0.05f;
+            light.lightColor = vec3(1.0f, 0.5f, 0.5f);
+            light.haloSoftness = 0.05f;
+            light.priority = 1;
+        }
         lights.push_back(light);
     }
 

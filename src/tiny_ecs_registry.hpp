@@ -52,6 +52,7 @@ public:
 
 	ComponentContainer<Zombie> zombies;
 	ComponentContainer<Sniper> snipers;
+	ComponentContainer<Boss> bosses;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -96,6 +97,7 @@ public:
 
 		registry_list.push_back(&zombies);
 		registry_list.push_back(&snipers);
+		registry_list.push_back(&bosses);
 	}
 
 	void clear_all_components() {

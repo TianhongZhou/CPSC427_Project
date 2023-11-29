@@ -141,7 +141,9 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 		entity,
 		{ TEXTURE_ASSET_ID::PLAYER,
 			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+			GEOMETRY_BUFFER_ID::SPRITE,
+			vec2(0.2, -0.5),
+			vec2(-10, 48.f / 2.0f + 8) });
 
 	return entity;
 }
@@ -210,7 +212,7 @@ Entity createRoomSniper(RenderSystem* renderer, vec2 pos, vec2 roomPostion, floa
 	motion.scale = mesh.original_size * 65.f;
 
 	// registry.players.emplace(entity);
-	//registry.mainWorldEnemies.emplace(entity);
+	registry.mainWorldEnemies.emplace(entity);
 	registry.snipers.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
@@ -236,7 +238,7 @@ Entity createRoomZombie(RenderSystem* renderer, vec2 pos, vec2 roomPostion, floa
 	motion.scale = mesh.original_size * 65.f;
 
 	// registry.players.emplace(entity);
-	//registry.mainWorldEnemies.emplace(entity);
+	registry.mainWorldEnemies.emplace(entity);
 	registry.zombies.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
@@ -353,18 +355,6 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 		Entity spikes = createSpikes({ distribution1(gen), distribution2(gen)}, {80, 80});
 		//Entity spikes = createSpikes({ 100 * i, distribution2(gen) }, {80, 80});
 		registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
-
-		int randomValue = rand() % 4;
-		printf("id = %d ", randomValue);
-		TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::DROPBALLSIZE;
-
-		if (randomValue == 1) {
-			id = TEXTURE_ASSET_ID::DROPBALLDAMAGE;
-		}
-		Entity drop = createDropBuff(renderer, { distribution1(gen), distribution2(gen) }, id);
-		DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
-		dropBuff.id = randomValue;
-		dropBuff.increaseValue = rand() % 7 + 2;
 	}
 
 	return entity;
@@ -404,6 +394,11 @@ Entity createRoom1(RenderSystem* renderer, vec2 pos)
 		room.enemies[i] = createRoomSniper(renderer, { pos[0] + distribution1(gen), pos[1] + distribution1(gen), }, pos, 700.f, i == 0);
 		registry.colors.insert(room.enemies[i], { distribution2(gen), distribution2(gen), distribution2(gen) });
 	}
+
+	registry.bosses.emplace(room.enemies[0]);
+	Motion& motion2 = registry.motions.get(room.enemies[0]);
+	motion2.scale *= 1.8f;
+	registry.lights.emplace(room.enemies[0]);
 	
 	// Add door
 	Entity door = createDoor({ 0,0 }, { 0,0 }); //intialized below
@@ -453,6 +448,11 @@ Entity createRoom2(RenderSystem* renderer, vec2 pos)
 		room.enemies[i] = createRoomZombie(renderer, { pos[0] + distribution1(gen), pos[1] + distribution1(gen), }, pos, 700.f, i == 0);
 		registry.colors.insert(room.enemies[i], { distribution2(gen), distribution2(gen), distribution2(gen) });
 	}
+
+	registry.bosses.emplace(room.enemies[0]);
+	Motion& motion2 = registry.motions.get(room.enemies[0]);
+	motion2.scale *= 1.8f;
+	registry.lights.emplace(room.enemies[0]);
 
 	// Add door
 	Entity door = createDoor({ 0,0 }, { 0,0 }); //intialized below
@@ -504,31 +504,19 @@ Entity createRoom3(RenderSystem* renderer, vec2 pos)
 		room.enemies[i] = createRoomEnemy(renderer, { pos[0] + distribution1(gen), pos[1] + distribution1(gen), }, pos, 700.f, i == 0);
 		registry.colors.insert(room.enemies[i], { distribution2(gen), distribution2(gen), distribution2(gen) });
 	}
+
+	registry.bosses.emplace(room.enemies[0]);
+	Motion&  motion2 = registry.motions.get(room.enemies[0]);
+	motion2.scale *= 1.8f;
+	registry.lights.emplace(room.enemies[0]);
 	PositionKeyFrame& positionKeyFrame = registry.positionKeyFrames.emplace(room.enemies[0]);
 	positionKeyFrame.timeIncrement = 0.0f;
 	positionKeyFrame.timeAccumulator = 0.1f;
 	std::vector<vec3> keyFrames = {};
-	keyFrames.push_back({ 0.0f, 600, 400 });
-	keyFrames.push_back({ 10.0f, 600, 600 });
-	keyFrames.push_back({ 20.0f, 400, 600 });
-	keyFrames.push_back({ 30.0f, 400, 400 });
-	keyFrames.push_back({ 40.0f, 600, 400 });
+	keyFrames.push_back({ 0.0f, window_width_px / 2 - 120, 50 });
+	keyFrames.push_back({ 20.0f, window_width_px / 2 + 120, 50 });
+	keyFrames.push_back({ 40.0f, window_width_px / 2 - 120, 50 });
 	positionKeyFrame.keyFrames = keyFrames;
-
-	srand(time(NULL));
-
-	for (int i = 0; i < 2; i++) {
-		int randomValue = rand() % 4;
-		TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::DROPBALLSIZE;
-
-		if (randomValue == 1) {
-			id = TEXTURE_ASSET_ID::DROPBALLDAMAGE;
-		}
-		Entity drop = createDropBuff(renderer, { pos[0] + distribution1(gen), pos[1] + distribution2(gen) }, id);
-		DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
-		dropBuff.id = randomValue;
-		dropBuff.increaseValue = rand() % 7 + 2;
-	}
 
 	return entity;
 }

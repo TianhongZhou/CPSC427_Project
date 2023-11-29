@@ -53,6 +53,8 @@ class RenderSystem {
 			textures_path("enemybullet.png"),
 			textures_path("drop_ball_size.png"),
 			textures_path("drop_ball_damage.png"),
+			textures_path("drop_beam.png"),
+			textures_path("drop_gravity.png"),
 			textures_path("pinball.png"),
 			textures_path("pinball_background.png"),
 			textures_path("flipper.png"),
