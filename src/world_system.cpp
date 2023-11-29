@@ -147,6 +147,22 @@ GLFWwindow *WorldSystem::create_window()
 	salmon_dead_sound = Mix_LoadWAV(audio_path("salmon_dead.wav").c_str());
 	player_attack_sound = Mix_LoadWAV(audio_path("Attack Sound.wav").c_str());
 
+
+	enemy_death_sound = Mix_LoadWAV(audio_path("enemyDeathSound.wav").c_str());
+	dash_sound = Mix_LoadWAV(audio_path("dashSound.wav").c_str());
+	enemy_hit_sound = Mix_LoadWAV(audio_path("enemyHitSound.wav").c_str());
+	flipper_sound = Mix_LoadWAV(audio_path("flipperSound.wav").c_str());
+	player_hit_sound = Mix_LoadWAV(audio_path("playerHitSound.wav").c_str());
+
+	Entity sounds = Entity();
+	soundForPhys s;
+	s.enemy_death_sound = enemy_death_sound;
+	s.enemy_hit_sound = enemy_hit_sound;
+	s.player_hit_sound = player_hit_sound;
+
+	registry.sfx.emplace(sounds, s);
+	
+
 	if (background_music == nullptr || salmon_dead_sound == nullptr || player_attack_sound == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",

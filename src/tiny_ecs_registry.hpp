@@ -42,6 +42,7 @@ public:
 	ComponentContainer<PinBall> pinBalls;
 	ComponentContainer<DropBuff> dropBuffs;
 	ComponentContainer<Particle> particles;
+	ComponentContainer<soundForPhys> sfx;
 	
 	// World assets
 	ComponentContainer<PlayerBullet> playerBullets;
@@ -86,6 +87,7 @@ public:
 		registry_list.push_back(&pinBalls);
 		registry_list.push_back(&dropBuffs);
 		registry_list.push_back(&particles);
+		registry_list.push_back(&sfx);
 
 		// World assets
 		registry_list.push_back(&playerBullets);

@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
+#include <SDL_mixer.h>
+
 struct Zombie
 {
 
@@ -284,6 +286,15 @@ struct DropBuff {
 	// 0 - pinball size, 1 - pinball damage , 2- antiGravity, 3 - tractorBeam
 	int id;
 	float increaseValue;
+};
+
+
+struct soundForPhys {
+	Mix_Chunk* enemy_death_sound;
+
+	Mix_Chunk* enemy_hit_sound;
+
+	Mix_Chunk* player_hit_sound;
 };
 
 
