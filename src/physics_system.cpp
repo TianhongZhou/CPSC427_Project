@@ -90,7 +90,7 @@ struct CollisionEvent
 	float Depth;
 	Edge *Edge;
 	Vertex_Phys *Vertex;
-
+	
 	physObj *EdgeParent;
 };
 
@@ -352,6 +352,8 @@ void detectAndSolveAllCollisions()
 
 						pinballEnemy.invincibilityTimer += 200.0f;
 
+						Mix_PlayChannel(-1, registry.sfx.components[0].enemy_hit_sound, 0);
+
 						// ticking up combo
 						registry.pinballPlayerStatus.components[0].comboCounter++;
 						printf("Combo = %i ", registry.pinballPlayerStatus.components[0].comboCounter);
@@ -373,6 +375,10 @@ void detectAndSolveAllCollisions()
 						}
 					}
 				}
+//                if (registry.swarmEnemies.has(entity_a) && !registry.swarmEnemies.has(entity_b) && !registry.swarmKing.has(entity_b))
+//                {
+//                    registry.remove_all_components_of(entity_a);
+//                }
 			}
 		}
 	}
@@ -458,6 +464,8 @@ void applyGlobalConstraints()
 						status.health -= registry.damages.get(registry.physObjs.entities[i]).damage;
 						status.invincibilityTimer += 500.0f;
 						// printf("PlayerHealth = %f ", status.health);
+
+						Mix_PlayChannel(-1, registry.sfx.components[0].player_hit_sound, 0);
 
 						// reset combo
 						status.comboCounter = 0;

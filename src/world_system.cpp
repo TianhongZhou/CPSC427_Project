@@ -94,12 +94,22 @@ GLFWwindow *WorldSystem::create_window()
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
 	// Obtain monitor full screen size
-	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
-	const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
-	MonitorWidth = mode->width;
-	MonitorHeight = mode->height;
 
-	float windowAspectRatio = static_cast<float>(window_width_px) / window_height_px;
+	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+
+    // using secondary monitor for testing purposes
+//    int count;
+//    GLFWmonitor** monitors = glfwGetMonitors(&count);
+//    printf("count: %d\n", count);
+//    GLFWmonitor* primaryMonitor = monitors[0];
+
+	const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+	MonitorWidth = static_cast<int>(mode->width );
+	MonitorHeight = static_cast<int>(mode->height);
+//    printf("monitor width: %d\n", MonitorWidth);
+//    printf("monitor height: %d\n", MonitorHeight);
+
+    float windowAspectRatio = static_cast<float>(window_width_px) / window_height_px;
 	float monitorAspectRatio = static_cast<float>(MonitorWidth) / MonitorHeight;
 	offsetX = 0;
 	offsetY = 0; // Offsets for letterboxing
@@ -146,6 +156,22 @@ GLFWwindow *WorldSystem::create_window()
 	background_music = Mix_LoadMUS(audio_path("Pinball Music.wav").c_str());
 	salmon_dead_sound = Mix_LoadWAV(audio_path("salmon_dead.wav").c_str());
 	player_attack_sound = Mix_LoadWAV(audio_path("Attack Sound.wav").c_str());
+
+
+	enemy_death_sound = Mix_LoadWAV(audio_path("enemyDeathSound.wav").c_str());
+	dash_sound = Mix_LoadWAV(audio_path("dashSound.wav").c_str());
+	enemy_hit_sound = Mix_LoadWAV(audio_path("enemyHitSound.wav").c_str());
+	flipper_sound = Mix_LoadWAV(audio_path("flipperSound.wav").c_str());
+	player_hit_sound = Mix_LoadWAV(audio_path("playerHitSound.wav").c_str());
+
+	Entity sounds = Entity();
+	soundForPhys s;
+	s.enemy_death_sound = enemy_death_sound;
+	s.enemy_hit_sound = enemy_hit_sound;
+	s.player_hit_sound = player_hit_sound;
+
+	registry.sfx.emplace(sounds, s);
+	
 
 	if (background_music == nullptr || salmon_dead_sound == nullptr || player_attack_sound == nullptr)
 	{
@@ -199,6 +225,10 @@ void WorldSystem::restart_game()
 	printf("Restarting\n");
 
 	GameSceneState = 0; // reset to world scene (we can make a function for combat restart)
+
+    // FIXME: awkward place to put this logic
+    // reset combat level
+    registry.combatLevel.components[0].counter = 1;
 
 	// Reset the game speed
 	current_speed = 1.f;
