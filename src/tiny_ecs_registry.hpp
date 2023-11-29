@@ -11,7 +11,7 @@ class ECSRegistry
 
 public:
 	// Manually created list of all components this game has
-	
+	ComponentContainer<CombatLevel> combatLevel;
     ComponentContainer<EnterCombatTimer> enterCombatTimer;
     ComponentContainer<Combat> combat;
     ComponentContainer<MainWorld> mainWorld;
@@ -23,6 +23,8 @@ public:
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<ScreenState> screenStates;
 	ComponentContainer<Enemy> mainWorldEnemies;
+    ComponentContainer<SwarmKing> swarmKing;
+    ComponentContainer<SwarmEnemy> swarmEnemies;
 	ComponentContainer<PinBallEnemy> pinballEnemies;
 	ComponentContainer<Room> rooms;
 	ComponentContainer<DebugComponent> debugComponents;
@@ -42,6 +44,7 @@ public:
 	ComponentContainer<PinBall> pinBalls;
 	ComponentContainer<DropBuff> dropBuffs;
 	ComponentContainer<Particle> particles;
+	ComponentContainer<soundForPhys> sfx;
 	
 	// World assets
 	ComponentContainer<PlayerBullet> playerBullets;
@@ -52,11 +55,13 @@ public:
 
 	ComponentContainer<Zombie> zombies;
 	ComponentContainer<Sniper> snipers;
+	ComponentContainer<Boss> bosses;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
 	{
+        registry_list.push_back(&combatLevel);
         registry_list.push_back(&combat);
 		registry_list.push_back(&mainWorld);
 		registry_list.push_back(&deathTimers);
@@ -67,6 +72,8 @@ public:
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&screenStates);
 		registry_list.push_back(&mainWorldEnemies);
+        registry_list.push_back(&swarmKing);
+        registry_list.push_back(&swarmEnemies);
 		registry_list.push_back(&pinballEnemies);
 		registry_list.push_back(&rooms);
 		registry_list.push_back(&debugComponents);
@@ -86,6 +93,7 @@ public:
 		registry_list.push_back(&pinBalls);
 		registry_list.push_back(&dropBuffs);
 		registry_list.push_back(&particles);
+		registry_list.push_back(&sfx);
 
 		// World assets
 		registry_list.push_back(&playerBullets);
@@ -96,6 +104,7 @@ public:
 
 		registry_list.push_back(&zombies);
 		registry_list.push_back(&snipers);
+		registry_list.push_back(&bosses);
 	}
 
 	void clear_all_components() {

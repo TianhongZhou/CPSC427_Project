@@ -101,6 +101,12 @@
 - ### Reloadability
     - save_game and load_game in world_system.cpp
     - Used external library nlohmann/json (https://github.com/nlohmann/json)
+    
+- ### Basic Integrated Assets
+    - createPinballRoom in world_init.cpp
+    - createBall in world_init.cpp
+    - createPinballWall in world_init.cpp
+    - createPinballFlipper in world_init.cpp
 
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:
@@ -155,3 +161,11 @@ Physics
 https://www.youtube.com/watch?v=lS_qeBy3aQI, 
 http://programmerart.weebly.com/separating-axis-theorem.html, 
 https://www.gamedev.net/tutorials/programming/math-and-physics/a-verlet-based-approach-for-2d-game-physics-r2714/
+
+
+free SFX from
+https://pixabay.com/sound-effects/search/splat/
+https://quicksounds.com/sound/104/minecraft-damage-oof
+https://pixabay.com/sound-effects/search/punch/
+https://www.myinstants.com/en/instant/hitmarkermp3/#google_vignette
+https://pixabay.com/sound-effects/search/whoosh/

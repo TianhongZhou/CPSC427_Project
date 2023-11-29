@@ -33,8 +33,10 @@ class RenderSystem {
 		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::ENEMYWAVE, mesh_path("enemyWave.obj")),
 		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::ROOM, mesh_path("room.obj")),
 		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::ROAD, mesh_path("road.obj")),
-		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::PLAYER, mesh_path("player.obj"))
-	};
+		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::PLAYER, mesh_path("player.obj")),
+          std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SWARMENEMY, mesh_path("triangle.obj")),
+
+    };
 
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, texture_count> texture_paths = {
@@ -53,6 +55,8 @@ class RenderSystem {
 			textures_path("enemybullet.png"),
 			textures_path("drop_ball_size.png"),
 			textures_path("drop_ball_damage.png"),
+			textures_path("drop_beam.png"),
+			textures_path("drop_gravity.png"),
 			textures_path("pinball.png"),
 			textures_path("pinball_background.png"),
 			textures_path("flipper.png"),

@@ -64,11 +64,14 @@ int main()
 		else if (GameSceneState == 1) {
 
 			if (InitCombat) {
-				world_system.init_combat(pinballSystem);
+				pinballSystem.init(window, &render_system, &world_system);
 				InitCombat = 0;
 			}
 
 			pinballSystem.step(elapsed_ms);
+			if (GameSceneState == 0) {
+				continue;
+			}
 			physics_system.step(elapsed_ms);
 			ai_system.step(elapsed_ms);
 			pinballSystem.handle_collisions();
