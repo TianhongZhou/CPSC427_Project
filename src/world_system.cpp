@@ -818,30 +818,30 @@ void WorldSystem::handle_collisions_world()
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other_entity;
-		if (registry.players.has(entity))
-		{
-			// Checking Player - Enemy collisions
-			if (registry.mainWorldEnemies.has(entity_other) && registry.positionKeyFrames.has(entity_other) && registry.mainWorldEnemies.size() == 1)
-			{
-				if (!registry.enterCombatTimer.has(entity))
-				{
-					registry.enterCombatTimer.emplace(entity);
-					registry.enterCombatTimer.get(entity).engagedEnemeis.push_back(entity_other);
-				} else {
-					std::vector<Entity> vec = registry.enterCombatTimer.get(entity).engagedEnemeis;
-					int find = 0;
-					for (unsigned int j = 0; j < vec.size(); j++) {
-    					if (vec[j]== entity_other) {
-							find = 1;
-							break;
-						}
-  					}
-					if (!find) {
-        				registry.enterCombatTimer.get(entity).engagedEnemeis.push_back(entity_other);
-    				}
-				}
-			}
-		}
+		//if (registry.players.has(entity))
+		//{
+		//	// Checking Player - Enemy collisions
+		//	if (registry.mainWorldEnemies.has(entity_other) && registry.positionKeyFrames.has(entity_other) && registry.mainWorldEnemies.size() == 1)
+		//	{
+		//		if (!registry.enterCombatTimer.has(entity))
+		//		{
+		//			registry.enterCombatTimer.emplace(entity);
+		//			registry.enterCombatTimer.get(entity).engagedEnemeis.push_back(entity_other);
+		//		} else {
+		//			std::vector<Entity> vec = registry.enterCombatTimer.get(entity).engagedEnemeis;
+		//			int find = 0;
+		//			for (unsigned int j = 0; j < vec.size(); j++) {
+  //  					if (vec[j]== entity_other) {
+		//					find = 1;
+		//					break;
+		//				}
+  //					}
+		//			if (!find) {
+  //      				registry.enterCombatTimer.get(entity).engagedEnemeis.push_back(entity_other);
+  //  				}
+		//		}
+		//	}
+		//}
 		// enemy bullet vs player bullet collision
 		if (registry.enemyBullets.has(entity) && registry.playerBullets.has(entity_other) ||
 			registry.enemyBullets.has(entity_other) && registry.playerBullets.has(entity)) {
@@ -854,8 +854,17 @@ void WorldSystem::handle_collisions_world()
 		if (registry.mainWorldEnemies.has(entity) && registry.playerBullets.has(entity_other) ||
 			registry.snipers.has(entity) && registry.playerBullets.has(entity_other) || 
 			registry.zombies.has(entity) && registry.playerBullets.has(entity_other) ) {
+
 			// remove enemy upon collision
-			if (!registry.positionKeyFrames.has(entity) && !registry.positionKeyFrames.has(entity_other)) {
+			if (!registry.bosses.has(entity)) {
+				GenerateDropBuff(entity);
+				registry.remove_all_components_of(entity);
+				registry.remove_all_components_of(entity_other);
+			}
+			else if (registry.mainWorldEnemies.size() == 1) {
+				registry.motions.get(player).velocity = vec2(0.f, 0.f);
+				GameSceneState = 1;
+				InitCombat = 1;
 				GenerateDropBuff(entity);
 				registry.remove_all_components_of(entity);
 				registry.remove_all_components_of(entity_other);
@@ -866,7 +875,7 @@ void WorldSystem::handle_collisions_world()
 		if (registry.enemyBullets.has(entity) && registry.players.has(entity_other) ||
 			registry.zombies.has(entity) && registry.players.has(entity_other)) {
 			// handle damage interaction (nothing for now)
-			restart_game();
+			// restart_game();
 			/*if (registry.enemyBullets.has(entity)) {
 				registry.remove_all_components_of(entity);
 			}
@@ -881,7 +890,7 @@ void WorldSystem::handle_collisions_world()
 		// spike collision
 		if (registry.spikes.has(entity) && registry.players.has(entity_other)) {
 			// handle damage interaction (nothing for now)
-			restart_game();
+			// restart_game();
 		}
 
 		// player vs door collision
@@ -909,16 +918,43 @@ void WorldSystem::handle_collisions_world()
 }
 
 // generate random drop after kill enemy
+// 66% have drop; in the 66% case, 40% drop size and damage increase, 10% drop beam and gravity ones
 void WorldSystem::GenerateDropBuff(Entity entity)
 {
 	Motion& motion = registry.motions.get(entity);
 
 	srand(time(NULL));
-	int randomValue = rand() % 4;
-	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::DROPBALLSIZE;
 
-	if (randomValue == 1) {
-		id = TEXTURE_ASSET_ID::DROPBALLDAMAGE;
+	int rawValue = rand() % 10;
+	if (rawValue < 3) { 
+		return;
+	}
+
+	int randomValue;
+	if (rawValue < 7) {
+		randomValue = rawValue % 2;
+	}
+	else if (rawValue == 7 || rawValue == 8) {
+		randomValue = 2;
+	}
+	else {
+		randomValue = 3;
+	}
+	TEXTURE_ASSET_ID id;
+
+	switch (randomValue) {
+		case 1:
+			id = TEXTURE_ASSET_ID::DROPBALLDAMAGE;
+			break;
+		case 2:
+			id = TEXTURE_ASSET_ID::DROPGRAVITY;
+			break;
+		case 3:
+			id = TEXTURE_ASSET_ID::DROPBEAM;
+			break;
+		default:
+			id = TEXTURE_ASSET_ID::DROPBALLSIZE;
+			break;
 	}
 	Entity drop = createDropBuff(renderer, motion.position, id);
 	DropBuff& dropBuff = registry.dropBuffs.emplace(drop);

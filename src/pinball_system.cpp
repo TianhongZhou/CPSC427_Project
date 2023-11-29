@@ -308,9 +308,15 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
         }
 
     }
-if (registry.swarmKing.size() > 0) {
-    update_swarm_motion();
-}
+    if (registry.swarmKing.size() > 0) {
+        update_swarm_motion();
+    }
+
+    if (registry.pinballEnemies.entities.size() <= 0) {
+        exit_combat();
+        updateTimers(elapsed_ms_since_last_update);
+        return true;
+    }
 
     updateTimers(elapsed_ms_since_last_update);
     stepEnemyAttack();

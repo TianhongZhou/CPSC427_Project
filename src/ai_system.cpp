@@ -182,6 +182,13 @@ void AISystem::step_world(float elapsed_ms)
 							(positionKeyFrame.keyFrames[j + 1].x > positionKeyFrame.timeIncrement))
 						{
 							vec2 target = vec2(positionKeyFrame.keyFrames[j + 1].y, positionKeyFrame.keyFrames[j + 1].z);
+							SpriteSheet& spriteSheet = registry.spriteSheets.get(motion_container.entities[i]);
+							if (target.x < enemyMotion.position.x) {
+								spriteSheet.xFlip = 1;
+							}
+							else {
+								spriteSheet.xFlip = 0;
+							}
 							float t = (positionKeyFrame.timeIncrement - positionKeyFrame.keyFrames[j].x) /
 									  (positionKeyFrame.keyFrames[j + 1].x - positionKeyFrame.keyFrames[j].x);
 							enemyMotion.position = (1.0f - t) * vec2(positionKeyFrame.keyFrames[j].y, positionKeyFrame.keyFrames[j].z) +
