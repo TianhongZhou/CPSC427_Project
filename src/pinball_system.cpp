@@ -294,11 +294,15 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
                 for (int j = 0; j < enemy.healthBar.size(); j++) {
                     registry.remove_all_components_of(enemy.healthBar[j]);
                 }
+
                 if (registry.swarmKing.has(entity)) {
                     for (Entity se: registry.swarmEnemies.entities) {
                         registry.remove_all_components_of(se);
                     }
                 }
+
+                Mix_PlayChannel(-1, registry.sfx.components[0].enemy_death_sound, 0);
+
                 registry.remove_all_components_of(entity);
             }
         }
@@ -372,12 +376,16 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_SPACE)
     {
+
+        Mix_PlayChannel(-1, world->flipper_sound, 0);
+
         Entity& flipper = registry.playerFlippers.entities[0];
 
         physObj& flipperPhys = registry.physObjs.get(flipper);
 
         flipperPhys.Vertices[0].accel += vec2(0.f, -0.8f);
         flipperPhys.Vertices[1].accel += vec2(0.f, -0.8f);
+        
     }
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_U)
@@ -399,6 +407,9 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_F)
     {
+        if (registry.pinballPlayerStatus.components[0].dashCooldown == 0) {
+            Mix_PlayChannel(-1, world->dash_sound, 0); // had to do this check here because of strange reference loss
+        }
         pinballDash();
     }
 

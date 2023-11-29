@@ -63,6 +63,13 @@ public:
 	void load_game(const std::string& filename);
 
 
+	Mix_Chunk* enemy_death_sound;
+	Mix_Chunk* dash_sound;
+	Mix_Chunk* enemy_hit_sound;
+	Mix_Chunk* flipper_sound;
+	Mix_Chunk* player_hit_sound;
+
+
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
@@ -101,7 +108,10 @@ private:
 	// music references
 	Mix_Music* background_music;
 	Mix_Chunk* salmon_dead_sound;
+
 	Mix_Chunk* player_attack_sound;
+
+
 
 	// C++ random number generator
 	std::default_random_engine rng;
