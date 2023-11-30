@@ -98,6 +98,7 @@ private:
 	float current_speed;
 	float generate_enemy_timer = 0.f;
 	float spike_damage_timer = 0.f;
+	float playerHealth = 100.f;
 	Entity player_salmon;
 	Entity player;
 	std::array<Entity,MAX_ROOM_NUM> rooms;

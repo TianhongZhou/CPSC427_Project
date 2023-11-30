@@ -121,7 +121,7 @@ Entity createPinballFlipper(RenderSystem* renderer, const std::vector<vec2>& ver
 	return entity;
 }
 
-Entity createPlayer(RenderSystem* renderer, vec2 pos)
+Entity createPlayer(RenderSystem* renderer, vec2 pos, float currentHealth)
 {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
@@ -137,6 +137,7 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 	motion.scale = mesh.original_size * 75.f;
 
 	Player& player = registry.players.emplace(entity);
+	player.currentHealth = currentHealth;
 
 	Entity healthBar = createHealth(renderer, { pos.x, pos.y-50 }, false);
 	registry.colors.insert(healthBar, { 0.2, 0.2, 0.2 });

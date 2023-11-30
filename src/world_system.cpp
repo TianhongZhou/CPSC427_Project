@@ -249,8 +249,8 @@ void WorldSystem::restart_game()
 
 	// Create room, player, lighting
 	rooms[0] = createRoom(renderer, { 600, 400 }, window, 0);
-	// player = createPlayer(renderer, { (window_width_px)/2, (window_height_px)/2 }); 
-	player = createPlayer(renderer, { (window_width_px) / 2, 4 * (window_height_px) / 5 }); // spawn at the bottom of room for now  
+	playerHealth = 100.f;
+	player = createPlayer(renderer, { (window_width_px) / 2, 4 * (window_height_px) / 5 }, playerHealth); // spawn at the bottom of room for now  
 	registry.lights.emplace(player);
 }
 
@@ -646,6 +646,7 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 	Motion& playerMotion = motion_container.get(registry.players.entities[0]);
 	Player& player = registry.players.components[0];
 	if (spike_damage_timer>0.f) spike_damage_timer-=step_seconds;
+	playerHealth=player.currentHealth;
 	if (player.currentHealth<=0) restart_game();
 	// Health bar follows player
 	for (int j=0; j<player.healthBar.size(); j++) {
@@ -749,7 +750,7 @@ void WorldSystem::enter_next_room()
 
 	curr_room += 1; 
 	rooms[0] = createRoom(renderer, {600, 400}, window, curr_room);
-	player = createPlayer(renderer, { (window_width_px) / 2, 4 * (window_height_px) / 5 });
+	player = createPlayer(renderer, { (window_width_px) / 2, 4 * (window_height_px) / 5 }, playerHealth);
 
 	PinBall& pinBall = registry.pinBalls.get(player);
 	pinBall.pinBallSize = temp.pinBallSize;

@@ -32,7 +32,7 @@ Entity createRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window, int room
 Entity createPinballRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
 
 // the player
-Entity createPlayer(RenderSystem* renderer, vec2 pos);
+Entity createPlayer(RenderSystem* renderer, vec2 pos, float currentHealth);
 // the room enemy
 Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPosition, float roomScale, bool keyFrame);
 // the player
