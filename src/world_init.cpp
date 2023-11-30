@@ -121,7 +121,7 @@ Entity createPinballFlipper(RenderSystem* renderer, const std::vector<vec2>& ver
 	return entity;
 }
 
-Entity createPlayer(RenderSystem* renderer, vec2 pos)
+Entity createPlayer(RenderSystem* renderer, vec2 pos, float currentHealth)
 {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
@@ -136,7 +136,20 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * 75.f;
 
-	registry.players.emplace(entity);
+	Player& player = registry.players.emplace(entity);
+	player.currentHealth = currentHealth;
+
+	Entity healthBar = createHealth(renderer, { pos.x, pos.y-50 }, false);
+	registry.colors.insert(healthBar, { 0.2, 0.2, 0.2 });
+	Entity healthAmortized = createHealth(renderer, { pos.x, pos.y-50 }, false);
+	registry.colors.insert(healthAmortized, { 1, 1, 1 });
+
+	Entity health = createHealth(renderer, { pos.x, pos.y-50 }, false);
+	registry.colors.insert(health, { 1, 0, 0 });
+	player.healthBar[0] = healthBar;
+	player.healthBar[1] = health;
+	player.healthBar[2] = healthAmortized;
+
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::PLAYER,
@@ -548,13 +561,13 @@ Entity createPinballRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 	return entity;
 }
 
-Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos)
+Entity createHealth(RenderSystem* renderer, vec2 pos, bool combat)
 {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PINBALLENEMYBLOOD);
 	registry.meshPtrs.emplace(entity, &mesh);
 
-	registry.combat.emplace(entity);
+	if (combat) registry.combat.emplace(entity);
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -562,6 +575,7 @@ Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos)
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = mesh.original_size * 20.f;
+	registry.healthBar.emplace(entity);
 
 	registry.renderRequests.insert(
 		entity,
@@ -628,14 +642,13 @@ Entity createSwarmEnemy(RenderSystem* renderer, vec2 pos)
 	enemy.currentHealth = 100.f;
 	enemy.invincibilityTimer = 0.0f;
 
-	Entity healthBar = createPinBallEnemyHealth(renderer, { pos.x, pos.y-50 });
+	Entity healthBar = createHealth(renderer, { pos.x, pos.y-50 }, true);
 	registry.colors.insert(healthBar, { 0.2, 0.2, 0.2 });
-	Entity healthAmortized = createPinBallEnemyHealth(renderer, { pos.x, pos.y-50 });
+	Entity healthAmortized = createHealth(renderer, { pos.x, pos.y-50 }, true);
 	registry.colors.insert(healthAmortized, { 1, 1, 1 });
 
-	Entity health = createPinBallEnemyHealth(renderer, { pos.x, pos.y-50 });
+	Entity health = createHealth(renderer, { pos.x, pos.y-50 }, true);
 	registry.colors.insert(health, { 1, 0, 0 });
-	registry.healthBar.emplace(health);
 	enemy.healthBar[0] = healthBar;
 	enemy.healthBar[1] = health;
 	enemy.healthBar[2] = healthAmortized;
@@ -892,6 +905,94 @@ void createNewRectangleTiedToEntity(Entity e, float w, float h, vec2 centerPos, 
 	newObj.center = centerPos;
 
 }
+
+// void createNewCircleTiedToEntity(Entity e, float w, float h, vec2 centerPos, bool moveable, float knockbackCoef) {
+
+
+// 	//	auto& entity = Entity();
+
+// 	Vertex_Phys newV{};
+// 	registry.physObjs.emplace(e);
+// 	physObj test0 = registry.physObjs.components[0];
+
+
+// 	//	0-----1
+// 	//	|	  |
+// 	//	3-----2
+
+// 	physObj& newObj = registry.physObjs.get(e);
+
+// 	newObj.moveable = moveable;
+// 	newObj.knockbackCoef = knockbackCoef;
+
+// 	newV.pos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
+// 	newV.oldPos = vec2(centerPos.x - w / 2, centerPos.y + h / 2);
+// 	newV.accel = vec2(0.0, 0.0);
+
+
+// 	newObj.Vertices[0] = newV;
+
+// 	newV.pos = vec2(centerPos.x + w / 2, centerPos.y + h / 2);
+// 	newV.oldPos = vec2(centerPos.x + w / 2, centerPos.y + h / 2);
+
+// 	newObj.Vertices[1] = newV;
+
+// 	newV.pos = vec2(centerPos.x - w / 2, centerPos.y - h / 2);
+// 	newV.oldPos = vec2(centerPos.x - w / 2, centerPos.y - h / 2);
+
+// 	newObj.Vertices[3] = newV;
+
+// 	newV.pos = vec2(centerPos.x + w / 2, centerPos.y - h / 2);
+// 	newV.oldPos = vec2(centerPos.x + w / 2, centerPos.y - h / 2);
+
+
+// 	newObj.Vertices[2] = newV;
+
+// 	newObj.VertexCount = 4;
+
+// 	physObj test1 = registry.physObjs.components[0];
+
+// 	Edge newEdge{};
+
+
+
+// 	newObj.Edges[0].v1 = 0;
+// 	newObj.Edges[0].v2 = 1;
+// 	newObj.Edges[0].len = w;
+
+
+// 	newObj.Edges[1].v1 = 1;
+// 	newObj.Edges[1].v2 = 2;
+// 	newObj.Edges[1].len = h;
+
+
+
+// 	newObj.Edges[2].v1 = 2;
+// 	newObj.Edges[2].v2 = 3;
+// 	newObj.Edges[2].len = w;
+
+// 	physObj test2 = registry.physObjs.components[0];
+
+
+// 	newObj.Edges[3].v1 = 3;
+// 	newObj.Edges[3].v2 = 0;
+// 	newObj.Edges[3].len = h;
+
+
+
+// 	newObj.Edges[4].v1 = 0;
+// 	newObj.Edges[4].v2 = 2;
+// 	newObj.Edges[4].len = sqrt(h * h + w * w);
+
+
+
+
+
+// 	newObj.EdgesCount = 5;
+
+// 	newObj.center = centerPos;
+
+// }
 
 
 //}// Room Generation 

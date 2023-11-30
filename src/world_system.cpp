@@ -34,7 +34,7 @@ int scaledHeight;
 
 // Create the fish world
 WorldSystem::WorldSystem()
-	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f)
+	: points(0)
 {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
@@ -249,8 +249,8 @@ void WorldSystem::restart_game()
 
 	// Create room, player, lighting
 	rooms[0] = createRoom(renderer, { 600, 400 }, window, 0);
-	// player = createPlayer(renderer, { (window_width_px)/2, (window_height_px)/2 }); 
-	player = createPlayer(renderer, { (window_width_px) / 2, 4 * (window_height_px) / 5 }); // spawn at the bottom of room for now  
+	playerHealth = 100.f;
+	player = createPlayer(renderer, { (window_width_px) / 2, 4 * (window_height_px) / 5 }, playerHealth); // spawn at the bottom of room for now  
 	registry.lights.emplace(player);
 }
 
@@ -643,6 +643,32 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 
 	// Removing out of screen entities
 	auto &motion_container = registry.motions;
+	Motion& playerMotion = motion_container.get(registry.players.entities[0]);
+	Player& player = registry.players.components[0];
+	if (spike_damage_timer>0.f) spike_damage_timer-=step_seconds;
+	playerHealth=player.currentHealth;
+	if (player.currentHealth<=0) restart_game();
+	// Health bar follows player
+	for (int j=0; j<player.healthBar.size(); j++) {
+		if (motion_container.has(player.healthBar[j])) {
+			Motion& healthbarMotion = motion_container.get(player.healthBar[j]);
+			healthbarMotion.position.x = playerMotion.position.x;
+			healthbarMotion.position.y = playerMotion.position.y-50.f;
+		}
+	}
+	
+	// Update healthbar
+	if (motion_container.has(player.healthBar[1]) && motion_container.has(player.healthBar[2])) {
+		Motion& barMotion = motion_container.get(player.healthBar[0]);
+		Motion& healthMotion = motion_container.get(player.healthBar[1]);
+		Motion& amortizedMotion = motion_container.get(player.healthBar[2]);
+		healthMotion.scale.x =  barMotion.scale.x * player.currentHealth/player.maxHealth;
+		healthMotion.position.x = barMotion.position.x - (barMotion.scale.x - healthMotion.scale.x) / 2;
+		if (amortizedMotion.scale.x>healthMotion.scale.x) {
+			amortizedMotion.scale.x -= 0.5f;
+		}
+		amortizedMotion.position.x = barMotion.position.x - (barMotion.scale.x - amortizedMotion.scale.x) / 2;
+	}
 	
 	save_player_last_direction();
 
@@ -724,7 +750,7 @@ void WorldSystem::enter_next_room()
 
 	curr_room += 1; 
 	rooms[0] = createRoom(renderer, {600, 400}, window, curr_room);
-	player = createPlayer(renderer, { (window_width_px) / 2, 4 * (window_height_px) / 5 });
+	player = createPlayer(renderer, { (window_width_px) / 2, 4 * (window_height_px) / 5 }, playerHealth);
 
 	PinBall& pinBall = registry.pinBalls.get(player);
 	pinBall.pinBallSize = temp.pinBallSize;
@@ -875,8 +901,8 @@ void WorldSystem::handle_collisions_world()
 		if (registry.enemyBullets.has(entity) && registry.players.has(entity_other) ||
 			registry.zombies.has(entity) && registry.players.has(entity_other)) {
 			// handle damage interaction (nothing for now)
-			// restart_game();
-			/*if (registry.enemyBullets.has(entity)) {
+			registry.players.components[0].currentHealth -= 10.f;
+			if (registry.enemyBullets.has(entity)) {
 				registry.remove_all_components_of(entity);
 			}
 			else if (registry.zombies.has(entity)) {
@@ -884,13 +910,16 @@ void WorldSystem::handle_collisions_world()
 			}
 			else {
 				registry.remove_all_components_of(entity_other);
-			}*/
+			}
 		}
 
 		// spike collision
 		if (registry.spikes.has(entity) && registry.players.has(entity_other)) {
 			// handle damage interaction (nothing for now)
-			// restart_game();
+			if (spike_damage_timer<=0.f) {
+				registry.players.components[0].currentHealth -= 10.f;
+				spike_damage_timer=1.f;
+			}
 		}
 
 		// player vs door collision
