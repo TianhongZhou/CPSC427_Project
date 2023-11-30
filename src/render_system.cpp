@@ -354,10 +354,10 @@ void RenderSystem::drawToScreen() {
     gl_has_errors();
 
     // Flicker
-    GLint flicker_uloc = glGetUniformLocation(water_program, "flicker");
-    assert(flicker_uloc >= 0);
-    const int li = registry.enterCombatTimer.size() > 0 ? 1 : 0;
-    glUniform1i(flicker_uloc, li);
+    //GLint flicker_uloc = glGetUniformLocation(water_program, "flicker");
+    //assert(flicker_uloc >= 0);
+    //const int li = registry.enterCombatTimer.size() > 0 ? 1 : 0;
+    //glUniform1i(flicker_uloc, li);
     gl_has_errors();
 
     // Draw
