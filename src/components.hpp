@@ -55,7 +55,9 @@ struct CombatLevel
 // Player component
 struct Player
 {
-
+	std::array<Entity,3> healthBar;
+	float maxHealth = 100.f;
+	float currentHealth = 100.f;
 };
 
 // Entity is a part of Combat

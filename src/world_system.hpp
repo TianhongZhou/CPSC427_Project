@@ -96,9 +96,8 @@ private:
 
 	RenderSystem* renderer;
 	float current_speed;
-	float next_turtle_spawn;
-	float next_fish_spawn;
 	float generate_enemy_timer = 0.f;
+	float spike_damage_timer = 0.f;
 	Entity player_salmon;
 	Entity player;
 	std::array<Entity,MAX_ROOM_NUM> rooms;
