@@ -182,6 +182,8 @@ void updateTimers(float ms) {
         for (int i = 0; i < registry.pinballEnemies.components.size(); i++) {
             countdown(registry.pinballEnemies.components[i].invincibilityTimer, ms);
             countdown(registry.pinballEnemies.components[i].attackTimer, ms);
+            // making the color the attack cd indicator
+            registry.colors.get(registry.pinballEnemies.entities[i]).r = clamp((registry.pinballEnemies.components[i].attackTimer * 0.001f)/5.0f, 0.0f, 1.0f);
         }
 
     }
@@ -535,6 +537,27 @@ void PinballSystem::on_mouse_click(int button, int action, int mods) {
     (int) button;
     (int) action;
     (int) mods;
+
+    if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_RIGHT)
+    {
+        if (registry.pinballPlayerStatus.components[0].dashCooldown == 0) {
+            Mix_PlayChannel(-1, world->dash_sound, 0); // had to do this check here because of strange reference loss
+        }
+        pinballDash();
+    }
+
+    if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_LEFT)
+    {
+        Mix_PlayChannel(-1, world->flipper_sound, 0);
+
+        Entity& flipper = registry.playerFlippers.entities[0];
+
+        physObj& flipperPhys = registry.physObjs.get(flipper);
+
+        flipperPhys.Vertices[0].accel += vec2(0.f, -0.8f);
+        flipperPhys.Vertices[1].accel += vec2(0.f, -0.8f);
+    }
+
 }
 
 void PinballSystem::spawn_swarm(vec2 boundary) {
@@ -559,7 +582,7 @@ void PinballSystem::spawn_swarm(vec2 boundary) {
 
     }
 
-    Entity swarmKing = createPinBallEnemy(renderer, vec2(525, 300), boundary, 0.5, 1, 5000.0f, 0.5);
+    Entity swarmKing = createPinBallEnemy(renderer, vec2(525, 300), boundary, 0.5, 0, 5000.0f, 0.5);
     registry.swarmKing.insert(swarmKing,{});
 
     registry.colors.insert(swarmKing, { 0, 1, 0 });
