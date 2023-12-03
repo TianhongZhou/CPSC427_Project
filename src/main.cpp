@@ -41,7 +41,7 @@ int main()
 	render_system.init(window);
     world_system.init(&render_system);
 
-    bool tutorial_open = true;
+    bool tutorial_open = false;
 
 	// variable timestep loop
 	auto t = Clock::now();
@@ -77,8 +77,11 @@ int main()
 			pinballSystem.handle_collisions();
             render_system.draw_combat_scene();
 		}
+		else if (GameSceneState == -1 || GameSceneState == -2) {
+			world_system.step_world(elapsed_ms);
+		}
 
-        if (GameSceneState == 0) {
+        if (GameSceneState == 0 || GameSceneState == -1 || GameSceneState == -2) {
             render_system.draw_world(tutorial_open);
         }
 
