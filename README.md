@@ -108,6 +108,11 @@
     - createPinballWall in world_init.cpp
     - createPinballFlipper in world_init.cpp
 
+- ### Tutorial
+    - GameSceneState == -1 and -2 case
+    - data/textures/start.png, tutorial.png
+    - on_key and on_mouse_.. in world_system.cpp
+
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:
 

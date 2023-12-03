@@ -376,12 +376,12 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
             debugging.in_debug_mode = true;
     }
 
-    // Resetting game
-    if (action == GLFW_RELEASE && key == GLFW_KEY_R)
-    {
-        exit_combat();
-        world->restart_game();
-    }
+    //// Resetting game
+    //if (action == GLFW_RELEASE && key == GLFW_KEY_R)
+    //{
+    //    exit_combat();
+    //    world->restart_game();
+    //}
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_X)
     {
@@ -414,10 +414,10 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
         
     }
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_I)
-    {
-        registry.pinballPlayerStatus.components[0].highGravityTimer += 5000.0f;
-    }
+    //if (action == GLFW_RELEASE && key == GLFW_KEY_I)
+    //{
+    //    registry.pinballPlayerStatus.components[0].highGravityTimer += 5000.0f;
+    //}
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_F)
     {
@@ -427,25 +427,25 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
         pinballDash();
     }
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_K)
-    {
-        PinBall& pinBall = registry.pinBalls.components[0];
-        Entity projectile_ball = createBall(renderer, { 400, 400 }, pinBall.pinBallSize, 0.f);
-        createNewRectangleTiedToEntity(projectile_ball, pinBall.pinBallSize, pinBall.pinBallSize, registry.motions.get(projectile_ball).position, true, 1);
+    //if (action == GLFW_RELEASE && key == GLFW_KEY_K)
+    //{
+    //    PinBall& pinBall = registry.pinBalls.components[0];
+    //    Entity projectile_ball = createBall(renderer, { 400, 400 }, pinBall.pinBallSize, 0.f);
+    //    createNewRectangleTiedToEntity(projectile_ball, pinBall.pinBallSize, pinBall.pinBallSize, registry.motions.get(projectile_ball).position, true, 1);
 
-        TemporaryProjectile temp;
-        temp.hitsLeft = 2;
-        temp.bonusBall = false;
-        DamageToPlayer d;
-        d.damage = 20.0f;
-        DamageToEnemy d2;
-        d2.damage = registry.pinBalls.components[0].pinBallDamage * 2.0f;
+    //    TemporaryProjectile temp;
+    //    temp.hitsLeft = 2;
+    //    temp.bonusBall = false;
+    //    DamageToPlayer d;
+    //    d.damage = 20.0f;
+    //    DamageToEnemy d2;
+    //    d2.damage = registry.pinBalls.components[0].pinBallDamage * 2.0f;
 
-        registry.attackPower.emplace(projectile_ball, d2);
-        registry.damages.emplace(projectile_ball, d);
-        registry.temporaryProjectiles.emplace(projectile_ball, temp);
+    //    registry.attackPower.emplace(projectile_ball, d2);
+    //    registry.damages.emplace(projectile_ball, d);
+    //    registry.temporaryProjectiles.emplace(projectile_ball, temp);
 
-    }
+    //}
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_Q)
     {
@@ -478,10 +478,10 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
         }
     }
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_W)
-    {
-        registry.pinballPlayerStatus.components[0].focusTimer = 600.0f;
-    }
+    //if (action == GLFW_RELEASE && key == GLFW_KEY_W)
+    //{
+    //    registry.pinballPlayerStatus.components[0].focusTimer = 600.0f;
+    //}
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_M)
     {
@@ -495,19 +495,19 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
     }
 
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
-    {
-        Entity& flipper = registry.playerFlippers.entities[0];
-        physObj& flipperPhys = registry.physObjs.get(flipper);
-        flipperPhys.Vertices[1].accel += vec2(0.2f, 0.f);
-    }
+    //if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
+    //{
+    //    Entity& flipper = registry.playerFlippers.entities[0];
+    //    physObj& flipperPhys = registry.physObjs.get(flipper);
+    //    flipperPhys.Vertices[1].accel += vec2(0.2f, 0.f);
+    //}
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT)
-    {
-        Entity& flipper = registry.playerFlippers.entities[0];
-        physObj& flipperPhys = registry.physObjs.get(flipper);
-        flipperPhys.Vertices[1].accel += vec2(-0.2f, 0.f);
-    }
+    //if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT)
+    //{
+    //    Entity& flipper = registry.playerFlippers.entities[0];
+    //    physObj& flipperPhys = registry.physObjs.get(flipper);
+    //    flipperPhys.Vertices[1].accel += vec2(-0.2f, 0.f);
+    //}
 }
 
 
