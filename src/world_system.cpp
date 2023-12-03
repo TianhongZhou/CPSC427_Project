@@ -412,6 +412,10 @@ bool WorldSystem::is_over() const
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod)
 {
+	if (GameSceneState == -2) {
+		return;
+	}
+
 	if (GameSceneState == -1) {
 		if (action == GLFW_RELEASE && key == GLFW_KEY_S)
 		{
