@@ -113,6 +113,11 @@
     - data/textures/start.png, tutorial.png
     - on_key and on_mouse_.. in world_system.cpp
 
+- ### Normal Map
+    - normal.fs.glsl
+    - normal.vs.glsl
+    - drawTexturedMesh in render_system.cpp
+
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:
 

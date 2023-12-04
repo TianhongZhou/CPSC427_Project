@@ -654,7 +654,7 @@ void RenderSystem::draw_world(bool &tutorial_open) {
             //{
             //	scale.y = 0.31;
             //}
-            if (!(registry.spikes.has(entity) || registry.healthBar.has(entity))) {
+            if (!(registry.spikes.has(entity) || registry.healthBar.has(entity) || registry.mazes.has(entity))) {
                 drawShadow(entity, projection_2D, M_PI / 2 - angle, scale);
             }
         }
