@@ -1025,7 +1025,6 @@ void WorldSystem::handle_collisions_world()
 			}
 			else if (registry.mainWorldEnemies.size() == 1)
 			{
-				Enter_combat_timer += 2000.f;
 				registry.motions.get(player).velocity = vec2(0.f, 0.f);
 
 				pressedKeys.clear();
@@ -1051,8 +1050,7 @@ void WorldSystem::handle_collisions_world()
 					registry.colors.insert(door, { 0, 0, 0 });
 				}
 
-				GameSceneState = 1;
-				InitCombat = 1;
+				Enter_combat_timer += 2000.f;
 				int i = 0;
 				while (i < 10) {
 					GenerateDropBuff(entity);
