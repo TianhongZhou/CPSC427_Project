@@ -435,7 +435,7 @@ void RenderSystem::draw_combat_scene() {
     glClearColor(0.5, 0.5, 0.5, 1.0);
     glClearDepth(10.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glViewport(offsetX, offsetY, scaledWidth, scaledHeight);
+    //glViewport(offsetX, offsetY, scaledWidth, scaledHeight);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST); // native OpenGL does not work with a depth buffer
@@ -568,7 +568,7 @@ void RenderSystem::draw_world(bool &tutorial_open) {
     glClearColor(0, 0, 0, 1.0);
     glClearDepth(10.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glViewport(offsetX, offsetY, scaledWidth, scaledHeight);
+    //glViewport(offsetX, offsetY, scaledWidth, scaledHeight);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST); // native OpenGL does not work with a depth buffer
