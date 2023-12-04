@@ -12,6 +12,8 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#include <string>
+
 void RenderSystem::drawTexturedMesh(Entity entity,
                                     const mat3 &projection) {
     Motion &motion = registry.motions.get(entity);
@@ -131,7 +133,49 @@ void RenderSystem::drawTexturedMesh(Entity entity,
             glUniform1i(highlight_uloc, li);
             gl_has_errors();
         }
-    } else {
+    }
+    else if (render_request.used_effect == EFFECT_ASSET_ID::NORMAL) {
+        GLint in_position_loc = glGetAttribLocation(program, "in_position");
+        GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
+        gl_has_errors();
+        assert(in_texcoord_loc >= 0);
+
+        glEnableVertexAttribArray(in_position_loc);
+        glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+            sizeof(TexturedVertex), (void*)0);
+        gl_has_errors();
+
+        glEnableVertexAttribArray(in_texcoord_loc);
+        glVertexAttribPointer(
+            in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+            (void*)sizeof(
+                vec3)); // note the stride to skip the preceeding vertex position
+
+        // Enabling and binding texture to slot 0
+        glActiveTexture(GL_TEXTURE0);
+        gl_has_errors();
+
+        assert(registry.renderRequests.has(entity));
+        GLuint texture_id =
+            texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+
+        glBindTexture(GL_TEXTURE_2D, texture_id);
+        glUniform1i(glGetUniformLocation(program, "sampler0"), 0);
+        gl_has_errors();
+
+        glActiveTexture(GL_TEXTURE1);
+        GLuint normal_texture_id = texture_gl_handles[(GLuint)render_request.used_normal];
+        glBindTexture(GL_TEXTURE_2D, normal_texture_id);
+        glUniform1i(glGetUniformLocation(program, "normal_map"), 1);
+
+        Entity player = registry.players.entities[0];
+        Light& light = registry.lights.get(player);
+        Motion& motion = registry.motions.get(player);
+
+        glUniform3f(glGetUniformLocation(program, "light_pos"), light.screenPosition.x, 1.5f, light.screenPosition.y);
+        glUniform3f(glGetUniformLocation(program, "light_color"), light.lightColor.x, light.lightColor.y, light.lightColor.z);
+    }    
+    else {
         assert(false && "Type of render request not supported");
     }
 
@@ -354,10 +398,10 @@ void RenderSystem::drawToScreen() {
     gl_has_errors();
 
     // Flicker
-    GLint flicker_uloc = glGetUniformLocation(water_program, "flicker");
-    assert(flicker_uloc >= 0);
-    const int li = registry.enterCombatTimer.size() > 0 ? 1 : 0;
-    glUniform1i(flicker_uloc, li);
+    //GLint flicker_uloc = glGetUniformLocation(water_program, "flicker");
+    //assert(flicker_uloc >= 0);
+    //const int li = registry.enterCombatTimer.size() > 0 ? 1 : 0;
+    //glUniform1i(flicker_uloc, li);
     gl_has_errors();
 
     // Draw
@@ -375,6 +419,11 @@ void RenderSystem::draw_combat_scene() {
     int w, h;
     glfwGetFramebufferSize(window, &w,
                            &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
 
     // First render to the custom framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
@@ -406,6 +455,47 @@ void RenderSystem::draw_combat_scene() {
 
     // Truely render to the screen
     drawToScreen();
+
+
+    
+    
+
+    // ImGui rendering
+    ImGui::Begin("Status");
+    ImGui::SetWindowSize(ImVec2(200.0f, 300.0f), ImGuiCond_Always);
+    ImGui::SetWindowPos(ImVec2(0.0, 0.0));
+    
+    
+    ImGui::TextColored(ImVec4(0.949f, 0.549f, 0.157f, 1.0f), "--------------------------");
+    const char* dashStatus;
+
+    float cd = registry.pinballPlayerStatus.components[0].dashCooldown;
+    if (cd == 0) {
+        dashStatus = "\n\nDash Status: Ready";
+    }
+    else {
+        dashStatus = "\n\nDash Status: Charging";
+    }
+  
+  
+
+    ImGui::TextColored(ImVec4(0.664, 0.384, 0.110,1.0), "Combo Counter: %d\nHP: %.1f\n\n--------------------------\n\nAntiGravity Charges: %d\nTractor Beam Charges: %d",
+        registry.pinballPlayerStatus.components[0].comboCounter,
+        registry.pinballPlayerStatus.components[0].health,
+        registry.pinBalls.components[0].antiGravityCount,
+        registry.pinBalls.components[0].tractorBeamCount);
+
+
+    ImGui::TextColored(ImVec4(0.664, 0.384, 0.110, 1.0), dashStatus);
+
+
+    ImGui::End();
+    ImGui::Render();
+
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+
+  
 
     // flicker-free display with a double buffer
     glfwSwapBuffers(window);
@@ -588,40 +678,42 @@ void RenderSystem::draw_world(bool &tutorial_open) {
     // Truely render to the screen
     drawToScreen();
 
-    // Make the screen black
-    float quadVertices[] = {
-            -1.0f, 1.0f, 0.0f, 1.0f,
-            -1.0f, -1.0f, 0.0f, 0.0f,
-            1.0f, -1.0f, 1.0f, 0.0f,
+    if (GameSceneState == 0) {
+        // Make the screen black
+        float quadVertices[] = {
+                -1.0f, 1.0f, 0.0f, 1.0f,
+                -1.0f, -1.0f, 0.0f, 0.0f,
+                1.0f, -1.0f, 1.0f, 0.0f,
 
-            -1.0f, 1.0f, 0.0f, 1.0f,
-            1.0f, -1.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 1.0f, 1.0f
-    };
-    unsigned int quadVAO, quadVBO;
-    glGenVertexArrays(1, &quadVAO);
-    glGenBuffers(1, &quadVBO);
-    glBindVertexArray(quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *) 0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *) (2 * sizeof(float)));
-    const GLuint post_program = effects[(GLuint) EFFECT_ASSET_ID::POST];
+                -1.0f, 1.0f, 0.0f, 1.0f,
+                1.0f, -1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 1.0f
+        };
+        unsigned int quadVAO, quadVBO;
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+        const GLuint post_program = effects[(GLuint)EFFECT_ASSET_ID::POST];
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glUseProgram(post_program);
+        glUseProgram(post_program);
 
-    glUniform1i(glGetUniformLocation(post_program, "screenTexture"), 0);
+        glUniform1i(glGetUniformLocation(post_program, "screenTexture"), 0);
 
-    // Draw lights
-    draw_lights(post_program, lights, (float) h / (float) w);
+        // Draw lights
+        draw_lights(post_program, lights, (float)h / (float)w);
 
-    glBindVertexArray(quadVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(quadVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
 
     // Render ImGui
     ImGui::Render();

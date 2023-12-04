@@ -10,6 +10,8 @@
 #include "physics_system.hpp"
 #include "world_system.hpp"
 
+#include "imgui.h"
+
 const size_t SWARM_SIZE = 50;
 const int S_CENTER_X = 525;
 const int S_CENTER_Y = 300;
@@ -182,6 +184,8 @@ void updateTimers(float ms) {
         for (int i = 0; i < registry.pinballEnemies.components.size(); i++) {
             countdown(registry.pinballEnemies.components[i].invincibilityTimer, ms);
             countdown(registry.pinballEnemies.components[i].attackTimer, ms);
+            // making the color the attack cd indicator
+            registry.colors.get(registry.pinballEnemies.entities[i]).r = clamp((registry.pinballEnemies.components[i].attackTimer * 0.001f)/5.0f, 0.0f, 1.0f);
         }
 
     }
@@ -322,6 +326,13 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
     stepEnemyAttack();
     tractorStep();
 
+
+    if (registry.pinballPlayerStatus.components[0].health <= 0.0f) {
+        printf("\n-You Died-\n");
+        exit_combat();
+        world->restart_game();
+    }
+
     return true;
 }
 
@@ -368,12 +379,12 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
             debugging.in_debug_mode = true;
     }
 
-    // Resetting game
-    if (action == GLFW_RELEASE && key == GLFW_KEY_R)
-    {
-        exit_combat();
-        world->restart_game();
-    }
+    //// Resetting game
+    //if (action == GLFW_RELEASE && key == GLFW_KEY_R)
+    //{
+    //    exit_combat();
+    //    world->restart_game();
+    //}
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_X)
     {
@@ -406,10 +417,10 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
         
     }
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_I)
-    {
-        registry.pinballPlayerStatus.components[0].highGravityTimer += 5000.0f;
-    }
+    //if (action == GLFW_RELEASE && key == GLFW_KEY_I)
+    //{
+    //    registry.pinballPlayerStatus.components[0].highGravityTimer += 5000.0f;
+    //}
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_F)
     {
@@ -419,25 +430,25 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
         pinballDash();
     }
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_K)
-    {
-        PinBall& pinBall = registry.pinBalls.components[0];
-        Entity projectile_ball = createBall(renderer, { 400, 400 }, pinBall.pinBallSize, 0.f);
-        createNewRectangleTiedToEntity(projectile_ball, pinBall.pinBallSize, pinBall.pinBallSize, registry.motions.get(projectile_ball).position, true, 1);
+    //if (action == GLFW_RELEASE && key == GLFW_KEY_K)
+    //{
+    //    PinBall& pinBall = registry.pinBalls.components[0];
+    //    Entity projectile_ball = createBall(renderer, { 400, 400 }, pinBall.pinBallSize, 0.f);
+    //    createNewRectangleTiedToEntity(projectile_ball, pinBall.pinBallSize, pinBall.pinBallSize, registry.motions.get(projectile_ball).position, true, 1);
 
-        TemporaryProjectile temp;
-        temp.hitsLeft = 2;
-        temp.bonusBall = false;
-        DamageToPlayer d;
-        d.damage = 20.0f;
-        DamageToEnemy d2;
-        d2.damage = registry.pinBalls.components[0].pinBallDamage * 2.0f;
+    //    TemporaryProjectile temp;
+    //    temp.hitsLeft = 2;
+    //    temp.bonusBall = false;
+    //    DamageToPlayer d;
+    //    d.damage = 20.0f;
+    //    DamageToEnemy d2;
+    //    d2.damage = registry.pinBalls.components[0].pinBallDamage * 2.0f;
 
-        registry.attackPower.emplace(projectile_ball, d2);
-        registry.damages.emplace(projectile_ball, d);
-        registry.temporaryProjectiles.emplace(projectile_ball, temp);
+    //    registry.attackPower.emplace(projectile_ball, d2);
+    //    registry.damages.emplace(projectile_ball, d);
+    //    registry.temporaryProjectiles.emplace(projectile_ball, temp);
 
-    }
+    //}
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_Q)
     {
@@ -470,10 +481,10 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
         }
     }
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_W)
-    {
-        registry.pinballPlayerStatus.components[0].focusTimer = 600.0f;
-    }
+    //if (action == GLFW_RELEASE && key == GLFW_KEY_W)
+    //{
+    //    registry.pinballPlayerStatus.components[0].focusTimer = 600.0f;
+    //}
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_M)
     {
@@ -487,19 +498,19 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
     }
 
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
-    {
-        Entity& flipper = registry.playerFlippers.entities[0];
-        physObj& flipperPhys = registry.physObjs.get(flipper);
-        flipperPhys.Vertices[1].accel += vec2(0.2f, 0.f);
-    }
+    //if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
+    //{
+    //    Entity& flipper = registry.playerFlippers.entities[0];
+    //    physObj& flipperPhys = registry.physObjs.get(flipper);
+    //    flipperPhys.Vertices[1].accel += vec2(0.2f, 0.f);
+    //}
 
-    if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT)
-    {
-        Entity& flipper = registry.playerFlippers.entities[0];
-        physObj& flipperPhys = registry.physObjs.get(flipper);
-        flipperPhys.Vertices[1].accel += vec2(-0.2f, 0.f);
-    }
+    //if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT)
+    //{
+    //    Entity& flipper = registry.playerFlippers.entities[0];
+    //    physObj& flipperPhys = registry.physObjs.get(flipper);
+    //    flipperPhys.Vertices[1].accel += vec2(-0.2f, 0.f);
+    //}
 }
 
 
@@ -529,6 +540,27 @@ void PinballSystem::on_mouse_click(int button, int action, int mods) {
     (int) button;
     (int) action;
     (int) mods;
+
+    if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_RIGHT)
+    {
+        if (registry.pinballPlayerStatus.components[0].dashCooldown == 0) {
+            Mix_PlayChannel(-1, world->dash_sound, 0); // had to do this check here because of strange reference loss
+        }
+        pinballDash();
+    }
+
+    if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_LEFT)
+    {
+        Mix_PlayChannel(-1, world->flipper_sound, 0);
+
+        Entity& flipper = registry.playerFlippers.entities[0];
+
+        physObj& flipperPhys = registry.physObjs.get(flipper);
+
+        flipperPhys.Vertices[0].accel += vec2(0.f, -0.8f);
+        flipperPhys.Vertices[1].accel += vec2(0.f, -0.8f);
+    }
+
 }
 
 void PinballSystem::spawn_swarm(vec2 boundary) {
@@ -553,8 +585,12 @@ void PinballSystem::spawn_swarm(vec2 boundary) {
 
     }
 
-    Entity swarmKing = createPinBallEnemy(renderer, vec2(525, 300), boundary, 0.5, 1, 5000.0f, 0.5);
+    Entity swarmKing = createPinBallEnemy(renderer, vec2(525, 300), boundary, 0.5, 0, 5000.0f, 0.5);
     registry.swarmKing.insert(swarmKing,{});
+
+    PinBallEnemy& pinballEnemy = registry.pinballEnemies.get(swarmKing);
+    pinballEnemy.maxHealth = 300.f;
+    pinballEnemy.currentHealth = 300.f;
 
     registry.colors.insert(swarmKing, { 0, 1, 0 });
 }
@@ -851,6 +887,9 @@ void PinballSystem::start_level_1() {
     std::uniform_real_distribution<float> distribution2(0.f, 1.f);
 
     Entity pinballenemyMain = createPinBallEnemy(renderer, vec2(525,180), boundary,2.0f, 0, 3000.0f, 1.0);
+    PinBallEnemy& pinballEnemy = registry.pinballEnemies.get(pinballenemyMain);
+    pinballEnemy.maxHealth = 50.f;
+    pinballEnemy.currentHealth = 50.f;
 
     registry.colors.insert(pinballenemyMain, { distribution2(gen), distribution2(gen), distribution2(gen) });
 }
@@ -869,6 +908,13 @@ void PinballSystem::start_level_2() {
     Entity pinballenemy = createPinBallEnemy(renderer, vec2(525, 90), boundary, 2.0f, 1, 5000.0f, 1.f);
     registry.colors.insert(pinballenemy, { distribution2(gen), distribution2(gen), distribution2(gen) });
 
+    PinBallEnemy& pinballEnemy = registry.pinballEnemies.get(pinballenemyMain);
+    pinballEnemy.maxHealth = 150.f;
+    pinballEnemy.currentHealth = 150.f;
+
+    PinBallEnemy& pinballEnemy2 = registry.pinballEnemies.get(pinballenemy);
+    pinballEnemy2.maxHealth = 150.f;
+    pinballEnemy2.currentHealth = 150.f;
 }
 
 void PinballSystem::start_level_3() {

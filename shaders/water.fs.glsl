@@ -3,7 +3,7 @@
 uniform sampler2D screen_texture;
 uniform float time;
 uniform float screen_darken_factor;
-uniform int flicker;
+//uniform int flicker;
 
 in vec2 texcoord;
 
@@ -18,32 +18,44 @@ vec2 distort(vec2 uv)
 	return uv;
 }
 
-vec4 color_shift(vec4 in_color) 
-{
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE THE COLOR SHIFTING HERE (you may want to make it blue-ish)
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	float factor = (sin(time*2)+1)/2;
-	vec4 faded_color = in_color*factor;
-	return faded_color;
-}
+const mat4 ditherMatrixFourbyFour = mat4(
+    0.0,  8.0,  2.0, 10.0,
+   12.0,  4.0, 14.0,  6.0,
+    3.0, 11.0,  1.0,  9.0,
+   15.0,  7.0, 13.0,  5.0
+)/ 16.0; // now pre-computed
 
-vec4 fade_color(vec4 in_color) 
-{
-	if (screen_darken_factor > 0)
-		in_color -= screen_darken_factor * vec4(0.8, 0.8, 0.8, 0);
-	return in_color;
-}
+const mat2 ditherMatrixTwobyTwo = mat2(
+    0.0,  2.0,  
+    3.0,  1.0
+);
 
-void main()
-{
-	vec2 coord = distort(texcoord);
 
-    vec4 in_color = texture(screen_texture, coord);
 
-	if (flicker==1) {
-		color = color_shift(in_color);
-	} else {
-		color = in_color;
-	}
+void main() {
+
+
+    //applying color downsampling and ordered dithering
+
+    float spread = 0.2f;
+
+    float colorCount = 4.0f; // downsampling is kind of weird atm
+
+    vec3 pixelColor = texture(screen_texture, texcoord).xyz;
+
+
+    int x = int(gl_FragCoord.x) % 4; // finding where the pixel is in the matrix
+    int y = int(gl_FragCoord.y) % 4;
+    float ditherValue = ditherMatrixFourbyFour[x][y];
+
+    vec3 beforeColorDownsample = pixelColor + ditherValue * spread;
+
+    vec3 downsampled;
+
+    downsampled.r = (floor(beforeColorDownsample.r*(colorCount - 1.0) + 0.5)/(colorCount - 1.0)); 
+    downsampled.g = (floor(beforeColorDownsample.g*(colorCount - 1.0) + 0.5)/(colorCount - 1.0));
+    downsampled.b = (floor(beforeColorDownsample.b*(colorCount - 1.0) + 0.5)/(colorCount - 1.0));
+
+    color = vec4(downsampled,1.0);
+
 }

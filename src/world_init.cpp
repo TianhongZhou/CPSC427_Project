@@ -8,6 +8,7 @@
 
 Entity createDropBuff(RenderSystem* renderer, vec2 pos, TEXTURE_ASSET_ID id)
 {
+	printf("%.2f, %.2f", pos.x, pos.y);
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
@@ -23,6 +24,7 @@ Entity createDropBuff(RenderSystem* renderer, vec2 pos, TEXTURE_ASSET_ID id)
 		{ id,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE,
+			id,
 			vec2(0.f, -0.5f),
 			vec2(0.f, 0.f)});
 
@@ -155,6 +157,7 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos, float currentHealth)
 		{ TEXTURE_ASSET_ID::PLAYER,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE,
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			vec2(0.2, -0.5),
 			vec2(-10, 48.f / 2.0f + 8) });
 
@@ -184,6 +187,7 @@ Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPostion, float
 		{ TEXTURE_ASSET_ID::ENEMYWALKSPRITESHEET,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE,
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			vec2(0.2, -0.5),
 			vec2(-10, 48.f / 2.0f + 8) });
 	Enemy& ene = registry.mainWorldEnemies.get(entity);
@@ -338,8 +342,9 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::GROUND,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+			EFFECT_ASSET_ID::NORMAL,
+			GEOMETRY_BUFFER_ID::SPRITE,
+			TEXTURE_ASSET_ID::GROUNDNORMAL });
 
 	// add things
 	int w, h;
@@ -396,7 +401,8 @@ Entity createRoom1(RenderSystem* renderer, vec2 pos)
 		entity,
 		{ TEXTURE_ASSET_ID::GROUND,
 			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+			GEOMETRY_BUFFER_ID::SPRITE,
+			TEXTURE_ASSET_ID::GROUNDNORMAL });
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -450,7 +456,8 @@ Entity createRoom2(RenderSystem* renderer, vec2 pos)
 		entity,
 		{ TEXTURE_ASSET_ID::GROUND,
 			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+			GEOMETRY_BUFFER_ID::SPRITE,
+			TEXTURE_ASSET_ID::GROUNDNORMAL });
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -506,7 +513,8 @@ Entity createRoom3(RenderSystem* renderer, vec2 pos)
 		entity,
 		{ TEXTURE_ASSET_ID::GROUND,
 			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+			GEOMETRY_BUFFER_ID::SPRITE,
+			TEXTURE_ASSET_ID::GROUNDNORMAL });
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -758,6 +766,7 @@ Entity createPlayerBullet(vec2 pos, vec2 size)
 		{ TEXTURE_ASSET_ID::PLAYERBULLET, // TEXTURE_COUNT indicates that no txture is needed
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE,
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			vec2(0.f, 0.f),
 			vec2(-10, 48.f / 2.0f + 20) });
 
@@ -782,6 +791,7 @@ Entity createEnemyBullet(vec2 pos, vec2 size)
 		{ TEXTURE_ASSET_ID::ENEMYBULLET, // TEXTURE_COUNT indicates that no txture is needed
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE,
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			vec2(0.f, 0.f),
 			vec2(-10, 48.f / 2.0f + 20) });
 
