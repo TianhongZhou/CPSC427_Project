@@ -1027,9 +1027,34 @@ void WorldSystem::handle_collisions_world()
 			{
 				Enter_combat_timer += 2000.f;
 				registry.motions.get(player).velocity = vec2(0.f, 0.f);
-				int i = 0;
-				while (i < 20)
+
+				pressedKeys.clear();
+
+				if (registry.spriteSheets.has(player))
 				{
+					SpriteSheet& spriteSheet = registry.spriteSheets.get(player);
+					RenderRequest& renderRequest = registry.renderRequests.get(player);
+					renderRequest.used_texture = spriteSheet.origin;
+					registry.spriteSheets.remove(player);
+				}
+
+				if (curr_room != 3) {
+					// Add door
+					Entity door = createDoor({ 0,0 }, { 0,0 }); //intialized below
+					Motion& door_motion = registry.motions.get(door);
+					float door_width = 50;
+					float door_height = 60;
+					door_motion.position = { window_width_px / 2.f - door_width / 2.f, door_height / 2.f };
+					door_motion.scale = { door_width, door_height };
+					door_motion.angle = 0;
+					door_motion.velocity = { 0,0 };
+					registry.colors.insert(door, { 0, 0, 0 });
+				}
+
+				GameSceneState = 1;
+				InitCombat = 1;
+				int i = 0;
+				while (i < 10) {
 					GenerateDropBuff(entity);
 					i++;
 				}
@@ -1070,10 +1095,38 @@ void WorldSystem::handle_collisions_world()
 		}
 
 		// player vs door collision
-		if (registry.doors.has(entity) && registry.players.has(entity_other))
-		{
-			// handle damage interaction (nothing for now)
+		if (registry.doors.has(entity) && registry.players.has(entity_other)) {
 			enter_next_room();
+		}
+
+		// player vs maze wall collision
+		if (registry.mazes.has(entity) && registry.players.has(entity_other)) {
+			
+			Motion& roomMotion = registry.motions.get(entity);
+			Motion& motion = registry.motions.get(entity_other);
+
+			float mazeLeft = roomMotion.position.x - (roomMotion.scale.x / 2) - 20.f;
+			float mazeRight = roomMotion.position.x + (roomMotion.scale.x / 2) + 20.f;
+			float mazeTop = roomMotion.position.y - (roomMotion.scale.y / 2) - 20.f;
+			float mazeBottom = roomMotion.position.y + (roomMotion.scale.y / 2) + 20.f;
+
+			if (motion.position.x < mazeLeft) {
+				motion.position.x = mazeLeft;
+				motion.velocity.x = 0;
+			}
+			else if (motion.position.x > mazeRight) {
+				motion.position.x = mazeRight;
+				motion.velocity.x = 0;
+			}
+
+			if (motion.position.y < mazeTop) {
+				motion.position.y = mazeTop;
+				motion.velocity.y = 0;
+			}
+			else if (motion.position.y > mazeBottom) {
+				motion.position.y = mazeBottom;
+				motion.velocity.y = 0;
+			}
 		}
 
 		// drop buff vs player collision

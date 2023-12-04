@@ -7,6 +7,11 @@
 
 #include <SDL_mixer.h>
 
+struct Maze
+{
+
+};
+
 struct Zombie
 {
 
@@ -303,6 +308,7 @@ struct DamageToEnemy {
 
 struct TemporaryProjectile {
 	int hitsLeft;
+	float timeLeft;
 	bool bonusBall;
 };
 
