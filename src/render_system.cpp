@@ -12,6 +12,8 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#include <string>
+
 void RenderSystem::drawTexturedMesh(Entity entity,
                                     const mat3 &projection) {
     Motion &motion = registry.motions.get(entity);
@@ -423,21 +425,31 @@ void RenderSystem::draw_combat_scene() {
     
     
     ImGui::TextColored(ImVec4(0.949f, 0.549f, 0.157f, 1.0f), "--------------------------");
-  
-   
-    
+    const char* dashStatus;
 
-    // Your ImGui UI code goes here, e.g., displaying combo counter
-    ImGui::TextColored(ImVec4(0.664, 0.384, 0.110,1.0), "Combo Counter: %d\nHP: %.1f\n\n\n\nAntiGravity Charges: %d\nTractor Beam Charges: %d",
+    float cd = registry.pinballPlayerStatus.components[0].dashCooldown;
+    if (cd == 0) {
+        dashStatus = "\n\nDash Status: Ready";
+    }
+    else {
+        dashStatus = "\n\nDash Status: Charging";
+    }
+  
+  
+
+    ImGui::TextColored(ImVec4(0.664, 0.384, 0.110,1.0), "Combo Counter: %d\nHP: %.1f\n\n--------------------------\n\nAntiGravity Charges: %d\nTractor Beam Charges: %d",
         registry.pinballPlayerStatus.components[0].comboCounter,
         registry.pinballPlayerStatus.components[0].health,
         registry.pinBalls.components[0].antiGravityCount,
         registry.pinBalls.components[0].tractorBeamCount);
 
-    // Optionally, you can add ImGui controls or windows here
+
+    ImGui::TextColored(ImVec4(0.664, 0.384, 0.110, 1.0), dashStatus);
+
+
     ImGui::End();
     ImGui::Render();
-  //  glClear(GL_COLOR_BUFFER_BIT); // Clear ImGui rendering
+
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 
