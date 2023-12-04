@@ -63,6 +63,7 @@ class RenderSystem {
 			textures_path("pinball_background.png"),
 			textures_path("flipper.png"),
 			textures_path("wall.png"),
+			textures_path("ground1_normal.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -73,7 +74,8 @@ class RenderSystem {
 		shader_path("salmon"),
 		shader_path("textured"),
 		shader_path("water"),
-		shader_path("post")
+		shader_path("post"),
+		shader_path("normal")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;

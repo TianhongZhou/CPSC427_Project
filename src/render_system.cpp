@@ -133,7 +133,49 @@ void RenderSystem::drawTexturedMesh(Entity entity,
             glUniform1i(highlight_uloc, li);
             gl_has_errors();
         }
-    } else {
+    }
+    else if (render_request.used_effect == EFFECT_ASSET_ID::NORMAL) {
+        GLint in_position_loc = glGetAttribLocation(program, "in_position");
+        GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
+        gl_has_errors();
+        assert(in_texcoord_loc >= 0);
+
+        glEnableVertexAttribArray(in_position_loc);
+        glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+            sizeof(TexturedVertex), (void*)0);
+        gl_has_errors();
+
+        glEnableVertexAttribArray(in_texcoord_loc);
+        glVertexAttribPointer(
+            in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+            (void*)sizeof(
+                vec3)); // note the stride to skip the preceeding vertex position
+
+        // Enabling and binding texture to slot 0
+        glActiveTexture(GL_TEXTURE0);
+        gl_has_errors();
+
+        assert(registry.renderRequests.has(entity));
+        GLuint texture_id =
+            texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+
+        glBindTexture(GL_TEXTURE_2D, texture_id);
+        glUniform1i(glGetUniformLocation(program, "sampler0"), 0);
+        gl_has_errors();
+
+        glActiveTexture(GL_TEXTURE1);
+        GLuint normal_texture_id = texture_gl_handles[(GLuint)render_request.used_normal];
+        glBindTexture(GL_TEXTURE_2D, normal_texture_id);
+        glUniform1i(glGetUniformLocation(program, "normal_map"), 1);
+
+        Entity player = registry.players.entities[0];
+        Light& light = registry.lights.get(player);
+        Motion& motion = registry.motions.get(player);
+
+        glUniform3f(glGetUniformLocation(program, "light_pos"), light.screenPosition.x, 1.5f, light.screenPosition.y);
+        glUniform3f(glGetUniformLocation(program, "light_color"), light.lightColor.x, light.lightColor.y, light.lightColor.z);
+    }    
+    else {
         assert(false && "Type of render request not supported");
     }
 
