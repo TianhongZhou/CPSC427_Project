@@ -1008,6 +1008,19 @@ void WorldSystem::handle_collisions_world()
 					registry.spriteSheets.remove(player);
 				}
 
+				if (curr_room != 3) {
+					// Add door
+					Entity door = createDoor({ 0,0 }, { 0,0 }); //intialized below
+					Motion& door_motion = registry.motions.get(door);
+					float door_width = 50;
+					float door_height = 60;
+					door_motion.position = { window_width_px / 2.f - door_width / 2.f, door_height / 2.f };
+					door_motion.scale = { door_width, door_height };
+					door_motion.angle = 0;
+					door_motion.velocity = { 0,0 };
+					registry.colors.insert(door, { 0, 0, 0 });
+				}
+
 				GameSceneState = 1;
 				InitCombat = 1;
 				int i = 0;
@@ -1052,14 +1065,14 @@ void WorldSystem::handle_collisions_world()
 
 		// player vs maze wall collision
 		if (registry.mazes.has(entity) && registry.players.has(entity_other)) {
-
+			
 			Motion& roomMotion = registry.motions.get(entity);
 			Motion& motion = registry.motions.get(entity_other);
 
-			float mazeLeft = roomMotion.position.x - (roomMotion.scale.x / 2);
-			float mazeRight = roomMotion.position.x + (roomMotion.scale.x / 2);
-			float mazeTop = roomMotion.position.y - (roomMotion.scale.y / 2);
-			float mazeBottom = roomMotion.position.y + (roomMotion.scale.y / 2);
+			float mazeLeft = roomMotion.position.x - (roomMotion.scale.x / 2) - 20.f;
+			float mazeRight = roomMotion.position.x + (roomMotion.scale.x / 2) + 20.f;
+			float mazeTop = roomMotion.position.y - (roomMotion.scale.y / 2) - 20.f;
+			float mazeBottom = roomMotion.position.y + (roomMotion.scale.y / 2) + 20.f;
 
 			if (motion.position.x < mazeLeft) {
 				motion.position.x = mazeLeft;
