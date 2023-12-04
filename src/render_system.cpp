@@ -376,6 +376,11 @@ void RenderSystem::draw_combat_scene() {
     glfwGetFramebufferSize(window, &w,
                            &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
 
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+
     // First render to the custom framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
     gl_has_errors();
@@ -406,6 +411,37 @@ void RenderSystem::draw_combat_scene() {
 
     // Truely render to the screen
     drawToScreen();
+
+
+    
+    
+
+    // ImGui rendering
+    ImGui::Begin("Status");
+    ImGui::SetWindowSize(ImVec2(200.0f, 300.0f), ImGuiCond_Always);
+    ImGui::SetWindowPos(ImVec2(0.0, 0.0));
+    
+    
+    ImGui::TextColored(ImVec4(0.949f, 0.549f, 0.157f, 1.0f), "--------------------------");
+  
+   
+    
+
+    // Your ImGui UI code goes here, e.g., displaying combo counter
+    ImGui::TextColored(ImVec4(0.664, 0.384, 0.110,1.0), "Combo Counter: %d\nHP: %.1f\n\n\n\nAntiGravity Charges: %d\nTractor Beam Charges: %d",
+        registry.pinballPlayerStatus.components[0].comboCounter,
+        registry.pinballPlayerStatus.components[0].health,
+        registry.pinBalls.components[0].antiGravityCount,
+        registry.pinBalls.components[0].tractorBeamCount);
+
+    // Optionally, you can add ImGui controls or windows here
+    ImGui::End();
+    ImGui::Render();
+  //  glClear(GL_COLOR_BUFFER_BIT); // Clear ImGui rendering
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+
+  
 
     // flicker-free display with a double buffer
     glfwSwapBuffers(window);

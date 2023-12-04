@@ -10,6 +10,8 @@
 #include "physics_system.hpp"
 #include "world_system.hpp"
 
+#include "imgui.h"
+
 const size_t SWARM_SIZE = 50;
 const int S_CENTER_X = 525;
 const int S_CENTER_Y = 300;
@@ -323,6 +325,7 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
     updateTimers(elapsed_ms_since_last_update);
     stepEnemyAttack();
     tractorStep();
+
 
     if (registry.pinballPlayerStatus.components[0].health <= 0.0f) {
         printf("\n-You Died-\n");
