@@ -266,7 +266,7 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
             std::uniform_real_distribution<> distAngle(0.f, 2.f * M_PI);
             std::normal_distribution<> distLifeSpan(1.0f, 0.2f);
             std::normal_distribution<> distVel(0.f, 1.f);
-            int numParticles = registry.pinBalls.components[0].pinBallSize*registry.pinBalls.components[0].pinBallSize/10;
+            int numParticles = registry.pinBalls.components[0].pinBallSize;
             for (Entity entity: registry.balls.entities) {
                 if (registry.balls.get(entity).trail>0.f) {
                 physObj ball = registry.physObjs.get(entity);
@@ -975,6 +975,7 @@ void PinballSystem::exit_combat() {
         registry.remove_all_components_of(registry.combat.entities.back());
     world->redirect_inputs_world();
     GameSceneState = 0;
+    registry.motions.get(registry.players.entities[0]).velocity = vec2(0.f,0.f);
 }
 
 

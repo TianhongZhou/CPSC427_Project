@@ -8,6 +8,8 @@
 #include "tiny_ecs.hpp"
 #include <iostream>
 
+extern float Enter_combat_timer;
+
 // System responsible for setting up OpenGL and for rendering all the
 // visual entities in the game
 class RenderSystem {

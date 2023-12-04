@@ -109,8 +109,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
         glBindTexture(GL_TEXTURE_2D, texture_id);
         gl_has_errors();
-    } else if (render_request.used_effect == EFFECT_ASSET_ID::SALMON ||
-               render_request.used_effect == EFFECT_ASSET_ID::PEBBLE) {
+    } else if (render_request.used_effect == EFFECT_ASSET_ID::SALMON) {
         GLint in_position_loc = glGetAttribLocation(program, "in_position");
         GLint in_color_loc = glGetAttribLocation(program, "in_color");
         gl_has_errors();
@@ -124,17 +123,37 @@ void RenderSystem::drawTexturedMesh(Entity entity,
         glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
                               sizeof(ColoredVertex), (void *) sizeof(vec3));
         gl_has_errors();
-
-        if (render_request.used_effect == EFFECT_ASSET_ID::SALMON) {
             // HighLight Enemy
             GLint highlight_uloc = glGetUniformLocation(program, "highlight");
             assert(highlight_uloc >= 0);
             const int li = registry.highLightEnemies.has(entity) ? 1 : 0;
             glUniform1i(highlight_uloc, li);
             gl_has_errors();
-        }
-    }
-    else if (render_request.used_effect == EFFECT_ASSET_ID::NORMAL) {
+    } else if (render_request.used_effect == EFFECT_ASSET_ID::PEBBLE) {
+        GLint in_position_loc = glGetAttribLocation(program, "in_position");
+        GLint in_color_loc = glGetAttribLocation(program, "in_color");
+        gl_has_errors();
+
+        glEnableVertexAttribArray(in_position_loc);
+        glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+                              sizeof(ColoredVertex), (void *) 0);
+        gl_has_errors();
+
+        glEnableVertexAttribArray(in_color_loc);
+        glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
+                              sizeof(ColoredVertex), (void *) sizeof(vec3));
+        gl_has_errors();
+        GLint offset_uloc = glGetUniformLocation(program, "offset");
+        // std::random_device rd;
+        // std::mt19937 gen(rd());
+        // std::uniform_real_distribution<> distRadius(0, 10.f);
+        // std::uniform_real_distribution<> distAngle(0.f, 2.f * M_PI);
+        // float randomRadius = distRadius(gen);
+        // float randomAngle = distAngle(gen);
+        // vec2 pos = {randomRadius * std::cos(randomAngle), randomRadius * std::sin(randomAngle)};
+        glUniform2f(offset_uloc, 0.0f, 0.0f);
+        gl_has_errors();
+    } else if (render_request.used_effect == EFFECT_ASSET_ID::NORMAL) {
         GLint in_position_loc = glGetAttribLocation(program, "in_position");
         GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
         gl_has_errors();
@@ -754,6 +773,10 @@ void RenderSystem::draw_lights(GLuint post_program, std::vector<Light> lights, f
     }
 
     glUniform1i(glGetUniformLocation(post_program, "numLights"), lightPositions.size());
+    GLuint time_uloc = glGetUniformLocation(post_program, "time");
+	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
+    GLuint flicker_uloc = glGetUniformLocation(post_program, "flicker");
+    glUniform1i(flicker_uloc, Enter_combat_timer<=0.f?0:1);
     glUniform1f(glGetUniformLocation(post_program, "aspectRatio"), aspectRatio);
     gl_has_errors();
 }

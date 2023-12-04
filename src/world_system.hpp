@@ -15,6 +15,7 @@
 #include "render_system.hpp"
 #include "pinball_system.hpp"
 
+extern float Enter_combat_timer;
 extern int GameSceneState;
 extern int InitCombat;
 extern int MonitorWidth;
