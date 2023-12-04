@@ -188,6 +188,13 @@ void updateTimers(float ms) {
             registry.colors.get(registry.pinballEnemies.entities[i]).r = clamp((registry.pinballEnemies.components[i].attackTimer * 0.001f)/5.0f, 0.0f, 1.0f);
         }
 
+        for (int i = 0; i < registry.temporaryProjectiles.components.size(); i++) {
+            countdown(registry.temporaryProjectiles.components[i].timeLeft, ms);
+            if (registry.temporaryProjectiles.components[i].timeLeft == 0 && !registry.temporaryProjectiles.components[i].bonusBall) {
+                registry.remove_all_components_of(registry.temporaryProjectiles.entities[i]);
+            }
+        }
+
     }
 
 }
@@ -214,6 +221,7 @@ void PinballSystem::stepEnemyAttack() {
                 TemporaryProjectile temp;
                 temp.hitsLeft = 1;
                 temp.bonusBall = false;
+                temp.timeLeft = 4000.0f;
                 DamageToPlayer d;
                 d.damage = 20.0f;
                 DamageToEnemy d2;
@@ -454,7 +462,7 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
     {
         if (registry.pinballPlayerStatus.components[0].comboCounter >= 5) {
 
-            registry.pinballPlayerStatus.components[0].comboCounter - 5;
+            registry.pinballPlayerStatus.components[0].comboCounter -= 5;
             printf("Spawned bonus ball! Combo count=%i ", registry.pinballPlayerStatus.components[0].comboCounter);
 
             vec2 spawnPos = vec2(registry.physObjs.get(registry.playerFlippers.entities[0]).center.x,

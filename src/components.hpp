@@ -303,6 +303,7 @@ struct DamageToEnemy {
 
 struct TemporaryProjectile {
 	int hitsLeft;
+	float timeLeft;
 	bool bonusBall;
 };
 
