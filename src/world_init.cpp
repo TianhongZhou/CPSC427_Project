@@ -515,17 +515,6 @@ Entity createRoom1(RenderSystem* renderer, vec2 pos)
 	Motion& motion2 = registry.motions.get(room.enemies[0]);
 	motion2.scale *= 1.8f;
 	registry.lights.emplace(room.enemies[0]);
-	
-	// Add door
-	Entity door = createDoor({ 0,0 }, { 0,0 }); //intialized below
-	Motion& door_motion = registry.motions.get(door);
-	float door_width = 50;
-	float door_height = 60;
-	door_motion.position = { window_width_px / 2.f - door_width / 2.f, door_height / 2.f };
-	door_motion.scale = { door_width, door_height };
-	door_motion.angle = 0;
-	door_motion.velocity = { 0,0 };
-	registry.colors.insert(door, { 0, 0, 0 });
 
 	return entity;
 }
@@ -570,17 +559,6 @@ Entity createRoom2(RenderSystem* renderer, vec2 pos)
 	Motion& motion2 = registry.motions.get(room.enemies[0]);
 	motion2.scale *= 1.8f;
 	registry.lights.emplace(room.enemies[0]);
-
-	// Add door
-	Entity door = createDoor({ 0,0 }, { 0,0 }); //intialized below
-	Motion& door_motion = registry.motions.get(door);
-	float door_width = 50;
-	float door_height = 60;
-	door_motion.position = { window_width_px / 2.f - door_width / 2.f, door_height / 2.f };
-	door_motion.scale = { door_width, door_height };
-	door_motion.angle = 0;
-	door_motion.velocity = { 0,0 };
-	registry.colors.insert(door, { 0, 0, 0 });
 
 	return entity;
 }
