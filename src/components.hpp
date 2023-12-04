@@ -7,6 +7,11 @@
 
 #include <SDL_mixer.h>
 
+struct Maze
+{
+
+};
+
 struct Zombie
 {
 

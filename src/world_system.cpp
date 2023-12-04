@@ -998,10 +998,20 @@ void WorldSystem::handle_collisions_world()
 			}
 			else if (registry.mainWorldEnemies.size() == 1) {
 				registry.motions.get(player).velocity = vec2(0.f, 0.f);
+				pressedKeys.clear();
+
+				if (registry.spriteSheets.has(player))
+				{
+					SpriteSheet& spriteSheet = registry.spriteSheets.get(player);
+					RenderRequest& renderRequest = registry.renderRequests.get(player);
+					renderRequest.used_texture = spriteSheet.origin;
+					registry.spriteSheets.remove(player);
+				}
+
 				GameSceneState = 1;
 				InitCombat = 1;
 				int i = 0;
-				while (i < 20) {
+				while (i < 10) {
 					GenerateDropBuff(entity);
 					i++;
 				}
@@ -1037,8 +1047,37 @@ void WorldSystem::handle_collisions_world()
 
 		// player vs door collision
 		if (registry.doors.has(entity) && registry.players.has(entity_other)) {
-			// handle damage interaction (nothing for now)
 			enter_next_room();
+		}
+
+		// player vs maze wall collision
+		if (registry.mazes.has(entity) && registry.players.has(entity_other)) {
+
+			Motion& roomMotion = registry.motions.get(entity);
+			Motion& motion = registry.motions.get(entity_other);
+
+			float mazeLeft = roomMotion.position.x - (roomMotion.scale.x / 2);
+			float mazeRight = roomMotion.position.x + (roomMotion.scale.x / 2);
+			float mazeTop = roomMotion.position.y - (roomMotion.scale.y / 2);
+			float mazeBottom = roomMotion.position.y + (roomMotion.scale.y / 2);
+
+			if (motion.position.x < mazeLeft) {
+				motion.position.x = mazeLeft;
+				motion.velocity.x = 0;
+			}
+			else if (motion.position.x > mazeRight) {
+				motion.position.x = mazeRight;
+				motion.velocity.x = 0;
+			}
+
+			if (motion.position.y < mazeTop) {
+				motion.position.y = mazeTop;
+				motion.velocity.y = 0;
+			}
+			else if (motion.position.y > mazeBottom) {
+				motion.position.y = mazeBottom;
+				motion.velocity.y = 0;
+			}
 		}
 
 		// drop buff vs player collision

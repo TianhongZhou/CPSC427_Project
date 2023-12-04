@@ -45,6 +45,7 @@ public:
 	ComponentContainer<DropBuff> dropBuffs;
 	ComponentContainer<Particle> particles;
 	ComponentContainer<soundForPhys> sfx;
+	ComponentContainer<Maze> mazes;
 	
 	// World assets
 	ComponentContainer<PlayerBullet> playerBullets;
@@ -94,6 +95,7 @@ public:
 		registry_list.push_back(&dropBuffs);
 		registry_list.push_back(&particles);
 		registry_list.push_back(&sfx);
+		registry_list.push_back(&mazes);
 
 		// World assets
 		registry_list.push_back(&playerBullets);

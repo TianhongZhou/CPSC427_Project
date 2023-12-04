@@ -210,6 +210,7 @@ void PinballSystem::stepEnemyAttack() {
 
                 Entity projectile_ball = createBall(r, spawnPos, pinball.pinBallSize, 0.f);
                 createNewRectangleTiedToEntity(projectile_ball, pinball.pinBallSize, pinball.pinBallSize, registry.motions.get(projectile_ball).position, true, 1);
+                registry.colors.insert(projectile_ball, { 1.f, 0.f, 0.f});
 
                 TemporaryProjectile temp;
                 temp.hitsLeft = 1;
