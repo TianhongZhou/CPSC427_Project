@@ -12,6 +12,8 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#include <string>
+
 void RenderSystem::drawTexturedMesh(Entity entity,
                                     const mat3 &projection) {
     Motion &motion = registry.motions.get(entity);
@@ -418,6 +420,11 @@ void RenderSystem::draw_combat_scene() {
     glfwGetFramebufferSize(window, &w,
                            &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
 
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+
     // First render to the custom framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
     gl_has_errors();
@@ -448,6 +455,47 @@ void RenderSystem::draw_combat_scene() {
 
     // Truely render to the screen
     drawToScreen();
+
+
+    
+    
+
+    // ImGui rendering
+    ImGui::Begin("Status");
+    ImGui::SetWindowSize(ImVec2(200.0f, 300.0f), ImGuiCond_Always);
+    ImGui::SetWindowPos(ImVec2(0.0, 0.0));
+    
+    
+    ImGui::TextColored(ImVec4(0.949f, 0.549f, 0.157f, 1.0f), "--------------------------");
+    const char* dashStatus;
+
+    float cd = registry.pinballPlayerStatus.components[0].dashCooldown;
+    if (cd == 0) {
+        dashStatus = "\n\nDash Status: Ready";
+    }
+    else {
+        dashStatus = "\n\nDash Status: Charging";
+    }
+  
+  
+
+    ImGui::TextColored(ImVec4(0.664, 0.384, 0.110,1.0), "Combo Counter: %d\nHP: %.1f\n\n--------------------------\n\nAntiGravity Charges: %d\nTractor Beam Charges: %d",
+        registry.pinballPlayerStatus.components[0].comboCounter,
+        registry.pinballPlayerStatus.components[0].health,
+        registry.pinBalls.components[0].antiGravityCount,
+        registry.pinBalls.components[0].tractorBeamCount);
+
+
+    ImGui::TextColored(ImVec4(0.664, 0.384, 0.110, 1.0), dashStatus);
+
+
+    ImGui::End();
+    ImGui::Render();
+
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+
+  
 
     // flicker-free display with a double buffer
     glfwSwapBuffers(window);
