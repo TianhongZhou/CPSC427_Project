@@ -396,10 +396,10 @@ void RenderSystem::drawToScreen() {
     gl_has_errors();
 
     // Flicker
-    GLint flicker_uloc = glGetUniformLocation(water_program, "flicker");
-    assert(flicker_uloc >= 0);
-    const int li = registry.enterCombatTimer.size() > 0 ? 1 : 0;
-    glUniform1i(flicker_uloc, li);
+    //GLint flicker_uloc = glGetUniformLocation(water_program, "flicker");
+    //assert(flicker_uloc >= 0);
+    //const int li = registry.enterCombatTimer.size() > 0 ? 1 : 0;
+    //glUniform1i(flicker_uloc, li);
     gl_has_errors();
 
     // Draw
@@ -606,7 +606,7 @@ void RenderSystem::draw_world(bool &tutorial_open) {
             //{
             //	scale.y = 0.31;
             //}
-            if (!(registry.spikes.has(entity))) {
+            if (!(registry.spikes.has(entity) || registry.healthBar.has(entity))) {
                 drawShadow(entity, projection_2D, M_PI / 2 - angle, scale);
             }
         }
@@ -630,40 +630,42 @@ void RenderSystem::draw_world(bool &tutorial_open) {
     // Truely render to the screen
     drawToScreen();
 
-    // Make the screen black
-    float quadVertices[] = {
-            -1.0f, 1.0f, 0.0f, 1.0f,
-            -1.0f, -1.0f, 0.0f, 0.0f,
-            1.0f, -1.0f, 1.0f, 0.0f,
+    if (GameSceneState == 0) {
+        // Make the screen black
+        float quadVertices[] = {
+                -1.0f, 1.0f, 0.0f, 1.0f,
+                -1.0f, -1.0f, 0.0f, 0.0f,
+                1.0f, -1.0f, 1.0f, 0.0f,
 
-            -1.0f, 1.0f, 0.0f, 1.0f,
-            1.0f, -1.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 1.0f, 1.0f
-    };
-    unsigned int quadVAO, quadVBO;
-    glGenVertexArrays(1, &quadVAO);
-    glGenBuffers(1, &quadVBO);
-    glBindVertexArray(quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *) 0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *) (2 * sizeof(float)));
-    const GLuint post_program = effects[(GLuint) EFFECT_ASSET_ID::POST];
+                -1.0f, 1.0f, 0.0f, 1.0f,
+                1.0f, -1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 1.0f
+        };
+        unsigned int quadVAO, quadVBO;
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+        const GLuint post_program = effects[(GLuint)EFFECT_ASSET_ID::POST];
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glUseProgram(post_program);
+        glUseProgram(post_program);
 
-    glUniform1i(glGetUniformLocation(post_program, "screenTexture"), 0);
+        glUniform1i(glGetUniformLocation(post_program, "screenTexture"), 0);
 
-    // Draw lights
-    draw_lights(post_program, lights, (float) h / (float) w);
+        // Draw lights
+        draw_lights(post_program, lights, (float)h / (float)w);
 
-    glBindVertexArray(quadVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(quadVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
 
     // Render ImGui
     ImGui::Render();

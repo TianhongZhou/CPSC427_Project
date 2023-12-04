@@ -20,7 +20,7 @@ Entity createPinballWall(RenderSystem* renderer, const std::vector<vec2>& vertic
 // the flipper
 Entity createPinballFlipper(RenderSystem* renderer, const std::vector<vec2>& vertices, GEOMETRY_BUFFER_ID id);
 // the pin ball enemy blood
-Entity createPinBallEnemyHealth(RenderSystem* renderer, vec2 pos);
+Entity createHealth(RenderSystem* renderer, vec2 pos, bool combat);
 // swarm enemies
 Entity createSwarmEnemy(RenderSystem* renderer, vec2 pos);
 // the pin ball enemy
@@ -32,7 +32,7 @@ Entity createRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window, int room
 Entity createPinballRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
 
 // the player
-Entity createPlayer(RenderSystem* renderer, vec2 pos);
+Entity createPlayer(RenderSystem* renderer, vec2 pos, float currentHealth);
 // the room enemy
 Entity createRoomEnemy(RenderSystem* renderer, vec2 pos, vec2 roomPosition, float roomScale, bool keyFrame);
 // the player

@@ -22,7 +22,8 @@ const size_t TURTLE_DELAY_MS = 2000 * 3;
 const size_t FISH_DELAY_MS = 5000 * 3;
 
 // Game state global variables
-int GameSceneState = 0;
+int GameSceneState = -1;
+int temp = 0;
 int InitCombat = 0;
 int MonitorWidth;
 int MonitorHeight;
@@ -34,7 +35,7 @@ int scaledHeight;
 
 // Create the fish world
 WorldSystem::WorldSystem()
-	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f)
+	: points(0)
 {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
@@ -210,9 +211,6 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 
 	// Set all states to default
 	restart_game();
-
-	// Load saved game state
-	load_game(PROJECT_SOURCE_DIR + std::string("gameState.json"));
 }
 
 // Reset the world state to its initial state
@@ -223,6 +221,21 @@ void WorldSystem::restart_game()
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 	printf("Restarting\n");
+
+	if (GameSceneState == -1) {
+		while (registry.motions.entities.size() > 0)
+			registry.remove_all_components_of(registry.motions.entities.back());
+
+		registry.list_all_components();
+
+		int w, h;
+		glfwGetWindowSize(window, &w, &h);
+
+		Entity room = createEmptyRoom(renderer, { 600, 400 }, window);
+		RenderRequest& render = registry.renderRequests.get(room);
+		render.used_texture = TEXTURE_ASSET_ID::START;
+		return;
+	}
 
 	GameSceneState = 0; // reset to world scene (we can make a function for combat restart)
 
@@ -249,8 +262,8 @@ void WorldSystem::restart_game()
 
 	// Create room, player, lighting
 	rooms[0] = createRoom(renderer, { 600, 400 }, window, 0);
-	// player = createPlayer(renderer, { (window_width_px)/2, (window_height_px)/2 }); 
-	player = createPlayer(renderer, { (window_width_px) / 2, 4 * (window_height_px) / 5 }); // spawn at the bottom of room for now  
+	playerHealth = 100.f;
+	player = createPlayer(renderer, { (window_width_px) / 2, 4 * (window_height_px) / 5 }, playerHealth); // spawn at the bottom of room for now  
 	registry.lights.emplace(player);
 }
 
@@ -413,6 +426,57 @@ bool WorldSystem::is_over() const
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod)
 {
+	if (GameSceneState == -2) {
+		return;
+	}
+
+	if (GameSceneState == -1) {
+		if (action == GLFW_RELEASE && key == GLFW_KEY_S)
+		{
+			int w, h;
+			glfwGetWindowSize(window, &w, &h);
+			GameSceneState = 0;
+
+			restart_game();
+		}
+
+		if (action == GLFW_RELEASE && key == GLFW_KEY_T)
+		{
+			temp = GameSceneState;
+			GameSceneState = -2;
+
+			int w, h;
+			glfwGetWindowSize(window, &w, &h);
+
+			Entity room = createEmptyRoom(renderer, { 600, 400 }, window);
+			RenderRequest& render = registry.renderRequests.get(room);
+			render.used_texture = TEXTURE_ASSET_ID::TUTORIAL;
+		}
+
+		if (action == GLFW_RELEASE && key == GLFW_KEY_L) 
+		{
+			GameSceneState = 0;
+
+			restart_game();
+			// Load saved game state
+			load_game(PROJECT_SOURCE_DIR + std::string("gameState.json"));
+		}
+		return;
+	}
+
+	if (action == GLFW_RELEASE && key == GLFW_KEY_T)
+	{
+		temp = GameSceneState;
+		GameSceneState = -2;
+
+		int w, h;
+		glfwGetWindowSize(window, &w, &h);
+
+		Entity room = createEmptyRoom(renderer, { 600, 400 }, window);
+		RenderRequest& render = registry.renderRequests.get(room);
+		render.used_texture = TEXTURE_ASSET_ID::TUTORIAL;
+	}
+
 	if (action == GLFW_PRESS)
 	{
 		pressedKeys.insert(key);
@@ -523,6 +587,15 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		restart_game();
 	}
 
+	if (action == GLFW_RELEASE && key == GLFW_KEY_ESCAPE)
+	{
+		int w, h;
+		glfwGetWindowSize(window, &w, &h);
+		GameSceneState = -1;
+
+		restart_game();
+	}
+
 
 	// Enter Combat
 	if (GameSceneState == 0 && action == GLFW_RELEASE && key == GLFW_KEY_C)
@@ -554,10 +627,10 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 //	}
 //	current_speed = fmax(0.f, current_speed);
 
-	// player attack
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && GameSceneState == 0) {
-		on_mouse_click(GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0);
-	}
+	//// player attack
+	//if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && GameSceneState == 0) {
+	//	on_mouse_click(GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0);
+	//}
 
 	// save game
 	if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && GameSceneState == 0) {
@@ -566,6 +639,9 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
+	if (GameSceneState == -1 || GameSceneState == -2) {
+		return;
+	}
 
 	if (registry.mousePosArray.size() == 0) {
 		Entity e;
@@ -581,6 +657,21 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 
 void WorldSystem::on_mouse_click(int button, int action, int mods)
 {
+	if (GameSceneState == -1) {
+		return;
+	}
+
+	if (GameSceneState == -2) {
+		GameSceneState = temp;
+
+		for (Entity room : registry.rooms.entities) {
+			RenderRequest& render = registry.renderRequests.get(room);
+			if (render.used_texture == TEXTURE_ASSET_ID::TUTORIAL) {
+				registry.remove_all_components_of(room);
+			}
+		}
+		return;
+	}
 
 	if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT && GameSceneState == 0)
 	{
@@ -645,6 +736,10 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 // Update our game world
 bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 {
+	if (GameSceneState == -1 || GameSceneState == -2) {
+		return true;
+	}
+
 	// Updating window title with points
 	std::stringstream title_ss;
 	title_ss << "Points: " << points;
@@ -657,6 +752,32 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 
 	// Removing out of screen entities
 	auto &motion_container = registry.motions;
+	Motion& playerMotion = motion_container.get(registry.players.entities[0]);
+	Player& player = registry.players.components[0];
+	if (spike_damage_timer>0.f) spike_damage_timer-=step_seconds;
+	playerHealth=player.currentHealth;
+	if (player.currentHealth<=0) restart_game();
+	// Health bar follows player
+	for (int j=0; j<player.healthBar.size(); j++) {
+		if (motion_container.has(player.healthBar[j])) {
+			Motion& healthbarMotion = motion_container.get(player.healthBar[j]);
+			healthbarMotion.position.x = playerMotion.position.x;
+			healthbarMotion.position.y = playerMotion.position.y-50.f;
+		}
+	}
+	
+	// Update healthbar
+	if (motion_container.has(player.healthBar[1]) && motion_container.has(player.healthBar[2])) {
+		Motion& barMotion = motion_container.get(player.healthBar[0]);
+		Motion& healthMotion = motion_container.get(player.healthBar[1]);
+		Motion& amortizedMotion = motion_container.get(player.healthBar[2]);
+		healthMotion.scale.x =  barMotion.scale.x * player.currentHealth/player.maxHealth;
+		healthMotion.position.x = barMotion.position.x - (barMotion.scale.x - healthMotion.scale.x) / 2;
+		if (amortizedMotion.scale.x>healthMotion.scale.x) {
+			amortizedMotion.scale.x -= 0.5f;
+		}
+		amortizedMotion.position.x = barMotion.position.x - (barMotion.scale.x - amortizedMotion.scale.x) / 2;
+	}
 	
 	save_player_last_direction();
 
@@ -738,7 +859,7 @@ void WorldSystem::enter_next_room()
 
 	curr_room += 1; 
 	rooms[0] = createRoom(renderer, {600, 400}, window, curr_room);
-	player = createPlayer(renderer, { (window_width_px) / 2, 4 * (window_height_px) / 5 });
+	player = createPlayer(renderer, { (window_width_px) / 2, 4 * (window_height_px) / 5 }, playerHealth);
 
 	PinBall& pinBall = registry.pinBalls.get(player);
 	pinBall.pinBallSize = temp.pinBallSize;
@@ -893,8 +1014,8 @@ void WorldSystem::handle_collisions_world()
 		if (registry.enemyBullets.has(entity) && registry.players.has(entity_other) ||
 			registry.zombies.has(entity) && registry.players.has(entity_other)) {
 			// handle damage interaction (nothing for now)
-			// restart_game();
-			/*if (registry.enemyBullets.has(entity)) {
+			registry.players.components[0].currentHealth -= 10.f;
+			if (registry.enemyBullets.has(entity)) {
 				registry.remove_all_components_of(entity);
 			}
 			else if (registry.zombies.has(entity)) {
@@ -902,13 +1023,16 @@ void WorldSystem::handle_collisions_world()
 			}
 			else {
 				registry.remove_all_components_of(entity_other);
-			}*/
+			}
 		}
 
 		// spike collision
 		if (registry.spikes.has(entity) && registry.players.has(entity_other)) {
 			// handle damage interaction (nothing for now)
-			// restart_game();
+			if (spike_damage_timer<=0.f) {
+				registry.players.components[0].currentHealth -= 10.f;
+				spike_damage_timer=1.f;
+			}
 		}
 
 		// player vs door collision

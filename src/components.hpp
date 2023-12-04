@@ -55,7 +55,9 @@ struct CombatLevel
 // Player component
 struct Player
 {
-
+	std::array<Entity,3> healthBar;
+	float maxHealth = 100.f;
+	float currentHealth = 100.f;
 };
 
 // Entity is a part of Combat
@@ -355,7 +357,9 @@ struct soundForPhys {
 
 enum class TEXTURE_ASSET_ID {
 	FISH = 0,
-	TURTLE = FISH + 1,
+	START = FISH + 1,
+	TUTORIAL = START + 1,
+	TURTLE = TUTORIAL + 1,
 	PLAYER = TURTLE + 1,
 	PLAYERATTACK = PLAYER + 1,
 	GROUND = PLAYERATTACK + 1,

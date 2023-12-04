@@ -461,9 +461,14 @@ void applyGlobalConstraints()
 
 					if (status.invincibilityTimer == 0.0f)
 					{
-						status.health -= registry.damages.get(registry.physObjs.entities[i]).damage;
+						float dmg = registry.damages.get(registry.physObjs.entities[i]).damage;
+						if (status.health < dmg) {
+							status.health = 0.0;
+						} else {
+							status.health -= dmg;
+						}
 						status.invincibilityTimer += 500.0f;
-						// printf("PlayerHealth = %f ", status.health);
+						printf("PlayerHealth = %f ", status.health);
 
 						Mix_PlayChannel(-1, registry.sfx.components[0].player_hit_sound, 0);
 
