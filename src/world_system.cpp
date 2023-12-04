@@ -359,12 +359,26 @@ void WorldSystem::load_game(const std::string& filename)
 					float buff_px = j["dropBuffs"][i]["position"]["x"].get<float>();
 					float buff_py = j["dropBuffs"][i]["position"]["y"].get<float>();
 
-					TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::DROPBALLSIZE;
-					if (buff_id == 1) {
-						id = TEXTURE_ASSET_ID::DROPBALLDAMAGE;
+					TEXTURE_ASSET_ID id;
+
+					switch (buff_id) {
+						case 1:
+							id = TEXTURE_ASSET_ID::DROPBALLDAMAGE;
+							break;
+						case 2:
+							id = TEXTURE_ASSET_ID::DROPGRAVITY;
+							break;
+						case 3:
+							id = TEXTURE_ASSET_ID::DROPBEAM;
+							break;
+						default:
+							id = TEXTURE_ASSET_ID::DROPBALLSIZE;
+							break;
 					}
 					Entity drop = createDropBuff(renderer, { buff_px, buff_py }, id);
 					DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
+					dropBuff.id = buff_id;
+					dropBuff.increaseValue = rand() % 7 + 2;
 				}
 			}
 			else {
@@ -865,7 +879,11 @@ void WorldSystem::handle_collisions_world()
 				registry.motions.get(player).velocity = vec2(0.f, 0.f);
 				GameSceneState = 1;
 				InitCombat = 1;
-				GenerateDropBuff(entity);
+				int i = 0;
+				while (i < 20) {
+					GenerateDropBuff(entity);
+					i++;
+				}
 				registry.remove_all_components_of(entity);
 				registry.remove_all_components_of(entity_other);
 			}
@@ -923,8 +941,6 @@ void WorldSystem::GenerateDropBuff(Entity entity)
 {
 	Motion& motion = registry.motions.get(entity);
 
-	srand(time(NULL));
-
 	int rawValue = rand() % 10;
 	if (rawValue < 3) { 
 		return;
@@ -956,7 +972,7 @@ void WorldSystem::GenerateDropBuff(Entity entity)
 			id = TEXTURE_ASSET_ID::DROPBALLSIZE;
 			break;
 	}
-	Entity drop = createDropBuff(renderer, motion.position, id);
+	Entity drop = createDropBuff(renderer, motion.position + vec2(rawValue * 10 - 50, rawValue * 10 - 50), id);
 	DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
 	dropBuff.id = randomValue;
 	dropBuff.increaseValue = rand() % 7 + 2;
