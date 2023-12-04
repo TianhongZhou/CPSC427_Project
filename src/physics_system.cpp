@@ -626,7 +626,7 @@ void updateWithSubstep(float dt, float steps)
 {
 
 
-	if (dt > 200.f)
+	if (dt > 100.f)
 	{
 		dt = 5.f;
 	}
