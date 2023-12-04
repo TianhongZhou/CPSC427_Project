@@ -217,6 +217,7 @@ void PinballSystem::stepEnemyAttack() {
 
                 Entity projectile_ball = createBall(r, spawnPos, pinball.pinBallSize, 0.f);
                 createNewRectangleTiedToEntity(projectile_ball, pinball.pinBallSize, pinball.pinBallSize, registry.motions.get(projectile_ball).position, true, 1);
+                registry.colors.insert(projectile_ball, { 1.f, 0.f, 0.f});
 
                 TemporaryProjectile temp;
                 temp.hitsLeft = 1;
@@ -596,6 +597,10 @@ void PinballSystem::spawn_swarm(vec2 boundary) {
     Entity swarmKing = createPinBallEnemy(renderer, vec2(525, 300), boundary, 0.5, 0, 5000.0f, 0.5);
     registry.swarmKing.insert(swarmKing,{});
 
+    PinBallEnemy& pinballEnemy = registry.pinballEnemies.get(swarmKing);
+    pinballEnemy.maxHealth = 300.f;
+    pinballEnemy.currentHealth = 300.f;
+
     registry.colors.insert(swarmKing, { 0, 1, 0 });
 }
 
@@ -891,6 +896,9 @@ void PinballSystem::start_level_1() {
     std::uniform_real_distribution<float> distribution2(0.f, 1.f);
 
     Entity pinballenemyMain = createPinBallEnemy(renderer, vec2(525,180), boundary,2.0f, 0, 3000.0f, 1.0);
+    PinBallEnemy& pinballEnemy = registry.pinballEnemies.get(pinballenemyMain);
+    pinballEnemy.maxHealth = 50.f;
+    pinballEnemy.currentHealth = 50.f;
 
     registry.colors.insert(pinballenemyMain, { distribution2(gen), distribution2(gen), distribution2(gen) });
 }
@@ -909,6 +917,13 @@ void PinballSystem::start_level_2() {
     Entity pinballenemy = createPinBallEnemy(renderer, vec2(525, 90), boundary, 2.0f, 1, 5000.0f, 1.f);
     registry.colors.insert(pinballenemy, { distribution2(gen), distribution2(gen), distribution2(gen) });
 
+    PinBallEnemy& pinballEnemy = registry.pinballEnemies.get(pinballenemyMain);
+    pinballEnemy.maxHealth = 150.f;
+    pinballEnemy.currentHealth = 150.f;
+
+    PinBallEnemy& pinballEnemy2 = registry.pinballEnemies.get(pinballenemy);
+    pinballEnemy2.maxHealth = 150.f;
+    pinballEnemy2.currentHealth = 150.f;
 }
 
 void PinballSystem::start_level_3() {

@@ -372,12 +372,26 @@ void WorldSystem::load_game(const std::string& filename)
 					float buff_px = j["dropBuffs"][i]["position"]["x"].get<float>();
 					float buff_py = j["dropBuffs"][i]["position"]["y"].get<float>();
 
-					TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::DROPBALLSIZE;
-					if (buff_id == 1) {
-						id = TEXTURE_ASSET_ID::DROPBALLDAMAGE;
+					TEXTURE_ASSET_ID id;
+
+					switch (buff_id) {
+						case 1:
+							id = TEXTURE_ASSET_ID::DROPBALLDAMAGE;
+							break;
+						case 2:
+							id = TEXTURE_ASSET_ID::DROPGRAVITY;
+							break;
+						case 3:
+							id = TEXTURE_ASSET_ID::DROPBEAM;
+							break;
+						default:
+							id = TEXTURE_ASSET_ID::DROPBALLSIZE;
+							break;
 					}
 					Entity drop = createDropBuff(renderer, { buff_px, buff_py }, id);
 					DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
+					dropBuff.id = buff_id;
+					dropBuff.increaseValue = rand() % 7 + 2;
 				}
 			}
 			else {
@@ -984,9 +998,23 @@ void WorldSystem::handle_collisions_world()
 			}
 			else if (registry.mainWorldEnemies.size() == 1) {
 				registry.motions.get(player).velocity = vec2(0.f, 0.f);
+				pressedKeys.clear();
+
+				if (registry.spriteSheets.has(player))
+				{
+					SpriteSheet& spriteSheet = registry.spriteSheets.get(player);
+					RenderRequest& renderRequest = registry.renderRequests.get(player);
+					renderRequest.used_texture = spriteSheet.origin;
+					registry.spriteSheets.remove(player);
+				}
+
 				GameSceneState = 1;
 				InitCombat = 1;
-				GenerateDropBuff(entity);
+				int i = 0;
+				while (i < 10) {
+					GenerateDropBuff(entity);
+					i++;
+				}
 				registry.remove_all_components_of(entity);
 				registry.remove_all_components_of(entity_other);
 			}
@@ -1019,8 +1047,37 @@ void WorldSystem::handle_collisions_world()
 
 		// player vs door collision
 		if (registry.doors.has(entity) && registry.players.has(entity_other)) {
-			// handle damage interaction (nothing for now)
 			enter_next_room();
+		}
+
+		// player vs maze wall collision
+		if (registry.mazes.has(entity) && registry.players.has(entity_other)) {
+
+			Motion& roomMotion = registry.motions.get(entity);
+			Motion& motion = registry.motions.get(entity_other);
+
+			float mazeLeft = roomMotion.position.x - (roomMotion.scale.x / 2);
+			float mazeRight = roomMotion.position.x + (roomMotion.scale.x / 2);
+			float mazeTop = roomMotion.position.y - (roomMotion.scale.y / 2);
+			float mazeBottom = roomMotion.position.y + (roomMotion.scale.y / 2);
+
+			if (motion.position.x < mazeLeft) {
+				motion.position.x = mazeLeft;
+				motion.velocity.x = 0;
+			}
+			else if (motion.position.x > mazeRight) {
+				motion.position.x = mazeRight;
+				motion.velocity.x = 0;
+			}
+
+			if (motion.position.y < mazeTop) {
+				motion.position.y = mazeTop;
+				motion.velocity.y = 0;
+			}
+			else if (motion.position.y > mazeBottom) {
+				motion.position.y = mazeBottom;
+				motion.velocity.y = 0;
+			}
 		}
 
 		// drop buff vs player collision
@@ -1046,8 +1103,6 @@ void WorldSystem::handle_collisions_world()
 void WorldSystem::GenerateDropBuff(Entity entity)
 {
 	Motion& motion = registry.motions.get(entity);
-
-	srand(time(NULL));
 
 	int rawValue = rand() % 10;
 	if (rawValue < 3) { 
@@ -1080,7 +1135,7 @@ void WorldSystem::GenerateDropBuff(Entity entity)
 			id = TEXTURE_ASSET_ID::DROPBALLSIZE;
 			break;
 	}
-	Entity drop = createDropBuff(renderer, motion.position, id);
+	Entity drop = createDropBuff(renderer, motion.position + vec2(rawValue * 10 - 50, rawValue * 10 - 50), id);
 	DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
 	dropBuff.id = randomValue;
 	dropBuff.increaseValue = rand() % 7 + 2;

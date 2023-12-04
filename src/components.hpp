@@ -7,6 +7,11 @@
 
 #include <SDL_mixer.h>
 
+struct Maze
+{
+
+};
+
 struct Zombie
 {
 
@@ -380,7 +385,8 @@ enum class TEXTURE_ASSET_ID {
 	PINBALLBACKGROUND = PINBALL + 1,
 	FLIPPER = PINBALLBACKGROUND + 1,
 	WALL = FLIPPER + 1,
-	TEXTURE_COUNT = WALL + 1
+	GROUNDNORMAL = WALL + 1,
+	TEXTURE_COUNT = GROUNDNORMAL + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -391,7 +397,8 @@ enum class EFFECT_ASSET_ID {
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
 	POST = WATER + 1,
-	EFFECT_COUNT = POST + 1,
+	NORMAL = POST + 1,
+	EFFECT_COUNT = NORMAL + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
@@ -419,6 +426,7 @@ struct RenderRequest {
 	TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
+	TEXTURE_ASSET_ID used_normal = TEXTURE_ASSET_ID::TEXTURE_COUNT;
 	vec2 textureOffset = vec2(0.0, 0.0);
 	vec2 translationOffest = vec2(0.0, 0.0);
 };
