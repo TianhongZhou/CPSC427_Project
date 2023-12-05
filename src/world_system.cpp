@@ -1184,7 +1184,7 @@ void WorldSystem::GenerateDropBuff(Entity entity)
 	Entity drop = createDropBuff(renderer, motion.position + vec2(rawValue * 10 - 50, rawValue * 10 - 50), id);
 	DropBuff &dropBuff = registry.dropBuffs.emplace(drop);
 	dropBuff.id = randomValue;
-	dropBuff.increaseValue = rand() % 7 + 2;
+	dropBuff.increaseValue = rand() % 3 + 2;
 }
 
 // handle value add when collision
