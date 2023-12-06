@@ -16,7 +16,7 @@ void main() {
     vec3 tex_color = texture(sampler0, uv).xyz;
     vec3 normalTex = texture(normal_map, uv).xyz * 2.0 - 1.0;
 
-    vec3 N = vec3(normalTex.x, normalTex.z, normalTex.y);
+    vec3 N = normalTex;
     vec3 L = 2.0 * light_pos - 1.0 - vcs_pos;
     N = normalize(N);
     L = normalize(L);
