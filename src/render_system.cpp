@@ -172,7 +172,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
         Light& light = registry.lights.get(player);
         Motion& motion = registry.motions.get(player);
 
-        glUniform3f(glGetUniformLocation(program, "light_pos"), light.screenPosition.x, 1.5f, light.screenPosition.y);
+        glUniform3f(glGetUniformLocation(program, "light_pos"), light.screenPosition.x, light.screenPosition.y, 1.2f);
         glUniform3f(glGetUniformLocation(program, "light_color"), light.lightColor.x, light.lightColor.y, light.lightColor.z);
     }    
     else {

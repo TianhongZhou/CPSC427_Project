@@ -546,38 +546,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 	}
 
-	if ((motion.velocity.x == 0.f) && (motion.velocity.y == 0.f))
-	{
-		if (registry.spriteSheets.has(player))
-		{
-			SpriteSheet& spriteSheet = registry.spriteSheets.get(player);
-			RenderRequest& renderRequest = registry.renderRequests.get(player);
-			renderRequest.used_texture = spriteSheet.origin;
-			registry.spriteSheets.remove(player);
-		}
-	}
-	else
-	{
-		if (!registry.spriteSheets.has(player))
-		{
-			SpriteSheet& spriteSheet = registry.spriteSheets.emplace_with_duplicates(player);
-			spriteSheet.next_sprite = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;
-			spriteSheet.frameIncrement = 0.06f;
-			spriteSheet.frameAccumulator = 0.0f;
-			spriteSheet.spriteSheetHeight = 1;
-			spriteSheet.spriteSheetWidth = 6;
-			spriteSheet.totalFrames = 6;
-			spriteSheet.origin = TEXTURE_ASSET_ID::PLAYER;
-			spriteSheet.loop = true;
-			if (motion.velocity.x < 0.f)
-			{
-				spriteSheet.xFlip = true;
-			}
-			RenderRequest& renderRequest = registry.renderRequests.get(player);
-			renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;
-		}
-	}
-
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
 	{
@@ -753,25 +721,25 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 	// Removing out of screen entities
 	auto &motion_container = registry.motions;
 	Motion& playerMotion = motion_container.get(registry.players.entities[0]);
-	Player& player = registry.players.components[0];
+	Player& player1 = registry.players.components[0];
 	if (spike_damage_timer>0.f) spike_damage_timer-=step_seconds;
-	playerHealth=player.currentHealth;
-	if (player.currentHealth<=0) restart_game();
+	playerHealth= player1.currentHealth;
+	if (player1.currentHealth<=0) restart_game();
 	// Health bar follows player
-	for (int j=0; j<player.healthBar.size(); j++) {
-		if (motion_container.has(player.healthBar[j])) {
-			Motion& healthbarMotion = motion_container.get(player.healthBar[j]);
+	for (int j=0; j< player1.healthBar.size(); j++) {
+		if (motion_container.has(player1.healthBar[j])) {
+			Motion& healthbarMotion = motion_container.get(player1.healthBar[j]);
 			healthbarMotion.position.x = playerMotion.position.x;
 			healthbarMotion.position.y = playerMotion.position.y-50.f;
 		}
 	}
 	
 	// Update healthbar
-	if (motion_container.has(player.healthBar[1]) && motion_container.has(player.healthBar[2])) {
-		Motion& barMotion = motion_container.get(player.healthBar[0]);
-		Motion& healthMotion = motion_container.get(player.healthBar[1]);
-		Motion& amortizedMotion = motion_container.get(player.healthBar[2]);
-		healthMotion.scale.x =  barMotion.scale.x * player.currentHealth/player.maxHealth;
+	if (motion_container.has(player1.healthBar[1]) && motion_container.has(player1.healthBar[2])) {
+		Motion& barMotion = motion_container.get(player1.healthBar[0]);
+		Motion& healthMotion = motion_container.get(player1.healthBar[1]);
+		Motion& amortizedMotion = motion_container.get(player1.healthBar[2]);
+		healthMotion.scale.x =  barMotion.scale.x * player1.currentHealth/ player1.maxHealth;
 		healthMotion.position.x = barMotion.position.x - (barMotion.scale.x - healthMotion.scale.x) / 2;
 		if (amortizedMotion.scale.x>healthMotion.scale.x) {
 			amortizedMotion.scale.x -= 0.5f;
@@ -826,20 +794,39 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 		}
 	}
 
-	//spawn_room_enemies(elapsed_ms_since_last_update);
 
-	//// TODO: move this to the top later
-	//int w, h;
-	//glfwGetWindowSize(window, &w, &h);
-
-	// Enter next room
-	//Motion& player_motion = registry.motions.get(player);
-	//if (player_motion.position.y < 60.f && player_motion.position.x > w/2 - 40 && player_motion.position.x < w / 2 + 40)
-	//	//&& registry.mainWorldEnemies.size()) 
-	//{
-	//	enter_next_room();
-	//	player_motion.position = { w/2, h * 4/ 5};
-	//}
+	Motion& motion = registry.motions.get(player);
+	if ((motion.velocity.x == 0.f) && (motion.velocity.y == 0.f))
+	{
+		if (registry.spriteSheets.has(player))
+		{
+			SpriteSheet& spriteSheet = registry.spriteSheets.get(player);
+			RenderRequest& renderRequest = registry.renderRequests.get(player);
+			renderRequest.used_texture = spriteSheet.origin;
+			registry.spriteSheets.remove(player);
+		}
+	}
+	else
+	{
+		if (!registry.spriteSheets.has(player))
+		{
+			SpriteSheet& spriteSheet = registry.spriteSheets.emplace_with_duplicates(player);
+			spriteSheet.next_sprite = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;
+			spriteSheet.frameIncrement = 0.06f;
+			spriteSheet.frameAccumulator = 0.0f;
+			spriteSheet.spriteSheetHeight = 1;
+			spriteSheet.spriteSheetWidth = 6;
+			spriteSheet.totalFrames = 6;
+			spriteSheet.origin = TEXTURE_ASSET_ID::PLAYER;
+			spriteSheet.loop = true;
+			if (motion.velocity.x < 0.f)
+			{
+				spriteSheet.xFlip = true;
+			}
+			RenderRequest& renderRequest = registry.renderRequests.get(player);
+			renderRequest.used_texture = TEXTURE_ASSET_ID::PLAYERWALKSPRITESHEET;
+		}
+	}
 
 	return true;
 }
