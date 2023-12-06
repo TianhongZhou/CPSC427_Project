@@ -29,7 +29,7 @@ Entity createPinBallEnemy(RenderSystem *renderer, vec2 pos, vec2 boundary, float
 // the room
 Entity createRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window, int room_num);
 // the pinball room
-Entity createPinballRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
+Entity* createPinballRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
 
 // the player
 Entity createPlayer(RenderSystem* renderer, vec2 pos, float currentHealth);
