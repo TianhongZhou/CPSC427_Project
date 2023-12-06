@@ -892,10 +892,13 @@ Entity createParticle(RenderSystem* renderer, vec2 pos, float size, vec2 vel, ve
 	Particle& particle = registry.particles.emplace(entity);
 	particle.lifespan = lifespan;
 
+    for (int i=0; i<8; i++) {
+		
+	}
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
-			EFFECT_ASSET_ID::SALMON,
+			EFFECT_ASSET_ID::PEBBLE,
 			GEOMETRY_BUFFER_ID::BALL });
 	registry.colors.insert(entity, color);
 

@@ -10,6 +10,8 @@ uniform float radii[10];
 uniform float softnesses[10];
 uniform vec3 colors[10];
 uniform int numLights;
+uniform float time;
+uniform int flicker;
 uniform float aspectRatio;
 
 void main()
@@ -22,7 +24,8 @@ void main()
         vec2 adjustedPosition = vec2(positions[i].x, positions[i].y * aspectRatio);
         float distanceToCenter = length(adjustedCoords - adjustedPosition);
         float alpha = 1.0 - smoothstep(radii[i], radii[i] + softnesses[i], distanceToCenter);
-        finalColor = mix(finalColor, col * colors[i], alpha);
+        if (flicker==0) finalColor = mix(finalColor, col * colors[i], alpha);
+        else finalColor = mix(finalColor, col * colors[i], alpha)*(sin(time/2)+1);
     }
 
     FragColor = vec4(finalColor, 1.0);
