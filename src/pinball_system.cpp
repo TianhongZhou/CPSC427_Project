@@ -254,6 +254,19 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
     // 	GameSceneState = 0;
     // }
     float step_seconds = elapsed_ms_since_last_update / 1000.f;
+
+    if (backgrounds!=NULL) {
+        float relativePosX = window_width_px/2 - 
+        (registry.physObjs.get(registry.playerFlippers.entities[0]).center.x);
+        registry.motions.get(backgrounds[1]).position.x = window_width_px/2+(relativePosX/50);
+        registry.motions.get(backgrounds[2]).position.x = window_width_px/2+(relativePosX/10);
+        registry.motions.get(backgrounds[3]).position.x = window_width_px/2+(relativePosX/7);
+        registry.motions.get(backgrounds[4]).position.x = window_width_px/2+(relativePosX/5);
+        registry.motions.get(backgrounds[5]).position.x = window_width_px/2+(relativePosX/3);
+        registry.motions.get(backgrounds[6]).position.x = window_width_px/2+(relativePosX/2);
+        registry.motions.get(backgrounds[7]).position.x = window_width_px/2+(relativePosX/2);
+    }
+
     if (registry.pinballEnemies.entities.size() == 0 && registry.swarmKing.entities.empty()) {
         // exit_combat();
         // GameSceneState = 0;
@@ -719,7 +732,7 @@ void PinballSystem::restart() {
 // initializes the room, ball, and flipper
 void PinballSystem::start_base_level() {
 
-    createPinballRoom(renderer, { 600, 400 }, window);
+    backgrounds = createPinballRoom(renderer, { 600, 400 }, window);
     r = renderer;
     vec2 boundary = {260 + 70, 800 - 70};
     std::random_device rd;
@@ -780,7 +793,7 @@ void PinballSystem::start_test_level() {
     // int w, h;
     // glfwGetWindowSize(window, &w, &h);
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-    createPinballRoom(renderer, { 600, 400 }, window);
+    backgrounds = createPinballRoom(renderer, { 600, 400 }, window);
     r = renderer;
     vec2 boundary = {260 + 70, 800 - 70};
     std::random_device rd;

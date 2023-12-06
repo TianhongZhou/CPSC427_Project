@@ -62,6 +62,8 @@ private:
 
     float particleSpawnTimer = 0.f;
 
+    Entity* backgrounds;
+
     // OpenGL window handle
     GLFWwindow* window;
 
