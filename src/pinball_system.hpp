@@ -70,7 +70,7 @@ private:
 
     WorldSystem* world;
 
-    SwarmSystem* swarmSystem;
+    SwarmSystem* swarmSystem = nullptr;
 
     // C++ random number generator
 //    std::default_random_engine rng;

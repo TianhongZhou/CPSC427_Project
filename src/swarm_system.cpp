@@ -12,6 +12,11 @@ const int S_CENTER_Y = 300;
 const int S_RADIUS = 200;
 const int S_SPEED = 1;
 
+const float COHERENCE = 8;
+const float SEPARATION = 100;
+const float ALIGNMENT = 20;
+const float LEADER = 10;
+
 SwarmSystem::SwarmSystem(RenderSystem* renderer_arg) {
     this->renderer = renderer_arg;
 }
@@ -59,8 +64,10 @@ void SwarmSystem::update_swarm_motion() {
     for (Entity entity: registry.swarmEnemies.entities) {
         Motion& motion = registry.motions.get(entity);
 
-        vec2 rule_sum = rule1(entity, 50) + rule2(entity, 10) + rule3(entity, 14)
-                        + rule4(swarmKing, entity, 30);
+        vec2 rule_sum = rule1(entity, COHERENCE)
+                + rule2(entity, SEPARATION)
+                + rule3(entity, ALIGNMENT)
+                + rule4(swarmKing, entity, LEADER);
         // scaling so that it doesn't go too fast
         float scaling = 0.01;
         rule_sum = {scaling * rule_sum.x, scaling * rule_sum.y};

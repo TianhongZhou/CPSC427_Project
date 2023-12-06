@@ -330,7 +330,7 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
 
     if (registry.pinballEnemies.entities.size() <= 0) {
         exit_combat();
-        updateTimers(elapsed_ms_since_last_update);
+         updateTimers(elapsed_ms_since_last_update);
         return true;
     }
 
@@ -341,8 +341,9 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
 
     if (registry.pinballPlayerStatus.components[0].health <= 0.0f) {
         printf("\n-You Died-\n");
-        exit_combat();
-        world->restart_game();
+        // TODO: uncomment
+//        exit_combat();
+//        world->restart_game();
     }
 
     return true;
@@ -392,7 +393,7 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
     }
 
     // TODO: comment this
-    // kill all enemies
+    // kill enemies
     if (key == GLFW_KEY_K && action == GLFW_RELEASE)
     {
         for (Entity entity: registry.pinballEnemies.entities) {
@@ -716,6 +717,7 @@ void PinballSystem::restart() {
         case -1:
             start_test_level();
         case 1:
+            // TODO: change to level 1
             start_level_3();
             break;
         case 2:
@@ -990,6 +992,12 @@ void PinballSystem::handle_collisions() {
 void PinballSystem::exit_combat() {
     while (registry.combat.entities.size() > 0)
         registry.remove_all_components_of(registry.combat.entities.back());
+
+    // FIXME: awkward logic. deleting without this check causes crashes on non swarm levels
+    if (registry.combatLevel.components[0].counter == 3) {
+        delete swarmSystem;
+    }
+//    delete swarmSystem;
     world->redirect_inputs_world();
     GameSceneState = 0;
     registry.motions.get(registry.players.entities[0]).velocity = vec2(0.f,0.f);
