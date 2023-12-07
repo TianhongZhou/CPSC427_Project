@@ -13,9 +13,10 @@ const int S_RADIUS = 200;
 const int S_SPEED = 1;
 
 const float COHERENCE = 8;
-const float SEPARATION = 100;
+const float SEPARATION = 10;
 const float ALIGNMENT = 20;
 const float LEADER = 10;
+const float LEADER_SEP = 80;
 
 SwarmSystem::SwarmSystem(RenderSystem* renderer_arg) {
     this->renderer = renderer_arg;
@@ -67,7 +68,12 @@ void SwarmSystem::update_swarm_motion() {
         vec2 rule_sum = rule1(entity, COHERENCE)
                 + rule2(entity, SEPARATION)
                 + rule3(entity, ALIGNMENT)
-                + rule4(swarmKing, entity, LEADER);
+                + rule4(swarmKing, entity, LEADER)
+                + rule5(swarmKing, entity, LEADER_SEP);
+
+//        vec2 rule_sum = rule5(swarmKing, entity, COHERENCE)
+//                        + rule2(entity, SEPARATION)
+//                        + rule3(entity, ALIGNMENT);
         // scaling so that it doesn't go too fast
         float scaling = 0.01;
         rule_sum = {scaling * rule_sum.x, scaling * rule_sum.y};
@@ -88,12 +94,25 @@ vec2 SwarmSystem::rule1(Entity b_j, float coherence = 100) {
         }
     }
 
-    // move boid 1% of the way towards the center
+    // move boid towards the center
     auto swarmSize = static_cast<float>(registry.swarmEnemies.size()) - 1;
     pc = {pc.x / swarmSize, pc.y / swarmSize};
     Motion m_j = registry.motions.get(b_j);
     vec2 diff = pc - m_j.position;
     return {diff.x / coherence, diff.y / coherence};
+}
+
+vec2 SwarmSystem::rule5(Entity swarmKing, Entity b_j, float leader_separation = 30) {
+    vec2 king_pos = registry.motions.get(swarmKing).position;
+    vec2 m_pos = registry.motions.get(b_j).position;
+    vec2 diff = king_pos - m_pos;
+    float dist = sqrt(diff.x * diff.x + diff.y * diff.y);
+
+    if (dist < leader_separation) {
+        return - diff;
+    } else {
+        return {0, 0};
+    }
 }
 
 vec2 SwarmSystem::rule2(Entity b_j, float separation = 50) {

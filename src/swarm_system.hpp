@@ -49,4 +49,6 @@ private:
     // strength is by how much
     // FIXME: there might be a bug in this as the boids seem to accelerate with time
     vec2 rule4(Entity swarmKing, Entity b_j, float strength);
+
+    vec2 rule5(Entity swarmKing, Entity b_j, float leader_separation);
 };
