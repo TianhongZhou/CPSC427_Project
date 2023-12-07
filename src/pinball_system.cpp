@@ -755,7 +755,7 @@ void PinballSystem::start_base_level() {
     registry.playerFlippers.insert(flipper, pf);
 
     PinBall& pinBall = registry.pinBalls.components[0];
-    Entity player_ball = createBall(renderer, { 400, 400 }, pinBall.pinBallSize, 1.f);
+    Entity player_ball = createBall(renderer, { 400, 400 }, pinBall.pinBallSize, 1.f, true);
     //createNewRectangleTiedToEntity(player_ball, 50.f * MonitorScreenRatio, 50.f * MonitorScreenRatio * 1.2f, registry.motions.get(player_ball).position, true, 1);
     createNewRectangleTiedToEntity(player_ball, pinBall.pinBallSize, pinBall.pinBallSize, registry.motions.get(player_ball).position, true, 1);
 

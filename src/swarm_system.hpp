@@ -23,15 +23,20 @@ public:
 
 private:
 
-//    // OpenGL window handle
 //    GLFWwindow* window;
 //
     RenderSystem* renderer;
 
     // detect swarm collision with ball
-    void detect_collision();
+    // due to the way the physics system was built it is hard to use with the swarm :(
+    // instead we use simple collision detection
 
-    void handle_collision();
+    bool collides(Entity b_j);
+
+    void handle_collision(Entity b_j);
+
+    // some of these numbers are inverted because of scuffed programing
+    // higher does not necessarily mean more
 
     // boids try to fly towards the centre of mass of neighbouring boids
     // coherence determines by how much
@@ -43,12 +48,13 @@ private:
 
     // boids try to match velocity with near boids
     // alignment determines by how much
-    vec2 rule3(Entity b, float alignment);
+    vec2 rule3(Entity b_j, float alignment);
 
     // boids try to go to position of the swarm king
     // strength is by how much
-    // FIXME: there might be a bug in this as the boids seem to accelerate with time
     vec2 rule4(Entity swarmKing, Entity b_j, float strength);
 
+    // boids try to leave if they get too close to the swarm king
+    // leader separation determines when they are too close
     vec2 rule5(Entity swarmKing, Entity b_j, float leader_separation);
 };

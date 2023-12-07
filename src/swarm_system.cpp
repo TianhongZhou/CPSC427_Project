@@ -57,6 +57,26 @@ void SwarmSystem::spawn_swarm(vec2 boundary) {
     registry.colors.insert(swarmKing, { 0, 1, 0 });
 }
 
+bool SwarmSystem::collides(Entity b_j) {
+    Entity mainBall;
+    for (int i = 0; i < registry.balls.components.size(); i++) {
+        if (registry.balls.components[i].isMainBall) {
+            mainBall = registry.balls.entities[i];
+        }
+    }
+
+    Motion &ball_motion = registry.motions.get(mainBall);
+    Motion &boid_motion = registry.motions.get(b_j);
+
+
+
+    return false;
+}
+
+void SwarmSystem::handle_collision(Entity b_j) {
+
+}
+
 
 void SwarmSystem::update_swarm_motion() {
 
@@ -71,9 +91,6 @@ void SwarmSystem::update_swarm_motion() {
                 + rule4(swarmKing, entity, LEADER)
                 + rule5(swarmKing, entity, LEADER_SEP);
 
-//        vec2 rule_sum = rule5(swarmKing, entity, COHERENCE)
-//                        + rule2(entity, SEPARATION)
-//                        + rule3(entity, ALIGNMENT);
         // scaling so that it doesn't go too fast
         float scaling = 0.01;
         rule_sum = {scaling * rule_sum.x, scaling * rule_sum.y};

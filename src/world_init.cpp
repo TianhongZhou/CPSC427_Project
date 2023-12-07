@@ -750,7 +750,7 @@ Entity createSwarmEnemy(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
-Entity createBall(RenderSystem* renderer, vec2 pos, float size, float trail) 
+Entity createBall(RenderSystem* renderer, vec2 pos, float size, float trail, bool isMainBall)
 {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::BALL);
@@ -767,6 +767,7 @@ Entity createBall(RenderSystem* renderer, vec2 pos, float size, float trail)
 
 	Ball& ball = registry.balls.emplace(entity);
 	ball.trail = trail;
+    ball.isMainBall = isMainBall;
 
 	// registry.players.emplace(entity);
 	registry.renderRequests.insert(
