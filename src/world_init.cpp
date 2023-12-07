@@ -636,8 +636,9 @@ Entity* createPinballRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 		/*int w, h;
 		glfwGetWindowSize(window, &w, &h);*/
 		//printf("This is Starting Room size: %d, %d\n", )
-		if (i<3||i==5) motion.scale = { window_width_px, window_height_px };
-		else motion.scale = { window_width_px*5.2/4, window_height_px };
+		motion.scale = { window_width_px, window_height_px };
+
+		registry.paras.emplace(entity);
 
 		registry.renderRequests.insert(
 			entity,
