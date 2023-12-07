@@ -42,6 +42,11 @@ struct Ball
 	float trail;
 };
 
+struct Parallox
+{
+	float offset;
+};
+
 struct PlayerBullet
 {
 
@@ -256,9 +261,7 @@ struct physObj {
 
 
 struct playerFlipper {
-
-
-
+	float exit_timer=0.f;
 };
 
 struct HealthBar {

@@ -12,6 +12,7 @@ uniform mat3 transform;
 uniform mat3 projection;
 uniform vec2 currentFrame;
 uniform vec2 spritesheetSize;
+uniform float offset;
 
 void main()
 {
@@ -20,7 +21,8 @@ void main()
         vec2 frameStart = currentFrame * frameSize;
         texcoord = frameStart + in_texcoord * frameSize;
     } else {
-        texcoord = in_texcoord;
+        texcoord.x = in_texcoord.x+offset;
+        texcoord.y = in_texcoord.y;
     }
 
 	vec3 pos = projection * transform * vec3(in_position.xy, 1.0);
