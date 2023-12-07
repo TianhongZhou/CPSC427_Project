@@ -51,6 +51,7 @@ Entity createSpikes(vec2 pos, vec2 size);
 Entity createBar(RenderSystem* renderer, vec2 pos, vec2 scale);
 
 Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
+Entity createMaze(RenderSystem* renderer, vec2 pos, GLFWwindow* window);
 Entity createMaze1(RenderSystem* renderer, vec2 pos);
 Entity createRoom1(RenderSystem* renderer, vec2 pos);
 Entity createRoom2(RenderSystem* renderer, vec2 pos);
