@@ -1072,7 +1072,7 @@ void WorldSystem::handle_collisions_world()
 
 				Enter_combat_timer += 2000.f;
 				int i = 0;
-				while (i < 2) {
+				while (i < 5) {
 					GenerateDropBuff(entity);
 					i++;
 				}
