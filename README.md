@@ -87,9 +87,9 @@
     - #### Combo meter and bonus ball system
 	    - PinballPlayerStatus component
 	    - related code in on_key in pinball_system.cpp
-    - #### Swarm Enemy Type
+    - #### Swarm AI and Enemy Type
    	    - SwarmKing and SwarmEnemy components
-    	    - spawn_swarm, update_swarm_motion and other functions in pinball_system.cpp
+    	    - all functions in swarm_system.cpp
     
     
 - ### Consistent game resolution
