@@ -529,19 +529,18 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 		Entity spikes = createSpikes({ i * spike_size + 100, 200 }, { spike_size, spike_size });
 		registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
 
-		Entity drop = createDropBuff(renderer, { i * spike_size + 100, 100 }, TEXTURE_ASSET_ID::DROPBALLSIZE);
-		DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
+		Entity spikes2 = createSpikes({ window_width_px - i * spike_size - 100, 400 }, { spike_size, spike_size });
+		registry.colors.insert(spikes2, { 0.5, 0.5, 0.5 });
 
 		if (i == horizontal / 3 || i == 2 * horizontal / 3) {
-			/*Entity drop = createDropBuff(renderer, { i * spike_size + 100, 100 }, TEXTURE_ASSET_ID::DROPBALLSIZE);
-			DropBuff& dropBuff = registry.dropBuffs.emplace(drop);*/
+			Entity drop = createDropBuff(renderer, { i * spike_size + 100, 100 }, TEXTURE_ASSET_ID::DROPBALLSIZE);
+			DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
+			dropBuff.increaseValue = 2;
 
 			Entity drop2 = createDropBuff(renderer, { i * spike_size + 100, 300 }, TEXTURE_ASSET_ID::DROPBALLDAMAGE);
 			DropBuff& dropBuff2 = registry.dropBuffs.emplace(drop2);
-		}
-
-		Entity spikes2 = createSpikes({ window_width_px - i * spike_size - 100, 400 }, { spike_size, spike_size });
-		registry.colors.insert(spikes2, { 0.5, 0.5, 0.5 });
+			dropBuff2.increaseValue = 2;
+		}	
 	}
 
 	return entity;

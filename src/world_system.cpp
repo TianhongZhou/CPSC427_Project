@@ -298,6 +298,9 @@ void WorldSystem::save_game(const std::string &filename)
 		j["player"]["position"]["x"] = motion.position.x;
 		j["player"]["position"]["y"] = motion.position.y;
 
+		// Save health
+		j["player"]["health"] = registry.players.components[0].currentHealth;
+
 		// Save buff drops
 		auto &dropBuffsRegistry = registry.dropBuffs;
 		for (uint i = 0; i < dropBuffsRegistry.components.size(); i++)
@@ -368,6 +371,9 @@ void WorldSystem::load_game(const std::string &filename)
 				Motion &motion = registry.motions.get(player);
 				motion.position.x = j["player"]["position"]["x"].get<float>();
 				motion.position.y = j["player"]["position"]["y"].get<float>();
+
+				// Restore health
+				registry.players.components[0].currentHealth = j["player"]["health"];
 
 				// Restore buff drops
 				// auto& dropBuffsRegistry = registry.dropBuffs;
@@ -1035,9 +1041,15 @@ void WorldSystem::handle_collisions_world()
 					registry.colors.insert(door, { 0, 0, 0 });
 				}
 
+				// remove still flying projectiles
+				while (registry.enemyBullets.entities.size() > 0)
+					registry.remove_all_components_of(registry.enemyBullets.entities.back());
+				while (registry.playerBullets.entities.size() > 0)
+					registry.remove_all_components_of(registry.playerBullets.entities.back());
+
 				Enter_combat_timer += 2000.f;
 				int i = 0;
-				while (i < 10) {
+				while (i < 2) {
 					GenerateDropBuff(entity);
 					i++;
 				}
@@ -1079,7 +1091,9 @@ void WorldSystem::handle_collisions_world()
 
 		// player vs door collision
 		if (registry.doors.has(entity) && registry.players.has(entity_other)) {
+			save_game(PROJECT_SOURCE_DIR + std::string("gameState.json"));
 			enter_next_room();
+			save_game(PROJECT_SOURCE_DIR + std::string("gameState.json"));
 		}
 
 		// player vs maze wall collision
