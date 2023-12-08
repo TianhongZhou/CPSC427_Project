@@ -479,6 +479,15 @@ void RenderSystem::draw_combat_scene() {
         drawTexturedMesh(entity, projection_2D);
     }
 
+    if (registry.pinballEnemies.components.size()>0) {
+        for (PinBallEnemy enemy: registry.pinballEnemies.components) {
+            for (int i=0; i<3; i++) {
+                Entity en = enemy.healthBar[i];
+                drawTexturedMesh(en, projection_2D);
+            }
+        }
+    }
+
     // Truely render to the screen
     drawToScreen();
 
@@ -688,9 +697,15 @@ void RenderSystem::draw_world(bool &tutorial_open) {
         //drawTexturedMesh(entity, projection_2D);
     }
 
+    if (registry.dropBuffs.entities.size()>0) {
+        for (Entity en: registry.dropBuffs.entities) {
+            drawTexturedMesh(en, projection_2D);
+        }
+    }
+
     // Draw all textured meshes that have a position and size component
     for (Entity entity: registry.renderRequests.entities) {
-        if (!registry.motions.has(entity) || registry.combat.has(entity))
+        if (!registry.motions.has(entity) || registry.combat.has(entity) || registry.dropBuffs.has(entity))
             continue;
 
         RenderRequest &renderRequest = registry.renderRequests.get(entity);
@@ -704,7 +719,6 @@ void RenderSystem::draw_world(bool &tutorial_open) {
     if (registry.players.components.size()>0) {
         for (int i=0; i<3; i++) {
             Entity en = registry.players.components[0].healthBar[i];
-            RenderRequest &renderRequest = registry.renderRequests.get(en);
             drawTexturedMesh(en, projection_2D);
         }
     }
