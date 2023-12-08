@@ -35,6 +35,7 @@ PinballSystem::PinballSystem() {
    auto curr_level = Entity();
    CombatLevel combatLevel = {1};
    registry.combatLevel.emplace(curr_level, combatLevel);
+   this->swarmSystem = SwarmSystem(renderer);
 
 }
 
@@ -45,6 +46,7 @@ void PinballSystem::init(GLFWwindow *window_arg, RenderSystem *renderer_arg, Wor
     this->window = window_arg;
     this->renderer = renderer_arg;
     this->world = world_arg;
+    this->swarmSystem = SwarmSystem(renderer_arg);
     restart();
     redirect_inputs_pinball();
 }
@@ -325,7 +327,7 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
                     for (Entity se: registry.swarmEnemies.entities) {
                         registry.remove_all_components_of(se);
                     }
-                    delete swarmSystem;
+//                    delete swarmSystem;
                 }
 
                 Mix_PlayChannel(-1, registry.sfx.components[0].enemy_death_sound, 0);
@@ -336,8 +338,8 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
 
     }
     if (registry.swarmKing.size() > 0) {
-        swarmSystem->handle_swarm_collision();
-        swarmSystem->update_swarm_motion();
+        swarmSystem.handle_swarm_collision();
+        swarmSystem.update_swarm_motion();
 //        update_swarm_motion();
 
     }
@@ -626,7 +628,7 @@ void PinballSystem::restart() {
             start_level_3();
             break;
         default:
-            start_base_level();
+            start_level_1();
     }
 
 //    curr_level += 1;
@@ -845,8 +847,8 @@ void PinballSystem::start_level_2() {
 void PinballSystem::start_level_3() {
     start_base_level();
     vec2 boundary = {260 + 70, 800 - 70};
-    this->swarmSystem = new SwarmSystem(renderer);
-    swarmSystem->spawn_swarm(boundary);
+    this->swarmSystem = SwarmSystem(renderer);
+    swarmSystem.spawn_swarm(boundary);
 //    spawn_swarm(boundary);
 }
 
@@ -893,9 +895,9 @@ void PinballSystem::exit_combat() {
         registry.remove_all_components_of(registry.combat.entities.back());
 
     // FIXME: awkward logic. deleting without this check causes crashes on non swarm levels
-    if (registry.combatLevel.components[0].counter == 3) {
-        delete swarmSystem;
-    }
+//    if (registry.combatLevel.components[0].counter == 3) {
+//        delete swarmSystem;
+//    }
     world->redirect_inputs_world();
     GameSceneState = 0;
     registry.motions.get(registry.players.entities[0]).velocity = vec2(0.f,0.f);
