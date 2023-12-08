@@ -416,6 +416,24 @@ void WorldSystem::load_game(const std::string &filename)
 					dropBuff.id = buff_id;
 					dropBuff.increaseValue = rand() % 7 + 2;
 				}
+				if (registry.roomLevel.get(curr_rooom).counter != 0) {
+					while (registry.rooms.entities.size() > 0)
+						registry.remove_all_components_of(registry.rooms.entities.back());
+					rooms[0] = createRoom(renderer, { 600, 400 }, window, -1);
+				}
+
+				// Add door
+				if (registry.roomLevel.get(curr_rooom).counter != 3) {
+					Entity door = createDoor({ 0,0 }, { 0,0 }); //intialized below
+					Motion& door_motion = registry.motions.get(door);
+					float door_width = 50;
+					float door_height = 60;
+					door_motion.position = { window_width_px / 2.f - door_width / 2.f, door_height / 2.f };
+					door_motion.scale = { door_width, door_height };
+					door_motion.angle = 0;
+					door_motion.velocity = { 0,0 };
+					registry.colors.insert(door, { 0, 0, 0 });
+				}
 			}
 			else
 			{
@@ -1070,17 +1088,24 @@ void WorldSystem::handle_collisions_world()
 			if (registry.enemyBullets.has(entity))
 			{
 				registry.remove_all_components_of(entity);
+				registry.players.components[0].currentHealth -= 10.f;
 			}
 			else if (registry.zombies.has(entity))
 			{
 				// registry.remove_all_components_of(entity);
+				if (spike_damage_timer <= 0.f)
+				{
+					registry.players.components[0].currentHealth -= 10.f;
+					spike_damage_timer = 1.f;
+				}
+
 			}
 			// handle damage interaction (nothing for now)
-			if (spike_damage_timer <= 0.f)
+			/*if (spike_damage_timer <= 0.f)
 			{
 				registry.players.components[0].currentHealth -= 10.f;
 				spike_damage_timer = 1.f;
-			}
+			}*/
 		}
 
 		// spike collision
@@ -1096,9 +1121,7 @@ void WorldSystem::handle_collisions_world()
 
 		// player vs door collision
 		if (registry.doors.has(entity) && registry.players.has(entity_other)) {
-			save_game(PROJECT_SOURCE_DIR + std::string("gameState.json"));
 			enter_next_room();
-			save_game(PROJECT_SOURCE_DIR + std::string("gameState.json"));
 		}
 
 		// player vs maze wall collision
