@@ -93,7 +93,8 @@ private:
 
 	// Game state
 	int static const MAX_ROOM_NUM = 9;
-	int curr_room = 0;
+//	int curr_room = 0;
+    Entity curr_rooom;
 
 	RenderSystem* renderer;
 	float current_speed;

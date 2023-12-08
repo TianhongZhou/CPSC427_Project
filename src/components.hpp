@@ -7,6 +7,9 @@
 
 #include <SDL_mixer.h>
 
+struct RoomLevel {
+    int counter = 0;
+};
 struct Maze
 {
 
