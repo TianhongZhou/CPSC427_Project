@@ -40,6 +40,7 @@ struct Spikes
 struct Ball
 {
 	float trail;
+    bool isMainBall;
 };
 
 struct Parallox

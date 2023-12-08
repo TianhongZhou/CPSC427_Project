@@ -90,7 +90,7 @@ int main()
 			}
 			physics_system.step(elapsed_ms);
 			ai_system.step(elapsed_ms);
-			pinballSystem.handle_collisions();
+//			pinballSystem.handle_collisions();
 			render_system.draw_combat_scene();
 		}
 		else if (GameSceneState == -1 || GameSceneState == -2)
