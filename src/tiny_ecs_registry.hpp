@@ -46,6 +46,7 @@ public:
 	ComponentContainer<Particle> particles;
 	ComponentContainer<soundForPhys> sfx;
 	ComponentContainer<Maze> mazes;
+	ComponentContainer<Parallox> paras;
 	
 	// World assets
 	ComponentContainer<PlayerBullet> playerBullets;
@@ -96,6 +97,7 @@ public:
 		registry_list.push_back(&particles);
 		registry_list.push_back(&sfx);
 		registry_list.push_back(&mazes);
+		registry_list.push_back(&paras);
 
 		// World assets
 		registry_list.push_back(&playerBullets);

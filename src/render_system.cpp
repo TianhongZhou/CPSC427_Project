@@ -49,6 +49,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
     if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED) {
         GLint in_position_loc = glGetAttribLocation(program, "in_position");
         GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
+        GLuint offset_uloc = glGetUniformLocation(program, "offset");
         gl_has_errors();
         assert(in_texcoord_loc >= 0);
 
@@ -56,6 +57,9 @@ void RenderSystem::drawTexturedMesh(Entity entity,
         glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
                               sizeof(TexturedVertex), (void *) 0);
         gl_has_errors();
+
+        float offset = registry.paras.has(entity)? registry.paras.get(entity).offset:0.f;
+        glUniform1f(offset_uloc, offset);
 
         glEnableVertexAttribArray(in_texcoord_loc);
         glVertexAttribPointer(
@@ -191,7 +195,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
         Light& light = registry.lights.get(player);
         Motion& motion = registry.motions.get(player);
 
-        glUniform3f(glGetUniformLocation(program, "light_pos"), light.screenPosition.x, 1.5f, light.screenPosition.y);
+        glUniform3f(glGetUniformLocation(program, "light_pos"), light.screenPosition.x, light.screenPosition.y, 1.2f);
         glUniform3f(glGetUniformLocation(program, "light_color"), light.lightColor.x, light.lightColor.y, light.lightColor.z);
     }    
     else {
@@ -399,6 +403,9 @@ void RenderSystem::drawToScreen() {
     // Set clock
     GLuint time_uloc = glGetUniformLocation(water_program, "time");
     GLuint dead_timer_uloc = glGetUniformLocation(water_program, "screen_darken_factor");
+    GLuint exit_effect_factor_uloc = glGetUniformLocation(water_program, "factor");
+    float factor = registry.playerFlippers.size()==0? 0.f: registry.playerFlippers.components[0].exit_timer/4;
+    glUniform1f(exit_effect_factor_uloc, factor);
     glUniform1f(time_uloc, (float) (glfwGetTime() * 10.0f));
     ScreenState &screen = registry.screenStates.get(screen_state_entity);
     glUniform1f(dead_timer_uloc, screen.screen_darken_factor);

@@ -617,31 +617,38 @@ Entity createRoom3(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
-Entity createPinballRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
+Entity* createPinballRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 {
-	auto entity = Entity();
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-	registry.meshPtrs.emplace(entity, &mesh);
-	registry.combat.emplace(entity);
+	auto entities = new Entity[8];
+	TEXTURE_ASSET_ID textures[8] = {TEXTURE_ASSET_ID::PINBALLBACKGROUND1, TEXTURE_ASSET_ID::PINBALLBACKGROUND2, TEXTURE_ASSET_ID::PINBALLBACKGROUND3, TEXTURE_ASSET_ID::PINBALLBACKGROUND4, TEXTURE_ASSET_ID::PINBALLBACKGROUND5, TEXTURE_ASSET_ID::PINBALLBACKGROUND6, TEXTURE_ASSET_ID::PINBALLBACKGROUND7, TEXTURE_ASSET_ID::PINBALLBACKGROUND8};
+	for (int i=0; i<8; i++) {
+		auto entity = Entity();
+		Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+		registry.meshPtrs.emplace(entity, &mesh);
+		registry.combat.emplace(entity);
 
-	// Setting initial motion values
-	Motion& motion = registry.motions.emplace(entity);
-	motion.position = pos;
-	motion.angle = 0.f;
-	motion.velocity = { 0.f, 0.f };
+		// Setting initial motion values
+		Motion& motion = registry.motions.emplace(entity);
+		motion.position = pos;
+		motion.angle = 0.f;
+		motion.velocity = { 0.f, 0.f };
 
-	/*int w, h;
-	glfwGetWindowSize(window, &w, &h);*/
-	//printf("This is Starting Room size: %d, %d\n", )
-	motion.scale = { window_width_px, window_height_px };
+		/*int w, h;
+		glfwGetWindowSize(window, &w, &h);*/
+		//printf("This is Starting Room size: %d, %d\n", )
+		motion.scale = { window_width_px, window_height_px };
 
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::PINBALLBACKGROUND,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+		registry.paras.emplace(entity);
 
-	return entity;
+		registry.renderRequests.insert(
+			entity,
+			{ textures[i],
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+		entities[i] = entity;
+	}
+
+	return entities;
 }
 
 Entity createHealth(RenderSystem* renderer, vec2 pos, bool combat)

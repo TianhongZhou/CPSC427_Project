@@ -3,7 +3,7 @@
 uniform sampler2D screen_texture;
 uniform float time;
 uniform float screen_darken_factor;
-//uniform int flicker;
+uniform float factor;
 
 in vec2 texcoord;
 
@@ -30,7 +30,18 @@ const mat2 ditherMatrixTwobyTwo = mat2(
     3.0,  1.0
 );
 
+vec3 simpleBlur(sampler2D textureSampler, vec2 uv, float strength)
+{
+    vec3 blur = vec3(0.0);
 
+    for (float i = -2.0; i <= 2.0; i += 1.0) {
+        for (float j = -2.0; j <= 2.0; j += 1.0) {
+            blur += texture(textureSampler, uv + vec2(i, j) * min(8.0* strength, 24.0) / textureSize(textureSampler, 0)).xyz;
+        }
+    }
+
+    return blur / 25.0;
+}
 
 void main() {
 
@@ -56,6 +67,11 @@ void main() {
     downsampled.g = (floor(beforeColorDownsample.g*(colorCount - 1.0) + 0.5)/(colorCount - 1.0));
     downsampled.b = (floor(beforeColorDownsample.b*(colorCount - 1.0) + 0.5)/(colorCount - 1.0));
 
-    color = vec4(downsampled,1.0);
+    if (factor==0.0) color = vec4(downsampled,1.0);
+    else {
+        vec3 blurredColor = simpleBlur(screen_texture, texcoord, factor);
+        vec3 finalColor = mix(blurredColor, downsampled, (1.0-factor));
+        color = vec4(finalColor*(1.0+factor), 1.0);
+    }
 
 }

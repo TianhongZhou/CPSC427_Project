@@ -35,6 +35,7 @@ PinballSystem::PinballSystem() {
    auto curr_level = Entity();
    CombatLevel combatLevel = {1};
    registry.combatLevel.emplace(curr_level, combatLevel);
+
 }
 
 PinballSystem::~PinballSystem() {
@@ -90,7 +91,7 @@ void pinballDash() {
             pinballPhys.Vertices[i].oldPos = pinballPhys.Vertices[i].pos;
 
         }
-
+        
         // this would not behave correctly before adding the main enemy
         //if (registry.pinballEnemies.components.size() <= 1) {
         //    printf("no target ");
@@ -254,6 +255,18 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
     // 	GameSceneState = 0;
     // }
     float step_seconds = elapsed_ms_since_last_update / 1000.f;
+
+    if (backgrounds!=NULL) {
+        float relativePosX = (window_width_px/2 -
+        (registry.physObjs.get(registry.playerFlippers.entities[0]).center.x))/window_width_px;
+        registry.paras.get(backgrounds[2]).offset = -(relativePosX/10);
+        registry.paras.get(backgrounds[3]).offset = -(relativePosX/7);
+        registry.paras.get(backgrounds[4]).offset = -(relativePosX/5);
+        registry.paras.get(backgrounds[5]).offset = -(relativePosX/3);
+        registry.paras.get(backgrounds[6]).offset = -(relativePosX/2);
+        registry.paras.get(backgrounds[7]).offset = -(relativePosX/2);
+    }
+
     if (registry.pinballEnemies.entities.size() == 0 && registry.swarmKing.entities.empty()) {
         // exit_combat();
         // GameSceneState = 0;
@@ -330,8 +343,13 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
     }
 
     if (registry.pinballEnemies.entities.size() <= 0) {
-        exit_combat();
-         updateTimers(elapsed_ms_since_last_update);
+        if (registry.playerFlippers.components[0].exit_timer>=4.f) {
+            registry.playerFlippers.components[0].exit_timer=0.f;
+            exit_combat();
+        } else {
+            registry.playerFlippers.components[0].exit_timer+=step_seconds;
+        }
+        updateTimers(elapsed_ms_since_last_update);
         return true;
     }
 
@@ -426,7 +444,7 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
 
         flipperPhys.Vertices[0].accel += vec2(0.f, -0.8f);
         flipperPhys.Vertices[1].accel += vec2(0.f, -0.8f);
-
+        
     }
 
     if (action == GLFW_RELEASE && key == GLFW_KEY_U)
@@ -438,7 +456,7 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
         else {
             printf(" No antiGrav charge ");
         }
-
+        
     }
 
     //if (action == GLFW_RELEASE && key == GLFW_KEY_I)
@@ -597,7 +615,7 @@ void PinballSystem::restart() {
             start_test_level();
         case 1:
             start_level_1();
-             break;
+            break;
         case 2:
             start_level_2();
             break;
@@ -614,7 +632,7 @@ void PinballSystem::restart() {
 // initializes the room, ball, and flipper
 void PinballSystem::start_base_level() {
 
-    createPinballRoom(renderer, { 600, 400 }, window);
+    backgrounds = createPinballRoom(renderer, { 600, 400 }, window);
     r = renderer;
     vec2 boundary = {260 + 70, 800 - 70};
     std::random_device rd;
@@ -675,7 +693,7 @@ void PinballSystem::start_test_level() {
     // int w, h;
     // glfwGetWindowSize(window, &w, &h);
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-    createPinballRoom(renderer, { 600, 400 }, window);
+    backgrounds = createPinballRoom(renderer, { 600, 400 }, window);
     r = renderer;
     vec2 boundary = {260 + 70, 800 - 70};
     std::random_device rd;
@@ -875,7 +893,6 @@ void PinballSystem::exit_combat() {
     if (registry.combatLevel.components[0].counter == 3) {
         delete swarmSystem;
     }
-//    delete swarmSystem;
     world->redirect_inputs_world();
     GameSceneState = 0;
     registry.motions.get(registry.players.entities[0]).velocity = vec2(0.f,0.f);
