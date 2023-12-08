@@ -108,15 +108,27 @@
     - createPinballWall in world_init.cpp
     - createPinballFlipper in world_init.cpp
 
-- ### Tutorial
+- ### User Experience
+- ## Tutorial
     - GameSceneState == -1 and -2 case
     - data/textures/start.png, tutorial.png
     - on_key and on_mouse_.. in world_system.cpp
+- ## Report on the user testing you performed
+    - googleDoc: https://docs.google.com/document/d/1RofeKl2MGerotKSOi44GetFGjieZlpuaCY7WcG6Qc-E/edit
 
 - ### Normal Map
     - normal.fs.glsl
     - normal.vs.glsl
     - drawTexturedMesh in render_system.cpp
+    
+- ### Parallox Scrolling Background
+    - createPinballRoom in world_init.cpp
+    - Parallox component in component.hpp
+    - Wrapping and shifting in textured.vs.glsl
+    
+- ### Shader effect in scene transition
+    - filcker effect when entering combat in post.fs.glsl
+    - shear, shake, blurr effect when exiting combat in water.vs.glsl and water.fs.glsl
 
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:
