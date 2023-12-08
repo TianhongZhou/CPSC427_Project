@@ -325,6 +325,56 @@ Entity createRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window, int room
 
 }
 
+
+//Entity createMaze(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
+//{
+//	auto entity = Entity();
+//	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+//	registry.meshPtrs.emplace(entity, &mesh);
+//	registry.mainWorld.emplace(entity);
+//
+//	// Setting initial motion values
+//	Motion& motion = registry.motions.emplace(entity);
+//	motion.position = pos;
+//	motion.angle = 0.f;
+//	motion.velocity = { 0.f, 0.f };
+//
+//	int w, h;
+//	glfwGetWindowSize(window, &w, &h);
+//	std::cout << "MAZE window width, height: " << w << " " << h << std::endl;
+//
+//	motion.scale = { window_width_px, window_height_px };
+//
+//	registry.rooms.emplace(entity);
+//
+//	registry.renderRequests.insert(
+//		entity,
+//		{ TEXTURE_ASSET_ID::GROUND,
+//			EFFECT_ASSET_ID::TEXTURED,
+//			GEOMETRY_BUFFER_ID::SPRITE });
+//
+//	float spike_size = 80;
+//	int horizontal = int( (window_width_px - 100) / spike_size) - 1;
+//
+//	for (int i = 0; i < horizontal; i++) {
+//		Entity spikes = createSpikes({ i * spike_size + 100, 200}, { spike_size, spike_size });
+//		registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
+//
+//		if (i == horizontal / 3 || i == 2 * horizontal / 3) {
+//			Entity drop = createDropBuff(renderer, { i * spike_size + 100, 100 }, TEXTURE_ASSET_ID::DROPBALLSIZE);
+//			DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
+//
+//			Entity drop2 = createDropBuff(renderer, { i * spike_size + 100, 300 }, TEXTURE_ASSET_ID::DROPBALLDAMAGE);
+//			DropBuff& dropBuff2 = registry.dropBuffs.emplace(drop2);
+//		}
+//
+//		Entity spikes2 = createSpikes({ window_width_px - i * spike_size - 100, 400 }, { spike_size, spike_size });
+//		registry.colors.insert(spikes2, { 0.5, 0.5, 0.5 });
+//	}
+//
+//	return entity;
+//}
+
 Entity createBar(RenderSystem* renderer, vec2 pos, vec2 scale) {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ROAD);
@@ -466,10 +516,31 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 	std::uniform_real_distribution<float> distribution2(100.0f, 4 * window_height_px / 5);
 	srand(time(NULL));
 
-	for (int i = 0; i < 4; i++) {
-		Entity spikes = createSpikes({ distribution1(gen), distribution2(gen)}, {80, 80});
-		//Entity spikes = createSpikes({ 100 * i, distribution2(gen) }, {80, 80});
+	//for (int i = 0; i < 4; i++) {
+	//	Entity spikes = createSpikes({ distribution1(gen), distribution2(gen)}, {80, 80});
+	//	//Entity spikes = createSpikes({ 100 * i, distribution2(gen) }, {80, 80});
+	//	registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
+	//}
+
+	float spike_size = 80;
+	int horizontal = int((window_width_px - 100) / spike_size) - 1;
+
+	for (int i = 0; i < horizontal; i++) {
+		Entity spikes = createSpikes({ i * spike_size + 100, 200 }, { spike_size, spike_size });
 		registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
+
+		Entity spikes2 = createSpikes({ window_width_px - i * spike_size - 100, 400 }, { spike_size, spike_size });
+		registry.colors.insert(spikes2, { 0.5, 0.5, 0.5 });
+
+		if (i == horizontal / 3 || i == 2 * horizontal / 3) {
+			Entity drop = createDropBuff(renderer, { i * spike_size + 100, 100 }, TEXTURE_ASSET_ID::DROPBALLSIZE);
+			DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
+			dropBuff.increaseValue = 2;
+
+			Entity drop2 = createDropBuff(renderer, { i * spike_size + 100, 300 }, TEXTURE_ASSET_ID::DROPBALLDAMAGE);
+			DropBuff& dropBuff2 = registry.dropBuffs.emplace(drop2);
+			dropBuff2.increaseValue = 2;
+		}	
 	}
 
 	return entity;

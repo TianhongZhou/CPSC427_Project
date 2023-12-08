@@ -137,7 +137,7 @@ GLFWwindow *WorldSystem::create_window()
 	}
 
 	// Create the main window (for rendering, keyboard, and mouse input)
-	window = glfwCreateWindow(MonitorWidth, MonitorHeight, "Pinball Luminary", primaryMonitor, nullptr);
+	window = glfwCreateWindow(MonitorWidth, MonitorHeight, "Pinball Luminary", nullptr, nullptr);
 	// window = glfwCreateWindow(window_width_px, window_height_px, "Salmon Game Assignment", nullptr, nullptr);
 	if (window == nullptr)
 	{
@@ -303,6 +303,9 @@ void WorldSystem::save_game(const std::string &filename)
 		j["player"]["position"]["x"] = motion.position.x;
 		j["player"]["position"]["y"] = motion.position.y;
 
+		// Save health
+		j["player"]["health"] = registry.players.components[0].currentHealth;
+
 		// Save buff drops
 		auto &dropBuffsRegistry = registry.dropBuffs;
 		for (uint i = 0; i < dropBuffsRegistry.components.size(); i++)
@@ -374,6 +377,9 @@ void WorldSystem::load_game(const std::string &filename)
 				motion.position.x = j["player"]["position"]["x"].get<float>();
 				motion.position.y = j["player"]["position"]["y"].get<float>();
 
+				// Restore health
+				registry.players.components[0].currentHealth = j["player"]["health"];
+
 				// Restore buff drops
 				// auto& dropBuffsRegistry = registry.dropBuffs;
 
@@ -409,6 +415,24 @@ void WorldSystem::load_game(const std::string &filename)
 					DropBuff &dropBuff = registry.dropBuffs.emplace(drop);
 					dropBuff.id = buff_id;
 					dropBuff.increaseValue = rand() % 7 + 2;
+				}
+				if (registry.roomLevel.get(curr_rooom).counter != 0) {
+					while (registry.rooms.entities.size() > 0)
+						registry.remove_all_components_of(registry.rooms.entities.back());
+					rooms[0] = createRoom(renderer, { 600, 400 }, window, -1);
+				}
+
+				// Add door
+				if (registry.roomLevel.get(curr_rooom).counter != 3) {
+					Entity door = createDoor({ 0,0 }, { 0,0 }); //intialized below
+					Motion& door_motion = registry.motions.get(door);
+					float door_width = 50;
+					float door_height = 60;
+					door_motion.position = { window_width_px / 2.f - door_width / 2.f, door_height / 2.f };
+					door_motion.scale = { door_width, door_height };
+					door_motion.angle = 0;
+					door_motion.velocity = { 0,0 };
+					registry.colors.insert(door, { 0, 0, 0 });
 				}
 			}
 			else
@@ -1040,9 +1064,15 @@ void WorldSystem::handle_collisions_world()
 					registry.colors.insert(door, { 0, 0, 0 });
 				}
 
+				// remove still flying projectiles
+				while (registry.enemyBullets.entities.size() > 0)
+					registry.remove_all_components_of(registry.enemyBullets.entities.back());
+				while (registry.playerBullets.entities.size() > 0)
+					registry.remove_all_components_of(registry.playerBullets.entities.back());
+
 				Enter_combat_timer += 2000.f;
 				int i = 0;
-				while (i < 10) {
+				while (i < 5) {
 					GenerateDropBuff(entity);
 					i++;
 				}
@@ -1058,17 +1088,24 @@ void WorldSystem::handle_collisions_world()
 			if (registry.enemyBullets.has(entity))
 			{
 				registry.remove_all_components_of(entity);
+				registry.players.components[0].currentHealth -= 10.f;
 			}
 			else if (registry.zombies.has(entity))
 			{
 				// registry.remove_all_components_of(entity);
+				if (spike_damage_timer <= 0.f)
+				{
+					registry.players.components[0].currentHealth -= 10.f;
+					spike_damage_timer = 1.f;
+				}
+
 			}
 			// handle damage interaction (nothing for now)
-			if (spike_damage_timer <= 0.f)
+			/*if (spike_damage_timer <= 0.f)
 			{
 				registry.players.components[0].currentHealth -= 10.f;
 				spike_damage_timer = 1.f;
-			}
+			}*/
 		}
 
 		// spike collision
