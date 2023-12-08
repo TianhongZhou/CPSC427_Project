@@ -671,7 +671,7 @@ Entity createHealth(RenderSystem* renderer, vec2 pos, bool combat)
 
 Entity createSwarmEnemy(RenderSystem* renderer, vec2 pos)
 {
-    float scale = 10.f;
+    float scale = 50.f;
     auto entity = Entity();
     Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SWARMENEMY);
     registry.meshPtrs.emplace(entity, &mesh);

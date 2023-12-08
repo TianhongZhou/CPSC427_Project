@@ -57,6 +57,14 @@ void SwarmSystem::spawn_swarm(vec2 boundary) {
     registry.colors.insert(swarmKing, { 0, 1, 0 });
 }
 
+void SwarmSystem::handle_swarm_collision() {
+    for (Entity b: registry.swarmEnemies.entities) {
+        if (collides(b)) {
+            handle_collision(b);
+        }
+    }
+}
+
 bool SwarmSystem::collides(Entity b_j) {
     Entity mainBall;
     for (int i = 0; i < registry.balls.components.size(); i++) {
@@ -68,19 +76,35 @@ bool SwarmSystem::collides(Entity b_j) {
     Motion &ball_motion = registry.motions.get(mainBall);
     Motion &boid_motion = registry.motions.get(b_j);
 
-
+    vec2 diff = ball_motion.position - boid_motion.position;
+    float dist = diff.x * diff.x + diff.y * diff.y;
+    if (dist < 2000) {
+        return true;
+    }
 
     return false;
 }
 
 void SwarmSystem::handle_collision(Entity b_j) {
-
+    registry.remove_all_components_of(b_j);
 }
 
 
 void SwarmSystem::update_swarm_motion() {
 
     Entity swarmKing = registry.swarmKing.entities[0];
+
+    if (registry.swarmEnemies.entities.empty()) {
+        PinBallEnemy &enemy = registry.pinballEnemies.get(swarmKing);
+        if (enemy.currentHealth >= 0) {
+            enemy.currentHealth = 1;
+        }
+    }
+
+    if (registry.swarmEnemies.size() == 1) {
+        registry.remove_all_components_of(registry.swarmEnemies.entities[0]);
+        return;
+    }
 
     for (Entity entity: registry.swarmEnemies.entities) {
         Motion& motion = registry.motions.get(entity);

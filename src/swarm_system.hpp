@@ -20,6 +20,8 @@ public:
     // https://eater.net/boids
     // http://www.kfish.org/boids/pseudocode.html
     void update_swarm_motion();
+    void handle_swarm_collision();
+
 
 private:
 
@@ -57,4 +59,5 @@ private:
     // boids try to leave if they get too close to the swarm king
     // leader separation determines when they are too close
     vec2 rule5(Entity swarmKing, Entity b_j, float leader_separation);
+
 };
