@@ -363,7 +363,8 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
     if (registry.pinballPlayerStatus.components[0].health <= 0.0f) {
         printf("\n-You Died-\n");
         exit_combat();
-        world->restart_game();
+        //world->restart_game();
+        registry.players.components[0].currentHealth -= 40.f;
     }
 
     return true;
