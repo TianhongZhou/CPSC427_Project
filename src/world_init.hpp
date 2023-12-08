@@ -12,7 +12,7 @@ const float TURTLE_BB_WIDTH = 0.4f * 300.f;
 const float TURTLE_BB_HEIGHT = 0.4f * 202.f;
 
 // the ball
-Entity createBall(RenderSystem* renderer, vec2 pos, float size, float trail);
+Entity createBall(RenderSystem* renderer, vec2 pos, float size, float trail, bool isMainBall = false);
 // the shadow
 Entity createShadow(RenderSystem* renderer, vec2 pos);
 // the walls
