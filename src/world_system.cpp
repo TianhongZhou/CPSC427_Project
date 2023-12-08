@@ -40,6 +40,9 @@ WorldSystem::WorldSystem()
 {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
+    auto e = Entity();
+    registry.roomLevel.emplace(e);
+    this->curr_rooom = e;
 }
 
 WorldSystem::~WorldSystem()
@@ -208,7 +211,8 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 {
 	this->renderer = renderer_arg;
 	// Playing background music indefinitely
-	Mix_PlayMusic(background_music, -1);
+    // TODO: uncomment
+//	Mix_PlayMusic(background_music, -1);
 	fprintf(stderr, "Loaded music\n");
 
 	// Set all states to default
@@ -250,7 +254,8 @@ void WorldSystem::restart_game()
 	current_speed = 1.f;
 
 	// Reset room number
-	curr_room = 0;
+//	curr_room = 0;
+    registry.roomLevel.get(curr_rooom).counter = 0;
 
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
@@ -277,7 +282,8 @@ void WorldSystem::save_game(const std::string &filename)
 	json j;
 
 	// Save room level
-	j["level"] = curr_room;
+	j["level"] = registry.roomLevel.get(curr_rooom).counter;
+    ;
 
 	// Check if player is in combat
 	if (registry.mainWorldEnemies.size() > 0 || registry.snipers.size() > 0 || registry.zombies.size() > 0)
@@ -336,10 +342,10 @@ void WorldSystem::load_game(const std::string &filename)
 		if (j.contains("level"))
 		{
 			// Restore room level
-			curr_room = j["level"].get<int>();
+            registry.roomLevel.get(curr_rooom).counter = j["level"].get<int>();
 
 			// URGENT TODO: temporary fix for spikes created
-			if (curr_room != 0)
+			if (registry.roomLevel.get(curr_rooom).counter != 0)
 			{
 				while (registry.spikes.entities.size() > 0)
 					registry.remove_all_components_of(registry.spikes.entities.back());
@@ -408,7 +414,7 @@ void WorldSystem::load_game(const std::string &filename)
 			}
 			else
 			{
-				rooms[0] = createRoom(renderer, {600, 400}, window, curr_room);
+				rooms[0] = createRoom(renderer, {600, 400}, window, registry.roomLevel.get(curr_rooom).counter);
 			}
 		}
 
@@ -867,8 +873,8 @@ void WorldSystem::enter_next_room()
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
 
-	curr_room += 1;
-	rooms[0] = createRoom(renderer, {600, 400}, window, curr_room);
+    registry.roomLevel.get(curr_rooom).counter += 1;
+	rooms[0] = createRoom(renderer, {600, 400}, window, registry.roomLevel.get(curr_rooom).counter);
 	player = createPlayer(renderer, {(window_width_px) / 2, 4 * (window_height_px) / 5}, playerHealth);
 
 	PinBall &pinBall = registry.pinBalls.get(player);
@@ -1022,7 +1028,7 @@ void WorldSystem::handle_collisions_world()
 					registry.spriteSheets.remove(player);
 				}
 
-				if (curr_room != 3) {
+				if (registry.roomLevel.get(curr_rooom).counter != 3) {
 					// Add door
 					Entity door = createDoor({ 0,0 }, { 0,0 }); //intialized below
 					Motion& door_motion = registry.motions.get(door);

@@ -411,15 +411,16 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
     }
 
     // enemy kill switch
-//    if (key == GLFW_KEY_K && action == GLFW_RELEASE)
-//    {
-//        for (Entity entity: registry.pinballEnemies.entities) {
-//            PinBallEnemy &enemy = registry.pinballEnemies.get(entity);
-//            if (enemy.currentHealth >= 0) {
-//                enemy.currentHealth = 1;
-//            }
-//        }
-//    }
+    // TODO: comment
+    if (key == GLFW_KEY_K && action == GLFW_RELEASE)
+    {
+        for (Entity entity: registry.pinballEnemies.entities) {
+            PinBallEnemy &enemy = registry.pinballEnemies.get(entity);
+            if (enemy.currentHealth >= 0) {
+                enemy.currentHealth = 1;
+            }
+        }
+    }
 
     //// Resetting game
     //if (action == GLFW_RELEASE && key == GLFW_KEY_R)
@@ -609,6 +610,8 @@ void PinballSystem::on_mouse_click(int button, int action, int mods) {
 void PinballSystem::restart() {
     Entity c = registry.combatLevel.entities[0];
     int& curr_level = registry.combatLevel.get(c).counter;
+    int room_level = registry.roomLevel.components[0].counter;
+    curr_level = room_level;
 
     switch (curr_level) {
         case -1:
@@ -626,7 +629,7 @@ void PinballSystem::restart() {
             start_base_level();
     }
 
-    curr_level += 1;
+//    curr_level += 1;
 }
 
 // initializes the room, ball, and flipper
