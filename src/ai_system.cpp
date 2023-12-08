@@ -66,8 +66,8 @@ void AISystem::step(float elapsed_ms)
 			// Update healthbar
 			if (motion_container.has(enemy.healthBar[1]) && motion_container.has(enemy.healthBar[2])) {
 				Motion& barMotion = motion_container.get(enemy.healthBar[0]);
-				Motion& healthMotion = motion_container.get(enemy.healthBar[1]);
-				Motion& amortizedMotion = motion_container.get(enemy.healthBar[2]);
+				Motion& healthMotion = motion_container.get(enemy.healthBar[2]);
+				Motion& amortizedMotion = motion_container.get(enemy.healthBar[1]);
 				healthMotion.scale.x =  barMotion.scale.x * enemy.currentHealth/enemy.maxHealth;
 				healthMotion.position.x = barMotion.position.x - (barMotion.scale.x - healthMotion.scale.x) / 2;
 				if (amortizedMotion.scale.x>healthMotion.scale.x) {

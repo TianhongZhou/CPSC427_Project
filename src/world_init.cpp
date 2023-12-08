@@ -124,6 +124,11 @@ Entity createPinballFlipper(RenderSystem* renderer, const std::vector<vec2>& ver
 
 Entity createPlayer(RenderSystem* renderer, vec2 pos, float currentHealth)
 {
+	Entity healthBar = createHealth(renderer, { pos.x, pos.y-50 }, false);
+	registry.colors.insert(healthBar, { 0.2, 0.2, 0.2 });
+	Entity healthAmortized = createHealth(renderer, { pos.x, pos.y-50 }, false);
+	registry.colors.insert(healthAmortized, { 1, 1, 1 });
+
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
@@ -140,25 +145,20 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos, float currentHealth)
 	Player& player = registry.players.emplace(entity);
 	player.currentHealth = currentHealth;
 
-	Entity healthBar = createHealth(renderer, { pos.x, pos.y-50 }, false);
-	registry.colors.insert(healthBar, { 0.2, 0.2, 0.2 });
-	Entity healthAmortized = createHealth(renderer, { pos.x, pos.y-50 }, false);
-	registry.colors.insert(healthAmortized, { 1, 1, 1 });
+	registry.renderRequests.insert(
+	entity,
+	{ TEXTURE_ASSET_ID::PLAYER,
+		EFFECT_ASSET_ID::TEXTURED,
+		GEOMETRY_BUFFER_ID::SPRITE,
+		TEXTURE_ASSET_ID::TEXTURE_COUNT,
+		vec2(0.2, -0.5),
+		vec2(-10, 48.f / 2.0f + 8) });
 
 	Entity health = createHealth(renderer, { pos.x, pos.y-50 }, false);
 	registry.colors.insert(health, { 1, 0, 0 });
 	player.healthBar[0] = healthBar;
-	player.healthBar[1] = health;
-	player.healthBar[2] = healthAmortized;
-
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::PLAYER,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE,
-			TEXTURE_ASSET_ID::TEXTURE_COUNT,
-			vec2(0.2, -0.5),
-			vec2(-10, 48.f / 2.0f + 8) });
+	player.healthBar[1] = healthAmortized;
+	player.healthBar[2] = health;
 
 	return entity;
 }
@@ -740,8 +740,8 @@ Entity createSwarmEnemy(RenderSystem* renderer, vec2 pos)
 	Entity health = createHealth(renderer, { pos.x, pos.y-50 }, true);
 	registry.colors.insert(health, { 1, 0, 0 });
 	enemy.healthBar[0] = healthBar;
-	enemy.healthBar[1] = health;
-	enemy.healthBar[2] = healthAmortized;
+	enemy.healthBar[1] = healthAmortized;
+	enemy.healthBar[2] = health;
 
 	enemy.attackType = attackType;
 	enemy.attackCooldown = attackCd;
