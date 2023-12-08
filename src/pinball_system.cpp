@@ -392,17 +392,16 @@ void PinballSystem::on_key(int key, int, int action, int mod) {
             debugging.in_debug_mode = true;
     }
 
-    // TODO: comment this
-    // kill enemies
-    if (key == GLFW_KEY_K && action == GLFW_RELEASE)
-    {
-        for (Entity entity: registry.pinballEnemies.entities) {
-            PinBallEnemy &enemy = registry.pinballEnemies.get(entity);
-            if (enemy.currentHealth >= 0) {
-                enemy.currentHealth = 1;
-            }
-        }
-    }
+    // enemy kill switch
+//    if (key == GLFW_KEY_K && action == GLFW_RELEASE)
+//    {
+//        for (Entity entity: registry.pinballEnemies.entities) {
+//            PinBallEnemy &enemy = registry.pinballEnemies.get(entity);
+//            if (enemy.currentHealth >= 0) {
+//                enemy.currentHealth = 1;
+//            }
+//        }
+//    }
 
     //// Resetting game
     //if (action == GLFW_RELEASE && key == GLFW_KEY_R)
