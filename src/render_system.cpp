@@ -701,6 +701,14 @@ void RenderSystem::draw_world(bool &tutorial_open) {
         drawTexturedMesh(entity, projection_2D);
     }
 
+    if (registry.players.components.size()>0) {
+        for (int i=0; i<3; i++) {
+            Entity en = registry.players.components[0].healthBar[i];
+            RenderRequest &renderRequest = registry.renderRequests.get(en);
+            drawTexturedMesh(en, projection_2D);
+        }
+    }
+
     // Truely render to the screen
     drawToScreen();
 

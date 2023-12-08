@@ -763,8 +763,8 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 	// Update healthbar
 	if (motion_container.has(player1.healthBar[1]) && motion_container.has(player1.healthBar[2])) {
 		Motion& barMotion = motion_container.get(player1.healthBar[0]);
-		Motion& healthMotion = motion_container.get(player1.healthBar[1]);
-		Motion& amortizedMotion = motion_container.get(player1.healthBar[2]);
+		Motion& healthMotion = motion_container.get(player1.healthBar[2]);
+		Motion& amortizedMotion = motion_container.get(player1.healthBar[1]);
 		healthMotion.scale.x =  barMotion.scale.x * player1.currentHealth/ player1.maxHealth;
 		healthMotion.position.x = barMotion.position.x - (barMotion.scale.x - healthMotion.scale.x) / 2;
 		if (amortizedMotion.scale.x > healthMotion.scale.x)
