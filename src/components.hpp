@@ -7,6 +7,9 @@
 
 #include <SDL_mixer.h>
 
+struct RoomLevel {
+    int counter = 0;
+};
 struct Maze
 {
 
@@ -40,6 +43,7 @@ struct Spikes
 struct Ball
 {
 	float trail;
+    bool isMainBall;
 };
 
 struct Parallox
