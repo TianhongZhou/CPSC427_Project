@@ -129,6 +129,14 @@
 - ### Shader effect in scene transition
     - filcker effect when entering combat in post.fs.glsl
     - shear, shake, blurr effect when exiting combat in water.vs.glsl and water.fs.glsl
+    
+- ### Dither shader in water.fs.glsl
+
+- ### Combat UI in render system
+
+- ### New SFX for combat in data
+
+- ### New powerups in pinball system
 
 ## Actual development progress
 The original development plan for the week of Sept. 31 and Oct. 8 is as following:
