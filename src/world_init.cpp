@@ -523,10 +523,12 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 		if (i%2 == 0) {
 			Entity drop = createDropBuff(renderer, { i * spike_size + 100, 100 }, TEXTURE_ASSET_ID::DROPBALLSIZE);
 			DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
+			dropBuff.id = 0;
 			dropBuff.increaseValue = 2;
 
 			Entity drop2 = createDropBuff(renderer, { i * spike_size + 100, 300 }, TEXTURE_ASSET_ID::DROPBALLDAMAGE);
 			DropBuff& dropBuff2 = registry.dropBuffs.emplace(drop2);
+			dropBuff2.id = 1;
 			dropBuff2.increaseValue = 2;
 		}	
 	}

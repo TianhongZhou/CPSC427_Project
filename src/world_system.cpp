@@ -913,6 +913,10 @@ void WorldSystem::enter_next_room()
 	PinBall &pinBall = registry.pinBalls.get(player);
 	pinBall.pinBallSize = temp.pinBallSize;
 	pinBall.pinBallDamage = temp.pinBallDamage;
+	if (registry.roomLevel.get(curr_rooom).counter == 4) {
+		pinBall.pinBallDamage -= 10.f;
+	}
+
 	registry.lights.emplace(player);
 }
 
