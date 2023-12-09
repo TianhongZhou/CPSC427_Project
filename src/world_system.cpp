@@ -423,7 +423,7 @@ void WorldSystem::load_game(const std::string &filename)
 				}
 
 				// Add door
-				if (registry.roomLevel.get(curr_rooom).counter != 3) {
+				if (registry.roomLevel.get(curr_rooom).counter != 7) {
 					Entity door = createDoor({ 0,0 }, { 0,0 }); //intialized below
 					Motion& door_motion = registry.motions.get(door);
 					float door_width = 50;
@@ -641,8 +641,10 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 	// save game
 	if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && GameSceneState == 0)
-	{
-		save_game(PROJECT_SOURCE_DIR + std::string("gameState.json")); // NOTE: assumes backslash at the end of PROJECT_SOURCE_DIR
+	{	
+		if (registry.roomLevel.get(curr_rooom).counter <= 3) {
+			save_game(PROJECT_SOURCE_DIR + std::string("gameState.json")); // NOTE: assumes backslash at the end of PROJECT_SOURCE_DIR
+		}
 	}
 }
 
@@ -754,9 +756,9 @@ bool WorldSystem::step_world(float elapsed_ms_since_last_update)
 		return true;
 	}
 
-	// Updating window title with points
+	// Updating window title with current level
 	std::stringstream title_ss;
-	title_ss << "Points: " << points;
+	title_ss << "Level: " << registry.roomLevel.get(curr_rooom).counter;
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 	float step_seconds = elapsed_ms_since_last_update / 1000.f;
 
@@ -1051,7 +1053,7 @@ void WorldSystem::handle_collisions_world()
 					registry.spriteSheets.remove(player);
 				}
 
-				if (registry.roomLevel.get(curr_rooom).counter != 3) {
+				if (registry.roomLevel.get(curr_rooom).counter != 7) {
 					// Add door
 					Entity door = createDoor({ 0,0 }, { 0,0 }); //intialized below
 					Motion& door_motion = registry.motions.get(door);

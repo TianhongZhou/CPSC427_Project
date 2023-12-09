@@ -356,7 +356,10 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
     }
 
     updateTimers(elapsed_ms_since_last_update);
-    stepEnemyAttack();
+    //stepEnemyAttack();
+    if (registry.roomLevel.components[0].counter > 3) {
+        stepEnemyAttack();
+    }
     tractorStep();
 
 
@@ -364,7 +367,7 @@ bool PinballSystem::step(float elapsed_ms_since_last_update) {
         printf("\n-You Died-\n");
         exit_combat();
         //world->restart_game();
-        registry.players.components[0].currentHealth -= 40.f;
+        registry.players.components[0].currentHealth -= 0.f; // MUST CHANGE
     }
 
     return true;
