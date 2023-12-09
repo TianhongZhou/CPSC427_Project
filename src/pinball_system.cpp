@@ -631,6 +631,15 @@ void PinballSystem::restart() {
         case 3:
             start_level_3();
             break;
+        case 5:
+            start_level_1();
+            break;
+        case 6:
+            start_level_2();
+            break;
+        case 7:
+            start_level_3();
+            break;
         default:
             start_level_1();
     }
