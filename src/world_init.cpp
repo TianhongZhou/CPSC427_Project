@@ -520,7 +520,7 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 		Entity spikes2 = createSpikes({ window_width_px - i * spike_size - 100, 400 }, { spike_size, spike_size });
 		registry.colors.insert(spikes2, { 0.5, 0.5, 0.5 });
 
-		if (i%4 == 0) {
+		if (i%2 == 0) {
 			Entity drop = createDropBuff(renderer, { i * spike_size + 100, 100 }, TEXTURE_ASSET_ID::DROPBALLSIZE);
 			DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
 			dropBuff.increaseValue = 2;

@@ -600,6 +600,9 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	{
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
+
+		restart_game();
+
 		GameSceneState = -1;
 
 		restart_game();
@@ -900,6 +903,11 @@ void WorldSystem::enter_next_room()
 
     registry.roomLevel.get(curr_rooom).counter += 1;
 	rooms[0] = createRoom(renderer, {600, 400}, window, registry.roomLevel.get(curr_rooom).counter);
+
+	// restore to full health if just entered basement
+	if (registry.roomLevel.get(curr_rooom).counter == 4) {
+		playerHealth = 100.f;
+	}
 	player = createPlayer(renderer, {(window_width_px) / 2, 4 * (window_height_px) / 5}, playerHealth);
 
 	PinBall &pinBall = registry.pinBalls.get(player);
