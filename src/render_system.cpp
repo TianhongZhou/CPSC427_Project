@@ -628,7 +628,12 @@ void RenderSystem::draw_world(bool &tutorial_open) {
             /*printf("%d, %d\n", w, h);
             printf("%.2f, %.2f\n", motion.position.x, motion.position.y);
             printf("%.2f, %.2f\n", light.screenPosition.x, light.screenPosition.y);*/
-            light.haloRadius = 0.15f; //1.2f;
+
+            // Smaller radius for basement
+            light.haloRadius = 1.2f;
+            if (registry.roomLevel.components[0].counter > 3) {
+                light.haloRadius = 0.15f;
+            }
             light.lightColor = vec3(1.0f, 1.0f, 1.0f);
             light.haloSoftness = 0.05f;
             light.priority = 2;
@@ -689,8 +694,12 @@ void RenderSystem::draw_world(bool &tutorial_open) {
             //{
             //	scale.y = 0.31;
             //}
-            if (!(registry.spikes.has(entity) || registry.healthBar.has(entity) || registry.mazes.has(entity))) {
-                drawShadow(entity, projection_2D, M_PI / 2 - angle, scale);
+
+            // Only draw shadows for basement
+            if (registry.roomLevel.components[0].counter > 3) {
+                if (!(registry.spikes.has(entity) || registry.healthBar.has(entity) || registry.mazes.has(entity))) {
+                    drawShadow(entity, projection_2D, M_PI / 2 - angle, scale);
+                }
             }
         }
 

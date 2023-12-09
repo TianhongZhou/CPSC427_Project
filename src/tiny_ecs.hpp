@@ -53,7 +53,10 @@ public:
 
 	// Inserting a component c associated to entity e
 	inline Component& insert(Entity e, Component c, bool check_for_duplicates = true)
-	{
+	{	
+		if (check_for_duplicates && has(e)) {
+			int a = 1;
+		}
 		// Usually, every entity should only have one instance of each component type
 		assert(!(check_for_duplicates && has(e)) && "Entity already contained in ECS registry");
 

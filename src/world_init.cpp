@@ -310,13 +310,22 @@ Entity createRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window, int room
 	case 1:
 		return createRoom1(renderer, pos);
 		break;
-	/*case 2:
-		return createMaze1(renderer, pos);
-		break;*/
 	case 2:
 		return createRoom2(renderer, pos);
 		break;
 	case 3:
+		return createRoom3(renderer, pos);
+		break;
+	case 4:
+		return createStartingRoom(renderer, pos, window);
+		break;
+	case 5:
+		return createRoom1(renderer, pos);
+		break;
+	case 6:
+		return createRoom2(renderer, pos);
+		break;
+	case 7:
 		return createRoom3(renderer, pos);
 		break;
 	}
@@ -325,55 +334,6 @@ Entity createRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window, int room
 
 }
 
-
-//Entity createMaze(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
-//{
-//	auto entity = Entity();
-//	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-//	registry.meshPtrs.emplace(entity, &mesh);
-//	registry.mainWorld.emplace(entity);
-//
-//	// Setting initial motion values
-//	Motion& motion = registry.motions.emplace(entity);
-//	motion.position = pos;
-//	motion.angle = 0.f;
-//	motion.velocity = { 0.f, 0.f };
-//
-//	int w, h;
-//	glfwGetWindowSize(window, &w, &h);
-//	std::cout << "MAZE window width, height: " << w << " " << h << std::endl;
-//
-//	motion.scale = { window_width_px, window_height_px };
-//
-//	registry.rooms.emplace(entity);
-//
-//	registry.renderRequests.insert(
-//		entity,
-//		{ TEXTURE_ASSET_ID::GROUND,
-//			EFFECT_ASSET_ID::TEXTURED,
-//			GEOMETRY_BUFFER_ID::SPRITE });
-//
-//	float spike_size = 80;
-//	int horizontal = int( (window_width_px - 100) / spike_size) - 1;
-//
-//	for (int i = 0; i < horizontal; i++) {
-//		Entity spikes = createSpikes({ i * spike_size + 100, 200}, { spike_size, spike_size });
-//		registry.colors.insert(spikes, { 0.5, 0.5, 0.5 });
-//
-//		if (i == horizontal / 3 || i == 2 * horizontal / 3) {
-//			Entity drop = createDropBuff(renderer, { i * spike_size + 100, 100 }, TEXTURE_ASSET_ID::DROPBALLSIZE);
-//			DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
-//
-//			Entity drop2 = createDropBuff(renderer, { i * spike_size + 100, 300 }, TEXTURE_ASSET_ID::DROPBALLDAMAGE);
-//			DropBuff& dropBuff2 = registry.dropBuffs.emplace(drop2);
-//		}
-//
-//		Entity spikes2 = createSpikes({ window_width_px - i * spike_size - 100, 400 }, { spike_size, spike_size });
-//		registry.colors.insert(spikes2, { 0.5, 0.5, 0.5 });
-//	}
-//
-//	return entity;
-//}
 
 Entity createBar(RenderSystem* renderer, vec2 pos, vec2 scale) {
 	auto entity = Entity();
@@ -457,12 +417,22 @@ Entity createEmptyRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 
 	registry.rooms.emplace(entity);
 
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::GROUND,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
-
+	if (registry.roomLevel.components[0].counter > 3) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::GROUND,
+				EFFECT_ASSET_ID::NORMAL,
+				GEOMETRY_BUFFER_ID::SPRITE,
+				TEXTURE_ASSET_ID::GROUNDNORMAL });
+	}
+	else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::GROUND,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE,
+				TEXTURE_ASSET_ID::GROUNDNORMAL });
+	}
 	return entity;
 }
 
@@ -486,12 +456,30 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 	motion.scale = { window_width_px, window_height_px };
 	registry.rooms.emplace(entity);
 
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::GROUND,
-			EFFECT_ASSET_ID::NORMAL,
-			GEOMETRY_BUFFER_ID::SPRITE,
-			TEXTURE_ASSET_ID::GROUNDNORMAL });
+	if (registry.roomLevel.components[0].counter > 3) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::GROUND,
+				EFFECT_ASSET_ID::NORMAL,
+				GEOMETRY_BUFFER_ID::SPRITE,
+				TEXTURE_ASSET_ID::GROUNDNORMAL });
+	}
+	else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::GROUND,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE,
+				TEXTURE_ASSET_ID::GROUNDNORMAL });
+	}
+
+
+	//registry.renderRequests.insert(
+	//	entity,
+	//	{ TEXTURE_ASSET_ID::GROUND,
+	//		EFFECT_ASSET_ID::NORMAL,
+	//		GEOMETRY_BUFFER_ID::SPRITE,
+	//		TEXTURE_ASSET_ID::GROUNDNORMAL });
 
 	// add things
 	int w, h;
@@ -532,7 +520,7 @@ Entity createStartingRoom(RenderSystem* renderer, vec2 pos, GLFWwindow* window)
 		Entity spikes2 = createSpikes({ window_width_px - i * spike_size - 100, 400 }, { spike_size, spike_size });
 		registry.colors.insert(spikes2, { 0.5, 0.5, 0.5 });
 
-		if (i == horizontal / 3 || i == 2 * horizontal / 3) {
+		if (i%2 == 0) {
 			Entity drop = createDropBuff(renderer, { i * spike_size + 100, 100 }, TEXTURE_ASSET_ID::DROPBALLSIZE);
 			DropBuff& dropBuff = registry.dropBuffs.emplace(drop);
 			dropBuff.increaseValue = 2;
@@ -565,12 +553,22 @@ Entity createRoom1(RenderSystem* renderer, vec2 pos)
 
 	registry.rooms.emplace(entity);
 
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::GROUND,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE,
-			TEXTURE_ASSET_ID::GROUNDNORMAL });
+	if (registry.roomLevel.components[0].counter > 3) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::GROUND,
+				EFFECT_ASSET_ID::NORMAL,
+				GEOMETRY_BUFFER_ID::SPRITE,
+				TEXTURE_ASSET_ID::GROUNDNORMAL });
+	}
+	else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::GROUND,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE,
+				TEXTURE_ASSET_ID::GROUNDNORMAL });
+	}
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -609,12 +607,22 @@ Entity createRoom2(RenderSystem* renderer, vec2 pos)
 
 	registry.rooms.emplace(entity);
 
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::GROUND,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE,
-			TEXTURE_ASSET_ID::GROUNDNORMAL });
+	if (registry.roomLevel.components[0].counter > 3) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::GROUND,
+				EFFECT_ASSET_ID::NORMAL,
+				GEOMETRY_BUFFER_ID::SPRITE,
+				TEXTURE_ASSET_ID::GROUNDNORMAL });
+	}
+	else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::GROUND,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE,
+				TEXTURE_ASSET_ID::GROUNDNORMAL });
+	}
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -655,12 +663,22 @@ Entity createRoom3(RenderSystem* renderer, vec2 pos)
 
 	registry.rooms.emplace(entity);
 
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::GROUND,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE,
-			TEXTURE_ASSET_ID::GROUNDNORMAL });
+	if (registry.roomLevel.components[0].counter > 3) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::GROUND,
+				EFFECT_ASSET_ID::NORMAL,
+				GEOMETRY_BUFFER_ID::SPRITE,
+				TEXTURE_ASSET_ID::GROUNDNORMAL });
+	}
+	else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::GROUND,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE,
+				TEXTURE_ASSET_ID::GROUNDNORMAL });
+	}
 
 	std::random_device rd;
 	std::mt19937 gen(rd());

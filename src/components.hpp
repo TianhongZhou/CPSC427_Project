@@ -322,7 +322,7 @@ struct TemporaryProjectile {
 struct PinBall {
 	float pinBallSize = 10.f;
 	float pinBallDamage = 5.f;
-	float maxPinBallSize = 60.f;
+	float maxPinBallSize = 30.f;
 	float maxPinBallDamage = 50.f;
 	int antiGravityCount = 0.0f;
 	int tractorBeamCount = 0.0f;
